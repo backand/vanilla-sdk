@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Backand SDK</title>
+   <meta charset="utf-8">
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+   <style>
+     .header {
+       margin: 0 0 10px 0;
+       font-size: 12px;
+       font-weight: 700;
+       color: #959595;
+       text-transform: uppercase;
+       letter-spacing: 1px;
+     }
+   </style>
+</head>
+<body style="overflow-y: hidden">
+
+<div style="position: fixed; top: 0; left: 0; right: 0; background-color: #3B3738; text-align: center">
+  <img style="padding: 20px" src="./Backand-logo.png"/>
+</div>
+
+<div style="position: fixed; top: 71px; left: 0; right: 0; bottom: 0; overflow-y: scroll">
+  <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="well well-sm" style="margin: 25px 25px 0 25px">
+            <span>
+              backand.init({
+                appName: 'sdk',
+                signUpToken: '851692ae-eb94-4f18-87ee-075255e67748',
+                anonymousToken: '82cfcfe8-c718-4621-8bb6-cd600e23487f',
+                runSocket: true
+              });
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="panel panel-default" style="margin: 25px 25px 0 25px" id="outputContainer">
+            <div class="panel-heading">Output</div>
+            <div class="panel-body" style="font-size: 10px" id="outputElement">
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="panel panel-default" style="margin: 25px 25px 0 25px">
+            <div class="panel-heading">Authentication</div>
+            <div class="panel-body">
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col-xs-4">
+                    <div class="header">signin (username, password)</div>
+                    <div class="form-group form-group-sm">
+                      <label for="sigin_user" class="col-sm-2 control-label">Username</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" id="sigin_user" value="sdk@backand.com">
+                      </div>
+                    </div>
+                    <div class="form-group form-group-sm">
+                      <label for="sigin_pass" class="col-sm-2 control-label">Password</label>
+                      <div class="col-sm-10">
+                        <input type="password" class="form-control" id="sigin_pass" value="Password1">
+                      </div>
+                    </div>
+                    <div class="form-group form-group-sm">
+                      <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" id="sigin_btn" class="btn btn-default btn-sm">signin</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-xs-4">
+                    <div class="header">useAnonymousAuth ()</div>
+                    <div class="form-group form-group-sm">
+                      <button type="submit" id="anonymous_btn" class="btn btn-default btn-sm">signin anonymously</button>
+                    </div>
+                  </div>
+                  <div class="col-xs-4">
+                    <div class="header">socialProviders</div>
+                    <div id="social_btns" class="form-group form-group-sm">
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="panel panel-default" style="margin: 25px 25px 0 25px">
+            <div class="panel-heading">CRUD</div>
+            <div class="panel-body">
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col-xs-4">
+                    <div class="header">create (object, data, params)</div>
+                    <div class="form-group form-group-sm">
+                      <button id="postitem_btn" class="btn btn-default btn-sm">create('items',{name:'test', description:'new item'})</button>
+                    </div>
+                  </div>
+                  <div class="col-xs-4">
+                    <div class="header">getList (object, params)</div>
+                    <div class="form-group form-group-sm">
+                      <button id="getitems_btn" class="btn btn-default btn-sm">getList('items',{filter:[], sort: []})</button>
+                    </div>
+                  </div>
+                  <div class="col-xs-4">
+                    <div class="header">getOne (object, id, params)</div>
+                    <div class="form-group form-group-sm">
+                      <button id="getitem_btn" class="btn btn-default btn-sm">getOne('items', lastCreatedId)</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-4">
+                    <div class="header">update (object, id, data, params)</div>
+                    <div class="form-group form-group-sm">
+                      <button id="updateitem_btn" class="btn btn-default btn-sm">update('items', lastCreatedId, {name:'test', description:'old item'})</button>
+                    </div>
+                  </div>
+                  <div class="col-xs-4">
+                    <div class="header">remove (object, id)</div>
+                    <div class="form-group form-group-sm">
+                      <button id="deleteitem_btn" class="btn btn-default btn-sm">remove('items', lastCreatedId)</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="panel panel-default" style="margin: 25px 25px 25px 25px">
+            <div class="panel-heading">Files</div>
+            <div class="panel-body">
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col-xs-8">
+                    <div class="header">upload (objectName, fileActionName, filename, filedata)</div>
+                    <div class="col-sm-4">
+                      <div class="form-group form-group-sm">
+                        <input id="uploadfile_btn" type="file" class="btn btn-default btn-sm">
+                      </div>
+                    </div>
+                    <div class="col-sm-8">
+                      <img id="preview" src="#" alt="Image preview..." style="max-height: 200px">
+                    </div>
+                  </div>
+                  <div class="col-xs-4">
+                    <div class="header">remove (objectName, fileActionName, filename) {</div>
+                    <div class="form-group form-group-sm">
+                      <button id="delfile_btn" class="btn btn-default btn-sm">remove('items', 'files', lastUploaded)</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="./backand.min.js"></script>
+<script src="./demo.js"></script>
+</body>
+</html>
