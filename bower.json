@@ -1,0 +1,20 @@
+{
+  "name": "backand-vanilla-sdk",
+  "description": "Backand SDK for JavaScript",
+  "version": "1.0.4",
+  "main": [
+    "dist/backand.min.js"
+  ],
+  "ignore": [
+    "Bower/*",
+    "example/*",
+    "Bower",
+    "src",
+    "example",
+    "package.json"
+  ],
+  "homepage": "https://github.com/backand/vanilla-sdk",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {}
+}
