@@ -116,8 +116,8 @@ backand.init = (config = {}) => {
   }
 
   // TASK: clean cache if needed
-  let user = utils.storage.get('user');
-  if (user && user.token["AnonymousToken"] && (user.token["AnonymousToken"] !== defaults.anonymousToken || !defaults.useAnonymousTokenByDefault)) {
+  let storeUser = utils.storage.get('user');
+  if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== defaults.anonymousToken || !defaults.useAnonymousTokenByDefault)) {
     utils.storage.remove('user');
   }
 
@@ -135,9 +135,9 @@ backand.init = (config = {}) => {
     }
   );
   if(defaults.runSocket) {
-    user = utils.storage.get('user');
-    user && utils.socket.connect(
-      user.token.Authorization || null,
+    storeUser = utils.storage.get('user');
+    storeUser && utils.socket.connect(
+      storeUser.token.Authorization || null,
       defaults.anonymousToken,
       defaults.appName
     );

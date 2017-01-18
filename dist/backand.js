@@ -1646,8 +1646,8 @@ backand.init = function () {
   };
 
   // TASK: clean cache if needed
-  var user = _utils2.default.storage.get('user');
-  if (user && user.token["AnonymousToken"] && (user.token["AnonymousToken"] !== _defaults2.default.anonymousToken || !_defaults2.default.useAnonymousTokenByDefault)) {
+  var storeUser = _utils2.default.storage.get('user');
+  if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== _defaults2.default.anonymousToken || !_defaults2.default.useAnonymousTokenByDefault)) {
     _utils2.default.storage.remove('user');
   }
 
@@ -1658,11 +1658,11 @@ backand.init = function () {
     object: _object2.default,
     file: _file2.default,
     query: _query2.default,
-    user: user
+    user: _user3.default
   });
   if (_defaults2.default.runSocket) {
-    user = _utils2.default.storage.get('user');
-    user && _utils2.default.socket.connect(user.token.Authorization || null, _defaults2.default.anonymousToken, _defaults2.default.appName);
+    storeUser = _utils2.default.storage.get('user');
+    storeUser && _utils2.default.socket.connect(storeUser.token.Authorization || null, _defaults2.default.anonymousToken, _defaults2.default.appName);
     _extends(backand, { on: _utils2.default.socket.on.bind(_utils2.default.socket) });
   }
   if (_defaults2.default.exportUtils) {
