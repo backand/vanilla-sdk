@@ -271,6 +271,7 @@ backand.file.remove(object, 'files', filename, scb, ecb)
 
 #### User:
 Return data about the connected user (getUserDetails, getUsername, getUserRole, getToken, getRefreshToken).
+
 ##### GetUserDetails
 Gets the connect user details. The 'force' parameter cause it to fetch data from server (default: false).
 ```javascript
