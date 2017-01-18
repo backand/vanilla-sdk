@@ -1,13 +1,16 @@
 {
   "name": "@backand/bkndvanilla-sdk",
-  "version": "1.1.0",
+  "version": "1.0.29",
   "description": "Backand SDK for JavaScript",
   "main": "./dist/backand.js",
   "types": "./dist/backand.d.ts",
+  "files": [
+    "dist",
+    "example",
+    "test"
+  ],
   "directories": {
-    "example": "example",
-    "test": "test",
-    "dist": "dist"
+    "example": "example"
   },
   "scripts": {
     "build": "gulp",

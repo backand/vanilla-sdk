@@ -1,7 +1,7 @@
 bkndvanilla-sdk
 ===
-[![npm version](https://img.shields.io/npm/v/bkndvanilla-sdk.svg?style=flat-square)](https://www.npmjs.org/package/bkndvanilla-sdk)
-[![npm downloads](https://img.shields.io/npm/dt/bkndvanilla-sdk.svg?style=flat-square)](http://npm-stat.com/charts.html?package=bkndvanilla-sdk)
+[![npm version](https://img.shields.io/npm/v/@backand/bkndvanilla-sdk.svg?style=flat-square)](https://www.npmjs.org/package/@backand/bkndvanilla-sdk)
+[![npm downloads](https://img.shields.io/npm/dt/@backand/bkndvanilla-sdk.svg?style=flat-square)](http://npm-stat.com/charts.html?package=@backand/bkndvanilla-sdk)
 
 >  Backand SDK for JavaScript.
 This SDK enables you to communicate comfortably and quickly with your Backand app.
@@ -11,19 +11,19 @@ It requires zero configurations, no installations and no requirements.
 ## Installation
 - npm:
 ```bash
-$ npm i -S bkndvanilla-sdk
+$ npm i -S @backand/bkndvanilla-sdk
 ```
 - yarn:
 ```bash
-$ yarn add bkndvanilla-sdk
+$ yarn add @backand/bkndvanilla-sdk
 ```
 ```javascript
-import backand from 'bkndvanilla-sdk'
-const backand = require('bkndvanilla-sdk')
+import backand from '@backand/bkndvanilla-sdk'
+const backand = require('@backand/bkndvanilla-sdk')
 ```
 - cdn:
 ``` html
-<script src="https://cdn.backand.net/javascript/dist/1.0.1/backand.min.js"></script>
+<script src="https://cdn.backand.net/javascript/dist/1.1.0/backand.min.js"></script>
 ```
 - download/clone this repo and include `backand.min.js` in your project
 ``` html
