@@ -130,6 +130,6 @@ export default function detect ()  {
   }
 
   result.device !== 'unknown' &&
-    console.log(`Running on ${result.device} with a ${result.os} os and ${result.env} ${result.env !== result.type ? '(' + result.type + ')' : '' } environment ...`);
+    console.info(`Running on ${result.device} with a ${result.os} os and ${result.env} ${result.env !== result.type ? '(' + result.type + ')' : '' } environment ...`);
   return result
 }

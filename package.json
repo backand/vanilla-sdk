@@ -1,6 +1,6 @@
 {
-  "name": "@backand/bkndvanilla-sdk",
-  "version": "1.0.30",
+  "name": "@backand/vanilla-sdk",
+  "version": "1.0.7",
   "description": "Backand SDK for JavaScript",
   "main": "./dist/backand.js",
   "types": "./dist/backand.d.ts",
@@ -41,19 +41,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/backand/bkndvanilla-sdk.git"
+    "url": "git+https://github.com/backand/vanilla-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/backand/bkndvanilla-sdk/issues"
+    "url": "https://github.com/backand/vanilla-sdk/issues"
   },
-  "homepage": "https://github.com/backand/bkndvanilla-sdk#readme",
+  "homepage": "https://github.com/backand/vanilla-sdk#readme",
   "keywords": [
     "Backand",
     "backend",
     "backend sdk",
     "backend js",
     "backend javascript",
-    "bkndvanilla-sdk",
+    "vanilla-sdk",
     "backend vanilla sdk"
   ]
 }

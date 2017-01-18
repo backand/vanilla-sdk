@@ -1,7 +1,7 @@
-bkndvanilla-sdk
+vanilla-sdk
 ===
-[![npm version](https://img.shields.io/npm/v/@backand/bkndvanilla-sdk.svg?style=flat-square)](https://www.npmjs.org/package/@backand/bkndvanilla-sdk)
-[![npm downloads](https://img.shields.io/npm/dt/@backand/bkndvanilla-sdk.svg?style=flat-square)](http://npm-stat.com/charts.html?package=@backand/bkndvanilla-sdk)
+[![npm version](https://img.shields.io/npm/v/@backand/vanilla-sdk.svg?style=flat-square)](https://www.npmjs.org/package/@backand/vanilla-sdk)
+[![npm downloads](https://img.shields.io/npm/dt/@backand/vanilla-sdk.svg?style=flat-square)](http://npm-stat.com/charts.html?package=@backand/vanilla-sdk)
 
 >  Backand SDK for JavaScript.
 This SDK enables you to communicate comfortably and quickly with your Backand app.
@@ -11,25 +11,28 @@ It requires zero configurations, no installations and no requirements.
 ## Installation
 - npm:
 ```bash
-$ npm i -S @backand/bkndvanilla-sdk
+$ npm i -S @backand/vanilla-sdk
 ```
 - yarn:
 ```bash
-$ yarn add @backand/bkndvanilla-sdk
+$ yarn add @backand/vanilla-sdk
 ```
-```javascript
-import backand from '@backand/bkndvanilla-sdk'
-const backand = require('@backand/bkndvanilla-sdk')
-```
-- cdn:
-``` html
-<script src="https://cdn.backand.net/javascript/dist/1.1.0/backand.min.js"></script>
-```
-- download/clone this repo and include `backand.min.js` in your project
-``` html
-<script src="backand.min.js"></script>
+- download/clone:
+```bash
+$ git clone https://github.com/backand/vanilla-sdk.git
 ```
 
+## Import
+- bundlers:
+```javascript
+import backand from '@backand/vanilla-sdk'
+const backand = require('@backand/vanilla-sdk')
+```
+-  index.html:
+``` html
+<script src="node_modules/@backand/vanilla-sdk/dist/backand.min.js"></script>
+<script src="backand.min.js"></script>
+```
 
 ## Browser Support
 
@@ -38,7 +41,7 @@ const backand = require('@backand/bkndvanilla-sdk')
 Latest ✔ | Latest ✔ | Latest ✔ | Latest ✔ | Latest ✔ | 10+ ✔ |
 
 
-## Quick start
+## Quick Start
 ```javascript
 backand.init({
   appName: 'APP_NAME',
@@ -295,7 +298,7 @@ backand.query.get(name, params, scb, ecb)
 
 
 ## Examples
-***To view the demo web page, just run npm start - [example page](https://github.com/backand/bkndvanilla-sdk/blob/master/example/).***
+***To view the demo web page, just run npm start - [example page](https://github.com/backand/vanilla-sdk/blob/master/example/).***
 
 
 ## License

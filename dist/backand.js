@@ -1559,10 +1559,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// running tests to identify the runtime environment
+// TASK: run tests to identify the runtime environment
 var detector = (0, _detector2.default)();
 
-// get data from url in social sign-in popup
+// TASK: get data from url in social sign-in popup
 if (window.location && detector.env !== 'node' && detector.env !== 'react-native') {
   var dataMatch = /(data|error)=(.+)/.exec(window.location.href);
   if (dataMatch && dataMatch[1] && dataMatch[2]) {
@@ -1586,15 +1586,15 @@ backand.init = function () {
   var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 
-  // combine defaults with user config
+  // TASK: combine defaults with user config
   _extends(_defaults2.default, config);
   // console.log(defaults);
 
-  // verify new defaults
+  // TASK: verify new defaults
   if (!_defaults2.default.appName) throw new Error('appName is missing');
   if (!_defaults2.default.anonymousToken && _defaults2.default.useAnonymousTokenByDefault) throw new Error('useAnonymousTokenByDefault is true but anonymousToken is missing');
 
-  // init utils
+  // TASK: init utils
   _extends(_utils2.default, {
     storage: new _storage2.default(_defaults2.default.storage, _defaults2.default.storagePrefix),
     http: _http2.default.create({
@@ -1608,6 +1608,7 @@ backand.init = function () {
     });
   }
 
+  // TASK: sets http interceptors for authorization header & refresh tokens
   _utils2.default.http.config.interceptors = {
     request: function request(req, config, next) {
       if (config.url.indexOf(constants.URLS.token) === -1) {
@@ -1644,17 +1645,24 @@ backand.init = function () {
     }
   };
 
-  // expose backand namespace to window
+  // TASK: clean cache if needed
+  var user = _utils2.default.storage.get('user');
+  if (user && user.token["AnonymousToken"] && (user.token["AnonymousToken"] !== _defaults2.default.anonymousToken || !_defaults2.default.useAnonymousTokenByDefault)) {
+    _utils2.default.storage.remove('user');
+  }
+
+  // TASK: expose backand namespace to window
   delete backand.init;
   _extends(backand, _auth2.default, {
     defaults: _defaults2.default,
     object: _object2.default,
     file: _file2.default,
     query: _query2.default,
-    user: _user3.default
+    user: user
   });
   if (_defaults2.default.runSocket) {
-    _utils2.default.storage.get('user') && _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization || null, _defaults2.default.anonymousToken, _defaults2.default.appName);
+    user = _utils2.default.storage.get('user');
+    user && _utils2.default.socket.connect(user.token.Authorization || null, _defaults2.default.anonymousToken, _defaults2.default.appName);
     _extends(backand, { on: _utils2.default.socket.on.bind(_utils2.default.socket) });
   }
   if (_defaults2.default.exportUtils) {
@@ -2549,7 +2557,7 @@ function detect() {
     result.type = 'unknown';
   }
 
-  result.device !== 'unknown' && console.log('Running on ' + result.device + ' with a ' + result.os + ' os and ' + result.env + ' ' + (result.env !== result.type ? '(' + result.type + ')' : '') + ' environment ...');
+  result.device !== 'unknown' && console.info('Running on ' + result.device + ' with a ' + result.os + ' os and ' + result.env + ' ' + (result.env !== result.type ? '(' + result.type + ')' : '') + ' environment ...');
   return result;
 }
 

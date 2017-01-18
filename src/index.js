@@ -20,10 +20,10 @@ import file from './services/file'
 import query from './services/query'
 import user from './services/user'
 
-// running tests to identify the runtime environment
+// TASK: run tests to identify the runtime environment
 var detector = detect();
 
-// get data from url in social sign-in popup
+// TASK: get data from url in social sign-in popup
 if(window.location && detector.env !== 'node' && detector.env !== 'react-native') {
   let dataMatch = /(data|error)=(.+)/.exec(window.location.href);
   if (dataMatch && dataMatch[1] && dataMatch[2]) {
@@ -46,24 +46,23 @@ let backand = {
 }
 backand.init = (config = {}) => {
 
-  // combine defaults with user config
+  // TASK: combine defaults with user config
   Object.assign(defaults, config);
   // console.log(defaults);
 
-  // verify new defaults
+  // TASK: verify new defaults
   if (!defaults.appName)
     throw new Error('appName is missing');
   if (!defaults.anonymousToken && defaults.useAnonymousTokenByDefault)
     throw new Error('useAnonymousTokenByDefault is true but anonymousToken is missing');
 
-  // init utils
+  // TASK: init utils
   Object.assign(utils, {
     storage: new Storage(defaults.storage, defaults.storagePrefix),
     http: Http.create({
       baseURL: defaults.apiUrl
     }),
     detector,
-    // isIE: window.document && (false || !!document.documentMode),
   });
   if (defaults.runSocket) {
     Object.assign(utils, {
@@ -71,6 +70,7 @@ backand.init = (config = {}) => {
     });
   }
 
+  // TASK: sets http interceptors for authorization header & refresh tokens
   utils.http.config.interceptors = {
     request: function(req, config, next) {
       if (config.url.indexOf(constants.URLS.token) ===  -1) {
@@ -115,7 +115,13 @@ backand.init = (config = {}) => {
     }
   }
 
-  // expose backand namespace to window
+  // TASK: clean cache if needed
+  let user = utils.storage.get('user');
+  if (user && user.token["AnonymousToken"] && (user.token["AnonymousToken"] !== defaults.anonymousToken || !defaults.useAnonymousTokenByDefault)) {
+    utils.storage.remove('user');
+  }
+
+  // TASK: expose backand namespace to window
   delete backand.init;
   Object.assign(
     backand,
@@ -129,8 +135,9 @@ backand.init = (config = {}) => {
     }
   );
   if(defaults.runSocket) {
-    utils.storage.get('user') && utils.socket.connect(
-      utils.storage.get('user').token.Authorization || null,
+    user = utils.storage.get('user');
+    user && utils.socket.connect(
+      user.token.Authorization || null,
       defaults.anonymousToken,
       defaults.appName
     );
