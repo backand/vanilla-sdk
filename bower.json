@@ -7,11 +7,13 @@
   ],
   "ignore": [
     "Bower/*",
-    "example/*",
     "Bower",
     "src",
-    "example",
-    "package.json"
+    "package.json",
+    "test",
+    ".babelrc",
+    ".gitignore",
+    "gulpfile.babel.js"
   ],
   "homepage": "https://github.com/backand/vanilla-sdk",
   "license": "MIT",
