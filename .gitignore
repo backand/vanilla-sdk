@@ -1,5 +1,2 @@
 # Dependency directory
 node_modules/**
-
-# npm build
-vanillabknd-sdk-*.tgz
