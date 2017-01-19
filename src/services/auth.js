@@ -1,4 +1,3 @@
-import { Promise } from 'es6-promise'
 import { URLS, EVENTS, SOCIAL_PROVIDERS } from './../constants'
 import defaults from './../defaults'
 import utils from './../utils/utils'
@@ -29,7 +28,7 @@ function __generateFakeResponse__ (status = 0, statusText = '', headers = [], da
 }
 function __dispatchEvent__ (name) {
   let event;
-  if(defaults.isMobile)
+  if(defaults.isMobile || utils.detector.env === 'node')
     return;
   if (document.createEvent) {
     event = document.createEvent('Event');
@@ -425,17 +424,21 @@ function changePassword (oldPassword, newPassword, scb, ecb) {
 }
 function signout (scb) {
   return new Promise((resolve, reject) => {
-    utils.http({
-      url: URLS.signout,
-      method: 'GET',
-    })
+    let storeUser = utils.storage.get('user');
+    if(storeUser.token["Authorization"]) {
+      utils.http({
+        url: URLS.signout,
+        method: 'GET',
+      })
+    }
     utils.storage.remove('user');
     if (defaults.runSocket) {
       utils.socket.disconnect();
     }
     __dispatchEvent__(EVENTS.SIGNOUT);
-    scb && scb(__generateFakeResponse__(200, 'OK', [], utils.storage.get('user')));
-    resolve(__generateFakeResponse__(200, 'OK', [], utils.storage.get('user')));
+    storeUser = utils.storage.get('user');
+    scb && scb(__generateFakeResponse__(200, 'OK', [], storeUser));
+    resolve(__generateFakeResponse__(200, 'OK', [], storeUser));
   });
 }
 function getSocialProviders (scb) {

@@ -8,11 +8,22 @@ import buffer from 'vinyl-buffer';
 import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
 import rename from 'gulp-rename';
+import header from 'gulp-header';
 
 const paths = {
     src:  { js: './src/index.js' },
     dest: { js: './dist', example: './example' }
 };
+const pkg = require('./package.json');
+const banner = ['/*********************************************************',
+  ' * <%= pkg.name %> - <%= pkg.description %>',
+  ' * @version v<%= pkg.version %>',
+  ' * @link <%= pkg.homepage %>',
+  ' * @copyright Copyright (c) 2017 <%= pkg.author %> https://www.backand.com/',
+  ' * @license <%= pkg.license %> (http://www.opensource.org/licenses/mit-license.php)',
+  ' * @Compiled At: ' + new Date().toLocaleDateString(),
+  '  *********************************************************/',
+  ''].join('\n');
 
 gulp.task('clean', function () {
   return gulp.src(paths.dest.js)
@@ -31,6 +42,7 @@ gulp.task('build', ['ts'], ()=> {
     .bundle()
     .pipe(source('backand.js'))
     .pipe(buffer())
+    .pipe(header(banner, { pkg : pkg } ))
     .pipe(gulp.dest(paths.dest.js))
     .pipe(sourcemaps.init())
     .pipe(uglify())
@@ -43,5 +55,6 @@ gulp.task('build', ['ts'], ()=> {
 gulp.task('watch', ()=> {
   gulp.watch('./src/**/*', ['build']);
 });
+
 
 gulp.task('default', ['build']);

@@ -1,5 +1,3 @@
-import { Promise } from 'es6-promise'
-
 class Http {
   constructor (config = {}) {
     if (!window.XMLHttpRequest)
@@ -117,7 +115,8 @@ class Http {
             reject(res);
           };
           req.onreadystatechange = () => {
-            if (req.readyState == XMLHttpRequest.DONE) {
+            let _DONE = XMLHttpRequest.DONE || 4;
+            if (req.readyState == _DONE) {
               let res = this._createResponse(req, config);
               if (res.status === 200){
                 if (config.interceptors.response) {

@@ -1,9 +1,3 @@
-/***********************************************
- * backand JavaScript Library
- * Authors: backand
- * License: MIT (http://www.opensource.org/licenses/mit-license.php)
- * Compiled At: 26/11/2016
- ***********************************************/
 import defaults from './defaults'
 import * as constants from './constants'
 import * as helpers from './helpers'
@@ -19,6 +13,9 @@ import object from './services/object'
 import file from './services/file'
 import query from './services/query'
 import user from './services/user'
+
+// polyfills
+require('es6-promise/auto');
 
 // TASK: run tests to identify the runtime environment
 var detector = detect();

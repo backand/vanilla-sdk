@@ -1,4 +1,18 @@
+/*********************************************************
+ * @backand/vanilla-sdk - Backand SDK for JavaScript
+ * @version v1.0.5
+ * @link https://github.com/backand/vanilla-sdk#readme
+ * @copyright Copyright (c) 2017 Backand https://www.backand.com/
+ * @license MIT (http://www.opensource.org/licenses/mit-license.php)
+ * @Compiled At: 2017-01-20
+  *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// This file can be required in Browserify and Node.js for automatic polyfill
+// To use it:  require('es6-promise/auto');
+'use strict';
+module.exports = require('./').polyfill();
+
+},{"./":2}],2:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -1158,7 +1172,7 @@ return Promise;
 })));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":2}],2:[function(require,module,exports){
+},{"_process":3}],3:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -1340,7 +1354,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1375,7 +1389,7 @@ var SOCIAL_PROVIDERS = exports.SOCIAL_PROVIDERS = {
   twitter: { name: 'twitter', label: 'Twitter', url: 'www.twitter.com', css: { backgroundColor: '#55acee' }, id: 4 }
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1398,7 +1412,7 @@ exports.default = {
   mobilePlatform: 'ionic'
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1492,16 +1506,10 @@ var StorageAbstract = exports.StorageAbstract = function () {
   return StorageAbstract;
 }();
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /***********************************************
-                                                                                                                                                                                                                                                                   * backand JavaScript Library
-                                                                                                                                                                                                                                                                   * Authors: backand
-                                                                                                                                                                                                                                                                   * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-                                                                                                                                                                                                                                                                   * Compiled At: 26/11/2016
-                                                                                                                                                                                                                                                                   ***********************************************/
-
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _defaults = require('./defaults');
 
@@ -1558,6 +1566,9 @@ var _user3 = _interopRequireDefault(_user2);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// polyfills
+require('es6-promise/auto');
 
 // TASK: run tests to identify the runtime environment
 var detector = (0, _detector2.default)();
@@ -1672,7 +1683,7 @@ backand.init = function () {
 
 module.exports = backand;
 
-},{"./constants":3,"./defaults":4,"./helpers":5,"./services/auth":7,"./services/file":8,"./services/object":9,"./services/query":10,"./services/user":11,"./utils/detector":12,"./utils/http":13,"./utils/socket":14,"./utils/storage":15,"./utils/utils":16}],7:[function(require,module,exports){
+},{"./constants":4,"./defaults":5,"./helpers":6,"./services/auth":8,"./services/file":9,"./services/object":10,"./services/query":11,"./services/user":12,"./utils/detector":13,"./utils/http":14,"./utils/socket":15,"./utils/storage":16,"./utils/utils":17,"es6-promise/auto":1}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1680,8 +1691,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _es6Promise = require('es6-promise');
 
 var _constants = require('./../constants');
 
@@ -1727,7 +1736,7 @@ function __generateFakeResponse__() {
 }
 function __dispatchEvent__(name) {
   var event = void 0;
-  if (_defaults2.default.isMobile) return;
+  if (_defaults2.default.isMobile || _utils2.default.detector.env === 'node') return;
   if (document.createEvent) {
     event = document.createEvent('Event');
     event.initEvent(name, true, true);
@@ -1741,7 +1750,7 @@ function __dispatchEvent__(name) {
   }
 }
 function __handleRefreshToken__() {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var user = _utils2.default.storage.get('user');
     if (!user || !user.details.refresh_token) {
       reject(__generateFakeResponse__(0, '', [], 'No cached user or refreshToken found. authentication is required.'));
@@ -1758,7 +1767,7 @@ function __handleRefreshToken__() {
   });
 };
 function useAnonymousAuth(scb, ecb) {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!_defaults2.default.anonymousToken) {
       ecb && ecb(__generateFakeResponse__(0, '', [], 'anonymousToken is missing'));
       reject(__generateFakeResponse__(0, '', [], 'anonymousToken is missing'));
@@ -1792,7 +1801,7 @@ function useAnonymousAuth(scb, ecb) {
   });
 }
 function signin(username, password, scb, ecb) {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     _utils2.default.http({
       url: _constants.URLS.token,
       method: 'POST',
@@ -1824,7 +1833,7 @@ function signup(firstName, lastName, email, password, confirmPassword) {
   var scb = arguments[6];
   var ecb = arguments[7];
 
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     _utils2.default.http({
       url: _constants.URLS.signup,
       method: 'POST',
@@ -1863,7 +1872,7 @@ function __getSocialUrl__(providerName, isSignup, isAutoSignUp) {
   return '/user/socialSign' + action + '?provider=' + provider.label + autoSignUpParam + '&response_type=token&client_id=self&redirect_uri=' + provider.url + '&state=';
 }
 function __socialAuth__(provider, isSignUp, spec, email) {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!_constants.SOCIAL_PROVIDERS[provider]) {
       reject(__generateFakeResponse__(0, '', [], 'Unknown Social Provider'));
     }
@@ -1948,7 +1957,7 @@ function __socialAuth__(provider, isSignUp, spec, email) {
 function socialSignin(provider, scb, ecb) {
   var spec = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'left=1, top=1, width=500, height=560';
 
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     __socialAuth__(provider, false, spec, '').then(function (response) {
       __dispatchEvent__(_constants.EVENTS.SIGNUP);
       return __signinWithToken__({
@@ -1964,7 +1973,7 @@ function socialSignin(provider, scb, ecb) {
   });
 };
 function socialSigninWithToken(provider, token, scb, ecb) {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     _utils2.default.http({
       url: _constants.URLS.socialSigninWithToken.replace('PROVIDER', provider),
       method: 'GET',
@@ -2025,7 +2034,7 @@ function socialSigninWithToken(provider, token, scb, ecb) {
 function socialSignup(provider, email, scb, ecb) {
   var spec = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'left=1, top=1, width=500, height=560';
 
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     __socialAuth__(provider, true, spec, email).then(function (response) {
       __dispatchEvent__(_constants.EVENTS.SIGNUP);
       if (_defaults2.default.runSigninAfterSignup) {
@@ -2046,7 +2055,7 @@ function socialSignup(provider, email, scb, ecb) {
   });
 }
 function __signinWithToken__(tokenData) {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var data = [];
     for (var obj in tokenData) {
       data.push(encodeURIComponent(obj) + '=' + encodeURIComponent(tokenData[obj]));
@@ -2108,28 +2117,32 @@ function changePassword(oldPassword, newPassword, scb, ecb) {
   }, scb, ecb);
 }
 function signout(scb) {
-  return new _es6Promise.Promise(function (resolve, reject) {
-    _utils2.default.http({
-      url: _constants.URLS.signout,
-      method: 'GET'
-    });
+  return new Promise(function (resolve, reject) {
+    var storeUser = _utils2.default.storage.get('user');
+    if (storeUser.token["Authorization"]) {
+      _utils2.default.http({
+        url: _constants.URLS.signout,
+        method: 'GET'
+      });
+    }
     _utils2.default.storage.remove('user');
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.disconnect();
     }
     __dispatchEvent__(_constants.EVENTS.SIGNOUT);
-    scb && scb(__generateFakeResponse__(200, 'OK', [], _utils2.default.storage.get('user')));
-    resolve(__generateFakeResponse__(200, 'OK', [], _utils2.default.storage.get('user')));
+    storeUser = _utils2.default.storage.get('user');
+    scb && scb(__generateFakeResponse__(200, 'OK', [], storeUser));
+    resolve(__generateFakeResponse__(200, 'OK', [], storeUser));
   });
 }
 function getSocialProviders(scb) {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     scb && scb(_constants.SOCIAL_PROVIDERS);
     resolve(_constants.SOCIAL_PROVIDERS);
   });
 }
 
-},{"./../constants":3,"./../defaults":4,"./../utils/utils":16,"es6-promise":1}],8:[function(require,module,exports){
+},{"./../constants":4,"./../defaults":5,"./../utils/utils":17}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2170,7 +2183,7 @@ function remove(object, fileAction, filename, scb, ecb) {
   }, scb, ecb);
 }
 
-},{"./../constants":3,"./../utils/utils":16}],9:[function(require,module,exports){
+},{"./../constants":4,"./../utils/utils":17}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2293,7 +2306,7 @@ function post(object, action, data) {
   }, scb, ecb);
 }
 
-},{"./../constants":3,"./../utils/utils":16}],10:[function(require,module,exports){
+},{"./../constants":4,"./../utils/utils":17}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2338,7 +2351,7 @@ function post(name, data) {
   }, scb, ecb);
 }
 
-},{"./../constants":3,"./../utils/utils":16}],11:[function(require,module,exports){
+},{"./../constants":4,"./../utils/utils":17}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2346,8 +2359,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _es6Promise = require('es6-promise');
 
 var _constants = require('./../constants');
 
@@ -2380,7 +2391,7 @@ function __generateFakeResponse__() {
   };
 }
 function __getUserDetailsFromStorage__(scb, ecb) {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var user = _utils2.default.storage.get('user');
     if (!user) {
       ecb && ecb(__generateFakeResponse__(0, '', [], 'No cached user found. authentication is required.'));
@@ -2442,7 +2453,7 @@ function getRefreshToken(scb, ecb) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":16,"es6-promise":1}],12:[function(require,module,exports){
+},{"./../constants":4,"./../utils/utils":17}],13:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -2562,7 +2573,7 @@ function detect() {
 }
 
 }).call(this,require('_process'))
-},{"_process":2}],13:[function(require,module,exports){
+},{"_process":3}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2574,8 +2585,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _es6Promise = require('es6-promise');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2685,7 +2694,7 @@ var Http = function () {
     value: function request(cfg, scb, ecb) {
       var _this = this;
 
-      return new _es6Promise.Promise(function (resolve) {
+      return new Promise(function (resolve) {
         var req = new XMLHttpRequest();
         var config = _extends({}, _this.config, cfg);
         if (config.interceptors.request) {
@@ -2697,7 +2706,7 @@ var Http = function () {
         var req = _ref.req,
             config = _ref.config;
 
-        return new _es6Promise.Promise(function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
           if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
             var res = _this._handleError('url parameter is missing', config);
             ecb && ecb(res);
@@ -2722,7 +2731,8 @@ var Http = function () {
             reject(res);
           };
           req.onreadystatechange = function () {
-            if (req.readyState == XMLHttpRequest.DONE) {
+            var _DONE = XMLHttpRequest.DONE || 4;
+            if (req.readyState == _DONE) {
               var _res = _this._createResponse(req, config);
               if (_res.status === 200) {
                 if (config.interceptors.response) {
@@ -2773,7 +2783,7 @@ http.create = function (config) {
 
 exports.default = http;
 
-},{"es6-promise":1}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2853,7 +2863,7 @@ var Socket = function () {
 
 exports.default = Socket;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2928,7 +2938,7 @@ var Storage = function () {
 
 exports.default = Storage;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2936,5 +2946,5 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {};
 
-},{}]},{},[6])(6)
+},{}]},{},[7])(7)
 });
