@@ -174,7 +174,7 @@ backand.object.getList(object, params, scb, ecb)
 let params = {
   sort: backand.helpers.sort.create('creationDate', backand.helpers.sort.orders.desc),
   exclude: backand.helpers.exclude.options.all,
-  filter = backand.helpers.filter.create('user', backand.helpers.filter.operators.relation.in, userId),
+  filter: backand.helpers.filter.create('user', backand.helpers.filter.operators.relation.in, userId),
   pageSize: 1000000,
   pageNumber: 1,
 }
