@@ -177,7 +177,7 @@ let params = {
   filter: backand.helpers.filter.create('user', backand.helpers.filter.operators.relation.in, userId),
   pageSize: 1000000,
   pageNumber: 1,
-}
+};
 backand.object.getList(object, params, scb, ecb)
   .then(res => {
     console.log(res.data);
