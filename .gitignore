@@ -3,4 +3,3 @@ node_modules/**
 .idea
 .idea/**
 webpack.config.js
-src/utils/axios.js

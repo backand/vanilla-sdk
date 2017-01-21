@@ -63,7 +63,16 @@ describe('Backand.initiate', () => {
           done(err);
         })
       });
+      it('changePassword 1', function() {
+        this.timeout(0);
+        return backand.changePassword('Password1','Password2')
+      });
+      it('changePassword 2', function() {
+        this.timeout(0);
+        return backand.changePassword('Password2', 'Password1');
+      });
       it('handleRefreshToken', function(done) {
+        this.timeout(0);
         localStorage.setItem('BACKAND_user', 'JSON__________{"token":{"Authorization":"Bearer 40TnXDDXpTBRs5cmYfeq5DfCQyi4ggPzz-i7Dd31pBPpt847TC8pr_ldBqg5iGvCnlPTX5ruVPiUzAvGbXsTxjK3eFGSKiKHzIUfXaqsLdX597UuIiLSYxJiIA11wJKfaFmF6rCGBm8ZAErUwga0aB2EEjSiYJYon8MWTIoaddfPgJo6I9hbAXESShNSe5hNl_9RMVjRbGXy2uDV-Vw_HmtcmTLkNGpRPTBnUt_8X71DaK0sdmxSP5FQlkY8nVyr"},"details":{"access_token":"40TnXDDXpTBRs5cmYfeq5DfCQyi4ggPzz-i7Dd31pBPpt847TC8pr_ldBqg5iGvCnlPTX5ruVPiUzAvGbXsTxjK3eFGSKiKHzIUfXaqsLdX597UuIiLSYxJiIA11wJKfaFmF6rCGBm8ZAErUwga0aB2EEjSiYJYon8MWTIoaddfPgJo6I9hbAXESShNSe5hNl_9RMVjRbGXy2uDV-Vw_HmtcmTLkNGpRPTBnUt_8X71DaK0sdmxSP5FQlkY8nVyr","token_type":"bearer","expires_in":1799,"refresh_token":"ADFqy2qOqdIlVbstcDTkgUX9ui1PtnjRcGgQLJ85pmAFuAxaVxZFaZjyM0FiriUOag==","appName":"sdk","username":"sdk@backand.com","role":"User","firstName":"sdk","lastName":"test","fullName":"sdk test","regId":782463,"userId":"2"}}')
         backand.user.getUserDetails(true)
         .then(res => {
@@ -74,20 +83,11 @@ describe('Backand.initiate', () => {
           done(err);
         })
       });
-      it('changePassword 1', function() {
-        this.timeout(0);
-        return backand.changePassword('Password1','Password2')
-      });
-      it('changePassword 2', function() {
-        this.timeout(0);
-        return backand.changePassword('Password2', 'Password1');
-      });
       it('signout', function(done) {
         this.timeout(0);
         backand.signout()
         .then(res => {
           expect(res.data).to.be.null;
-          backand.useAnonymousAuth();
           done();
         })
         .catch(err => {
@@ -149,7 +149,7 @@ describe('Backand.initiate', () => {
       });
     });
     describe('files', () => {
-      it('upload', function() {
+      it('upload', function(done) {
         this.timeout(0);
         var file = new File(["test"], 'file2upload');
         var reader  = new FileReader();
@@ -172,7 +172,7 @@ describe('Backand.initiate', () => {
   });
   describe('Backand.helpers', () => {
     it('should have some impotant keys', () => {
-      expect(backand.helpers).to.have.all.keys('filter', 'sort', 'exclude', 'StorageAbstract');
+      expect(backand.helpers).to.have.all.keys('filter', 'sort', 'exclude', 'StorageAbstract', 'MemoryStorage');
     });
   });
   describe('Backand.constants', () => {

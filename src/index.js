@@ -5,6 +5,7 @@ import * as helpers from './helpers'
 import utils from './utils/utils'
 import Storage from './utils/storage'
 import Http from './utils/http'
+import interceptors from './utils/interceptors'
 import Socket from './utils/socket'
 import detect from './utils/detector'
 
@@ -14,14 +15,14 @@ import file from './services/file'
 import query from './services/query'
 import user from './services/user'
 
-// polyfills
-require('es6-promise/auto');
-
 // TASK: run tests to identify the runtime environment
 var detector = detect();
 
+// TASK: set first defaults base on detector results
+defaults["storage"] = (detector.env === 'browser') ? window.localStorage : new helpers.MemoryStorage();
+
 // TASK: get data from url in social sign-in popup
-if(window.location && detector.env !== 'node' && detector.env !== 'react-native') {
+if(detector.env !== 'node' && detector.env !== 'react-native' && window.location) {
   let dataMatch = /(data|error)=(.+)/.exec(window.location.href);
   if (dataMatch && dataMatch[1] && dataMatch[2]) {
     let data = {
@@ -69,47 +70,9 @@ backand.init = (config = {}) => {
 
   // TASK: sets http interceptors for authorization header & refresh tokens
   utils.http.config.interceptors = {
-    request: function(req, config, next) {
-      if (config.url.indexOf(constants.URLS.token) ===  -1) {
-        let user = utils.storage.get('user');
-        if (defaults.useAnonymousTokenByDefault && !user) {
-          auth.useAnonymousAuth()
-            .then(response => {
-              config.headers = Object.assign({}, config.headers, utils.storage.get('user').token);
-              next({req, config});
-            })
-        }
-        else if (user) {
-          config.headers = Object.assign({}, config.headers, user.token);
-          next({req, config});
-        }
-        else {
-          next({req, config});
-        }
-      }
-      else {
-        next({req, config});
-      }
-    },
-    responseError: function (error, config, resolve, reject, scb, ecb) {
-      if (config.url.indexOf(constants.URLS.token) ===  -1
-       && defaults.manageRefreshToken
-       && error.status === 401
-       && error.data && error.data.Message === 'invalid or expired token') {
-         auth.__handleRefreshToken__()
-           .then(response => {
-             resolve(this.request(config, scb, ecb));
-           })
-           .catch(error => {
-             ecb && ecb(error);
-             reject(error);
-           })
-      }
-      else {
-        ecb && ecb(error);
-        reject(error);
-      }
-    }
+    request: interceptors.requestInterceptor,
+    response: interceptors.responseInterceptor,
+    responseError: interceptors.responseErrorInterceptor,
   }
 
   // TASK: clean cache if needed

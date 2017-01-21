@@ -1,9 +1,11 @@
+import { Promise } from 'es6-promise'
+
 class Http {
   constructor (config = {}) {
-    if (!window.XMLHttpRequest)
+    if (!XMLHttpRequest)
       throw new Error('XMLHttpRequest is not supported by this platform');
 
-    this.config = Object.assign({
+    this.defaults = Object.assign({
       // url: '/',
       method: 'GET',
       headers: {},
@@ -16,7 +18,7 @@ class Http {
        username: null,
        password: null
       }
-    }, config)
+    }, config);
   }
   _getHeaders (headers) {
     return headers.split('\r\n').filter(header => header).map(header => {
@@ -83,36 +85,30 @@ class Http {
       req.send(JSON.stringify(data));
     }
   }
-  request (cfg, scb, ecb) {
+  request (cfg = {}) {
     return new Promise(resolve => {
-      let req = new XMLHttpRequest();
-      let config = Object.assign({}, this.config, cfg);
+      let config = Object.assign({}, this.defaults, cfg);
       if (config.interceptors.request) {
-        config.interceptors.request.call(this, req, config, resolve);
+        resolve(config.interceptors.request(config));
       }
       else {
-        resolve({req, config});
+        resolve(config);
       }
-    }).then(({req, config}) => {
+    }).then((config) => {
         return new Promise((resolve, reject) => {
           if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
-            let res = this._handleError('url parameter is missing', config);
-            ecb && ecb(res);
-            reject(res);
+            reject(this._handleError('url parameter is missing', config));
           }
+          let req = new XMLHttpRequest();
           if (config.withCredentials) { req.withCredentials = true }
           if (config.timeout) { req.timeout = true }
           let params = this._encodeParams(config.params);
           req.open(config.method, `${config.baseURL ? config.baseURL+'/' : ''}${config.url}${params ? '?'+params : ''}`, true, config.auth.username, config.auth.password);
           req.ontimeout = () => {
-            let res = this._handleError('timeout', config);
-            ecb && ecb(res);
-            reject(res);
+            reject(this._handleError('timeout', config));
           };
           req.onabort = () => {
-            let res = this._handleError('abort', config);
-            ecb && ecb(res);
-            reject(res);
+            reject(this._handleError('abort', config));
           };
           req.onreadystatechange = () => {
             let _DONE = XMLHttpRequest.DONE || 4;
@@ -120,19 +116,17 @@ class Http {
               let res = this._createResponse(req, config);
               if (res.status === 200){
                 if (config.interceptors.response) {
-                  config.interceptors.response.call(this, res, config, resolve, reject, scb, ecb);
+                  resolve(config.interceptors.response(res));
                 }
                 else {
-                  scb && scb(res);
                   resolve(res);
                 }
               }
               else {
                 if (config.interceptors.responseError) {
-                  config.interceptors.responseError.call(this, res, config, resolve, reject, scb, ecb);
+                  resolve(config.interceptors.responseError(res));
                 }
                 else {
-                  ecb && ecb(res);
                   reject(res);
                 }
               }
@@ -147,7 +141,7 @@ class Http {
 function createInstance(config = {}) {
   var context = new Http(config);
   var instance = (...args) => Http.prototype.request.apply(context, args);
-  instance.config = context.config;
+  instance.config = context.defaults;
   return instance;
 }
 

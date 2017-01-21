@@ -1,18 +1,12 @@
 /*********************************************************
  * @backand/vanilla-sdk - Backand SDK for JavaScript
- * @version v1.0.5
+ * @version v1.0.7
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-01-20
+ * @Compiled At: 2017-01-21
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-// This file can be required in Browserify and Node.js for automatic polyfill
-// To use it:  require('es6-promise/auto');
-'use strict';
-module.exports = require('./').polyfill();
-
-},{"./":2}],2:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -1172,7 +1166,7 @@ return Promise;
 })));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":3}],3:[function(require,module,exports){
+},{"_process":2}],2:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -1354,7 +1348,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1389,7 +1383,7 @@ var SOCIAL_PROVIDERS = exports.SOCIAL_PROVIDERS = {
   twitter: { name: 'twitter', label: 'Twitter', url: 'www.twitter.com', css: { backgroundColor: '#55acee' }, id: 4 }
 };
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1401,7 +1395,7 @@ exports.default = {
   useAnonymousTokenByDefault: true,
   signUpToken: null,
   apiUrl: 'https://api.backand.com',
-  storage: window.localStorage,
+  storage: {},
   storagePrefix: 'BACKAND_',
   manageRefreshToken: true,
   runSigninAfterSignup: true,
@@ -1412,7 +1406,7 @@ exports.default = {
   mobilePlatform: 'ionic'
 };
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1420,6 +1414,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1506,7 +1504,45 @@ var StorageAbstract = exports.StorageAbstract = function () {
   return StorageAbstract;
 }();
 
-},{}],7:[function(require,module,exports){
+var MemoryStorage = exports.MemoryStorage = function (_StorageAbstract) {
+  _inherits(MemoryStorage, _StorageAbstract);
+
+  function MemoryStorage() {
+    _classCallCheck(this, MemoryStorage);
+
+    var _this = _possibleConstructorReturn(this, (MemoryStorage.__proto__ || Object.getPrototypeOf(MemoryStorage)).call(this));
+
+    _this.data = {};
+    return _this;
+  }
+
+  _createClass(MemoryStorage, [{
+    key: "setItem",
+    value: function setItem(id, val) {
+      return this.data[id] = String(val);
+    }
+  }, {
+    key: "getItem",
+    value: function getItem(id) {
+      return this.data.hasOwnProperty(id) ? this.data[id] : null;
+    }
+  }, {
+    key: "removeItem",
+    value: function removeItem(id) {
+      delete this.data[id];
+      return null;
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      return this.data = {};
+    }
+  }]);
+
+  return MemoryStorage;
+}(StorageAbstract);
+
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -1535,6 +1571,10 @@ var _http = require('./utils/http');
 
 var _http2 = _interopRequireDefault(_http);
 
+var _interceptors = require('./utils/interceptors');
+
+var _interceptors2 = _interopRequireDefault(_interceptors);
+
 var _socket = require('./utils/socket');
 
 var _socket2 = _interopRequireDefault(_socket);
@@ -1559,22 +1599,22 @@ var _query = require('./services/query');
 
 var _query2 = _interopRequireDefault(_query);
 
-var _user2 = require('./services/user');
+var _user = require('./services/user');
 
-var _user3 = _interopRequireDefault(_user2);
+var _user2 = _interopRequireDefault(_user);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// polyfills
-require('es6-promise/auto');
-
 // TASK: run tests to identify the runtime environment
 var detector = (0, _detector2.default)();
 
+// TASK: set first defaults base on detector results
+_defaults2.default["storage"] = detector.env === 'browser' ? window.localStorage : new helpers.MemoryStorage();
+
 // TASK: get data from url in social sign-in popup
-if (window.location && detector.env !== 'node' && detector.env !== 'react-native') {
+if (detector.env !== 'node' && detector.env !== 'react-native' && window.location) {
   var dataMatch = /(data|error)=(.+)/.exec(window.location.href);
   if (dataMatch && dataMatch[1] && dataMatch[2]) {
     var data = {
@@ -1621,39 +1661,9 @@ backand.init = function () {
 
   // TASK: sets http interceptors for authorization header & refresh tokens
   _utils2.default.http.config.interceptors = {
-    request: function request(req, config, next) {
-      if (config.url.indexOf(constants.URLS.token) === -1) {
-        var _user = _utils2.default.storage.get('user');
-        if (_defaults2.default.useAnonymousTokenByDefault && !_user) {
-          _auth2.default.useAnonymousAuth().then(function (response) {
-            config.headers = _extends({}, config.headers, _utils2.default.storage.get('user').token);
-            next({ req: req, config: config });
-          });
-        } else if (_user) {
-          config.headers = _extends({}, config.headers, _user.token);
-          next({ req: req, config: config });
-        } else {
-          next({ req: req, config: config });
-        }
-      } else {
-        next({ req: req, config: config });
-      }
-    },
-    responseError: function responseError(error, config, resolve, reject, scb, ecb) {
-      var _this = this;
-
-      if (config.url.indexOf(constants.URLS.token) === -1 && _defaults2.default.manageRefreshToken && error.status === 401 && error.data && error.data.Message === 'invalid or expired token') {
-        _auth2.default.__handleRefreshToken__().then(function (response) {
-          resolve(_this.request(config, scb, ecb));
-        }).catch(function (error) {
-          ecb && ecb(error);
-          reject(error);
-        });
-      } else {
-        ecb && ecb(error);
-        reject(error);
-      }
-    }
+    request: _interceptors2.default.requestInterceptor,
+    response: _interceptors2.default.responseInterceptor,
+    responseError: _interceptors2.default.responseErrorInterceptor
   };
 
   // TASK: clean cache if needed
@@ -1669,7 +1679,7 @@ backand.init = function () {
     object: _object2.default,
     file: _file2.default,
     query: _query2.default,
-    user: _user3.default
+    user: _user2.default
   });
   if (_defaults2.default.runSocket) {
     storeUser = _utils2.default.storage.get('user');
@@ -1683,7 +1693,7 @@ backand.init = function () {
 
 module.exports = backand;
 
-},{"./constants":4,"./defaults":5,"./helpers":6,"./services/auth":8,"./services/file":9,"./services/object":10,"./services/query":11,"./services/user":12,"./utils/detector":13,"./utils/http":14,"./utils/socket":15,"./utils/storage":16,"./utils/utils":17,"es6-promise/auto":1}],8:[function(require,module,exports){
+},{"./constants":3,"./defaults":4,"./helpers":5,"./services/auth":7,"./services/file":8,"./services/object":9,"./services/query":10,"./services/user":11,"./utils/detector":12,"./utils/http":14,"./utils/interceptors":15,"./utils/socket":16,"./utils/storage":17,"./utils/utils":18}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1691,6 +1701,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _es6Promise = require('es6-promise');
 
 var _constants = require('./../constants');
 
@@ -1701,6 +1713,8 @@ var _defaults2 = _interopRequireDefault(_defaults);
 var _utils = require('./../utils/utils');
 
 var _utils2 = _interopRequireDefault(_utils);
+
+var _fns = require('./../utils/fns');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1716,24 +1730,10 @@ exports.default = {
   resetPassword: resetPassword,
   changePassword: changePassword,
   signout: signout,
-  // getUserDetails,
   getSocialProviders: getSocialProviders
 };
 
 
-function __generateFakeResponse__() {
-  var status = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-  var statusText = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-  var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-  var data = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
-
-  return {
-    status: status,
-    statusText: statusText,
-    headers: headers,
-    data: data
-  };
-}
 function __dispatchEvent__(name) {
   var event = void 0;
   if (_defaults2.default.isMobile || _utils2.default.detector.env === 'node') return;
@@ -1749,28 +1749,51 @@ function __dispatchEvent__(name) {
     window.fireEvent('on' + event.eventType, event);
   }
 }
+function __authorize__(tokenData) {
+  var data = [];
+  Object.keys(tokenData).forEach(function (key) {
+    data.push(encodeURIComponent(key) + '=' + encodeURIComponent(tokenData[key]));
+  });
+  data = data.join("&");
+
+  return _utils2.default.http({
+    url: _constants.URLS.token,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    data: data + '&appName=' + _defaults2.default.appName + '&grant_type=password'
+  }).then(function (response) {
+    _utils2.default.storage.set('user', {
+      token: {
+        Authorization: 'Bearer ' + response.data.access_token
+      },
+      details: response.data
+    });
+    __dispatchEvent__(_constants.EVENTS.SIGNIN);
+    if (_defaults2.default.runSocket) {
+      _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
+    }
+    return response;
+  });
+}
 function __handleRefreshToken__() {
-  return new Promise(function (resolve, reject) {
+  return new _es6Promise.Promise(function (resolve, reject) {
     var user = _utils2.default.storage.get('user');
     if (!user || !user.details.refresh_token) {
-      reject(__generateFakeResponse__(0, '', [], 'No cached user or refreshToken found. authentication is required.'));
+      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user or refreshToken found. authentication is required.', {}));
     } else {
-      __signinWithToken__({
+      resolve(__authorize__({
         username: user.details.username,
         refreshToken: user.details.refresh_token
-      }).then(function (response) {
-        resolve(response);
-      }).catch(function (error) {
-        reject(error);
-      });
+      }));
     }
   });
-};
-function useAnonymousAuth(scb, ecb) {
-  return new Promise(function (resolve, reject) {
+}
+function useAnonymousAuth() {
+  return new _es6Promise.Promise(function (resolve, reject) {
     if (!_defaults2.default.anonymousToken) {
-      ecb && ecb(__generateFakeResponse__(0, '', [], 'anonymousToken is missing'));
-      reject(__generateFakeResponse__(0, '', [], 'anonymousToken is missing'));
+      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'anonymousToken is missing', {}));
     } else {
       var details = {
         "access_token": _defaults2.default.anonymousToken,
@@ -1795,74 +1818,40 @@ function useAnonymousAuth(scb, ecb) {
       if (_defaults2.default.runSocket) {
         _utils2.default.socket.connect(null, _defaults2.default.anonymousToken, _defaults2.default.appName);
       }
-      scb && scb(__generateFakeResponse__(200, 'OK', [], details));
-      resolve(__generateFakeResponse__(200, 'OK', [], details));
+      resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, details, {}));
     }
   });
 }
-function signin(username, password, scb, ecb) {
-  return new Promise(function (resolve, reject) {
-    _utils2.default.http({
-      url: _constants.URLS.token,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: 'username=' + username + '&password=' + password + '&appName=' + _defaults2.default.appName + '&grant_type=password'
-    }).then(function (response) {
-      _utils2.default.storage.set('user', {
-        token: {
-          Authorization: 'Bearer ' + response.data.access_token
-        },
-        details: response.data
-      });
-      __dispatchEvent__(_constants.EVENTS.SIGNIN);
-      if (_defaults2.default.runSocket) {
-        _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
-      }
-      scb && scb(response);
-      resolve(response);
-    }).catch(function (error) {
-      ecb && ecb(error);
-      reject(error);
-    });
+function signin(username, password) {
+  return __authorize__({
+    username: username,
+    password: password
   });
 }
 function signup(firstName, lastName, email, password, confirmPassword) {
   var parameters = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
-  var scb = arguments[6];
-  var ecb = arguments[7];
 
-  return new Promise(function (resolve, reject) {
-    _utils2.default.http({
-      url: _constants.URLS.signup,
-      method: 'POST',
-      headers: {
-        'SignUpToken': _defaults2.default.signUpToken
-      },
-      data: {
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        password: password,
-        confirmPassword: confirmPassword,
-        parameters: parameters
-      }
-    }, scb, ecb).then(function (response) {
-      __dispatchEvent__(_constants.EVENTS.SIGNUP);
-      if (_defaults2.default.runSigninAfterSignup) {
-        return signin(response.data.username, password);
-      } else {
-        scb && scb(response);
-        resolve(response);
-      }
-    }).then(function (response) {
-      scb && scb(response);
-      resolve(response);
-    }).catch(function (error) {
-      ecb && ecb(error);
-      reject(error);
-    });
+  return _utils2.default.http({
+    url: _constants.URLS.signup,
+    method: 'POST',
+    headers: {
+      'SignUpToken': _defaults2.default.signUpToken
+    },
+    data: {
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: password,
+      confirmPassword: confirmPassword,
+      parameters: parameters
+    }
+  }).then(function (response) {
+    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    if (_defaults2.default.runSigninAfterSignup) {
+      return signin(response.data.username, password);
+    } else {
+      return response;
+    }
   });
 }
 function __getSocialUrl__(providerName, isSignup, isAutoSignUp) {
@@ -1872,9 +1861,9 @@ function __getSocialUrl__(providerName, isSignup, isAutoSignUp) {
   return '/user/socialSign' + action + '?provider=' + provider.label + autoSignUpParam + '&response_type=token&client_id=self&redirect_uri=' + provider.url + '&state=';
 }
 function __socialAuth__(provider, isSignUp, spec, email) {
-  return new Promise(function (resolve, reject) {
+  return new _es6Promise.Promise(function (resolve, reject) {
     if (!_constants.SOCIAL_PROVIDERS[provider]) {
-      reject(__generateFakeResponse__(0, '', [], 'Unknown Social Provider'));
+      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Social Provider', {}));
     }
     var url = _defaults2.default.apiUrl + '/1/' + __getSocialUrl__(provider, isSignUp, true) + '&appname=' + _defaults2.default.appName + (email ? '&email=' + email : '') + '&returnAddress='; // ${location.href}
     var popup = null;
@@ -1906,9 +1895,9 @@ function __socialAuth__(provider, isSignUp, spec, email) {
           popup.addEventListener('loadstart', handler, false);
         })();
       } else if (_defaults2.default.mobilePlatform === 'react-native') {
-        reject(__generateFakeResponse__(0, '', [], 'react-native is not supported yet for socials'));
+        reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'react-native is not supported yet for socials', {}));
       } else {
-        reject(__generateFakeResponse__(0, '', [], 'isMobile is true but mobilePlatform is not supported.\n          \'try contact us in request to add support for this platform'));
+        reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'isMobile is true but mobilePlatform is not supported.\n          \'try contact us in request to add support for this platform', {}));
       }
     } else if (_utils2.default.detector.env === 'browser') {
       (function () {
@@ -1919,7 +1908,7 @@ function __socialAuth__(provider, isSignUp, spec, email) {
             window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
           }
           if (url.indexOf(window.location.origin) === -1) {
-            reject(__generateFakeResponse__(0, '', [], 'Unknown Origin Message'));
+            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
           }
 
           var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
@@ -1946,7 +1935,7 @@ function __socialAuth__(provider, isSignUp, spec, email) {
         }
       })();
     } else if (_utils2.default.detector.env === 'node') {
-      reject(__generateFakeResponse__(0, '', [], 'socials are not supported in a nodejs environment'));
+      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'socials are not supported in a nodejs environment', {}));
     }
 
     if (popup && popup.focus) {
@@ -1954,139 +1943,80 @@ function __socialAuth__(provider, isSignUp, spec, email) {
     }
   });
 }
-function socialSignin(provider, scb, ecb) {
-  var spec = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'left=1, top=1, width=500, height=560';
+function socialSignin(provider) {
+  var spec = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'left=1, top=1, width=500, height=560';
 
-  return new Promise(function (resolve, reject) {
-    __socialAuth__(provider, false, spec, '').then(function (response) {
-      __dispatchEvent__(_constants.EVENTS.SIGNUP);
-      return __signinWithToken__({
-        accessToken: response.data.access_token
-      });
-    }).then(function (response) {
-      scb && scb(response);
-      resolve(response);
-    }).catch(function (error) {
-      ecb && ecb(error);
-      reject(error);
+  return __socialAuth__(provider, false, spec, '').then(function (response) {
+    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    return __authorize__({
+      accessToken: response.data.access_token
     });
   });
-};
-function socialSigninWithToken(provider, token, scb, ecb) {
-  return new Promise(function (resolve, reject) {
-    _utils2.default.http({
-      url: _constants.URLS.socialSigninWithToken.replace('PROVIDER', provider),
+}
+function socialSigninWithToken(provider, token) {
+  return _utils2.default.http({
+    url: _constants.URLS.socialSigninWithToken.replace('PROVIDER', provider),
+    method: 'GET',
+    params: {
+      accessToken: token,
+      appName: _defaults2.default.appName,
+      signupIfNotSignedIn: true
+    }
+  }).then(function (response) {
+    _utils2.default.storage.set('user', {
+      token: {
+        Authorization: 'Bearer ' + response.data.access_token
+      },
+      details: response.data
+    });
+    __dispatchEvent__(_constants.EVENTS.SIGNIN);
+    if (_defaults2.default.runSocket) {
+      _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
+    }
+    // PATCH
+    return _utils2.default.http({
+      url: _constants.URLS.objects + '/users',
       method: 'GET',
       params: {
-        accessToken: token,
-        appName: _defaults2.default.appName,
-        signupIfNotSignedIn: true
+        filter: [{
+          "fieldName": "email",
+          "operator": "equals",
+          "value": response.data.username
+        }]
       }
-    }).then(function (response) {
+    }).then(function (patch) {
+      var _patch$data$data$ = patch.data.data[0],
+          id = _patch$data$data$.id,
+          firstName = _patch$data$data$.firstName,
+          lastName = _patch$data$data$.lastName;
+
+      var user = _utils2.default.storage.get('user');
+      var newDetails = { userId: id.toString(), firstName: firstName, lastName: lastName };
       _utils2.default.storage.set('user', {
-        token: {
-          Authorization: 'Bearer ' + response.data.access_token
-        },
-        details: response.data
+        token: user.token,
+        details: _extends({}, user.details, newDetails)
       });
-      __dispatchEvent__(_constants.EVENTS.SIGNIN);
-      if (_defaults2.default.runSocket) {
-        _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
-      }
-      // TODO:PATCH
-      _utils2.default.http({
-        url: _constants.URLS.objects + '/users',
-        method: 'GET',
-        params: {
-          filter: [{
-            "fieldName": "email",
-            "operator": "equals",
-            "value": response.data.username
-          }]
-        }
-      }).then(function (patch) {
-        var _patch$data$data$ = patch.data.data[0],
-            id = _patch$data$data$.id,
-            firstName = _patch$data$data$.firstName,
-            lastName = _patch$data$data$.lastName;
-
-        var user = _utils2.default.storage.get('user');
-        var newDetails = { userId: id.toString(), firstName: firstName, lastName: lastName };
-        _utils2.default.storage.set('user', {
-          token: user.token,
-          details: _extends({}, user.details, newDetails)
-        });
-        user = _utils2.default.storage.get('user');
-        var res = __generateFakeResponse__(response.status, response.statusText, response.headers, user.details);
-        scb && scb(res);
-        resolve(res);
-      }).catch(function (error) {
-        ecb && ecb(error);
-        reject(error);
-      });
-      // EOP
-    }).catch(function (error) {
-      ecb && ecb(error);
-      reject(error);
+      user = _utils2.default.storage.get('user');
+      return (0, _fns.__generateFakeResponse__)(response.status, response.statusText, response.headers, user.details);
     });
-  });
-};
-function socialSignup(provider, email, scb, ecb) {
-  var spec = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'left=1, top=1, width=500, height=560';
-
-  return new Promise(function (resolve, reject) {
-    __socialAuth__(provider, true, spec, email).then(function (response) {
-      __dispatchEvent__(_constants.EVENTS.SIGNUP);
-      if (_defaults2.default.runSigninAfterSignup) {
-        return __signinWithToken__({
-          accessToken: response.data.access_token
-        });
-      } else {
-        scb && scb(response);
-        resolve(response);
-      }
-    }).then(function (response) {
-      scb && scb(response);
-      resolve(response);
-    }).catch(function (error) {
-      ecb && ecb(error);
-      reject(error);
-    });
+    // EOP
   });
 }
-function __signinWithToken__(tokenData) {
-  return new Promise(function (resolve, reject) {
-    var data = [];
-    for (var obj in tokenData) {
-      data.push(encodeURIComponent(obj) + '=' + encodeURIComponent(tokenData[obj]));
+function socialSignup(provider, email) {
+  var spec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'left=1, top=1, width=500, height=560';
+
+  return __socialAuth__(provider, true, spec, email).then(function (response) {
+    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    if (_defaults2.default.runSigninAfterSignup) {
+      return __authorize__({
+        accessToken: response.data.access_token
+      });
+    } else {
+      return response;
     }
-    data = data.join("&");
-
-    _utils2.default.http({
-      url: _constants.URLS.token,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: data + '&appName=' + _defaults2.default.appName + '&grant_type=password'
-    }).then(function (response) {
-      _utils2.default.storage.set('user', {
-        token: {
-          Authorization: 'Bearer ' + response.data.access_token
-        },
-        details: response.data
-      });
-      __dispatchEvent__(_constants.EVENTS.SIGNIN);
-      if (_defaults2.default.runSocket) {
-        _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
-      }
-      resolve(response);
-    }).catch(function (error) {
-      reject(error);
-    });
   });
 }
-function requestResetPassword(username, scb, ecb) {
+function requestResetPassword(username) {
   return _utils2.default.http({
     url: _constants.URLS.requestResetPassword,
     method: 'POST',
@@ -2094,9 +2024,9 @@ function requestResetPassword(username, scb, ecb) {
       appName: _defaults2.default.appName,
       username: username
     }
-  }, scb, ecb);
+  });
 }
-function resetPassword(newPassword, resetToken, scb, ecb) {
+function resetPassword(newPassword, resetToken) {
   return _utils2.default.http({
     url: _constants.URLS.resetPassword,
     method: 'POST',
@@ -2104,9 +2034,9 @@ function resetPassword(newPassword, resetToken, scb, ecb) {
       newPassword: newPassword,
       resetToken: resetToken
     }
-  }, scb, ecb);
+  });
 }
-function changePassword(oldPassword, newPassword, scb, ecb) {
+function changePassword(oldPassword, newPassword) {
   return _utils2.default.http({
     url: _constants.URLS.changePassword,
     method: 'POST',
@@ -2114,35 +2044,40 @@ function changePassword(oldPassword, newPassword, scb, ecb) {
       oldPassword: oldPassword,
       newPassword: newPassword
     }
-  }, scb, ecb);
+  });
 }
-function signout(scb) {
-  return new Promise(function (resolve, reject) {
-    var storeUser = _utils2.default.storage.get('user');
-    if (storeUser.token["Authorization"]) {
-      _utils2.default.http({
-        url: _constants.URLS.signout,
-        method: 'GET'
-      });
-    }
+function __signoutBody__() {
+  return new _es6Promise.Promise(function (resolve, reject) {
     _utils2.default.storage.remove('user');
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.disconnect();
     }
     __dispatchEvent__(_constants.EVENTS.SIGNOUT);
-    storeUser = _utils2.default.storage.get('user');
-    scb && scb(__generateFakeResponse__(200, 'OK', [], storeUser));
-    resolve(__generateFakeResponse__(200, 'OK', [], storeUser));
+    resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, _utils2.default.storage.get('user'), {}));
   });
 }
-function getSocialProviders(scb) {
-  return new Promise(function (resolve, reject) {
-    scb && scb(_constants.SOCIAL_PROVIDERS);
+function signout() {
+  var storeUser = _utils2.default.storage.get('user');
+  if (!storeUser.token["Authorization"]) {
+    return __signoutBody__();
+  } else {
+    return _utils2.default.http({
+      url: _constants.URLS.signout,
+      method: 'GET'
+    }).then(function (res) {
+      return __signoutBody__();
+    }).catch(function (res) {
+      return __signoutBody__();
+    });
+  }
+}
+function getSocialProviders() {
+  return new _es6Promise.Promise(function (resolve, reject) {
     resolve(_constants.SOCIAL_PROVIDERS);
   });
 }
 
-},{"./../constants":4,"./../defaults":5,"./../utils/utils":17}],9:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../utils/fns":13,"./../utils/utils":18,"es6-promise":1}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2163,7 +2098,7 @@ exports.default = {
 };
 
 
-function upload(object, fileAction, filename, filedata, scb, ecb) {
+function upload(object, fileAction, filename, filedata) {
   return _utils2.default.http({
     url: _constants.URLS.objectsAction + '/' + object + '?name=' + fileAction,
     method: 'POST',
@@ -2171,19 +2106,19 @@ function upload(object, fileAction, filename, filedata, scb, ecb) {
       filename: filename,
       filedata: filedata.substr(filedata.indexOf(',') + 1, filedata.length)
     }
-  }, scb, ecb);
+  });
 }
-function remove(object, fileAction, filename, scb, ecb) {
+function remove(object, fileAction, filename) {
   return _utils2.default.http({
     url: _constants.URLS.objectsAction + '/' + object + '?name=' + fileAction,
     method: 'DELETE',
     data: {
       filename: filename
     }
-  }, scb, ecb);
+  });
 }
 
-},{"./../constants":4,"./../utils/utils":17}],10:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":18}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2222,25 +2157,20 @@ function __allowedParams__(allowedParams, params) {
 }
 function getList(object) {
   var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var scb = arguments[2];
-  var ecb = arguments[3];
 
   var allowedParams = ['pageSize', 'pageNumber', 'filter', 'sort', 'search', 'exclude', 'deep', 'relatedObjects'];
   return _utils2.default.http({
     url: _constants.URLS.objects + '/' + object,
     method: 'GET',
     params: __allowedParams__(allowedParams, params)
-  }, null, ecb).then(function (response) {
+  }).then(function (response) {
     var totalRows = response.data['totalRows'];
     response.data = response.data['data'];
-    scb && scb(response, totalRows);
     return response;
   });
 }
 function create(object, data) {
   var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var scb = arguments[3];
-  var ecb = arguments[4];
 
   var allowedParams = ['returnObject', 'deep'];
   return _utils2.default.http({
@@ -2248,24 +2178,20 @@ function create(object, data) {
     method: 'POST',
     data: data,
     params: __allowedParams__(allowedParams, params)
-  }, scb, ecb);
+  });
 }
 function getOne(object, id) {
   var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var scb = arguments[3];
-  var ecb = arguments[4];
 
   var allowedParams = ['deep', 'exclude', 'level'];
   return _utils2.default.http({
     url: _constants.URLS.objects + '/' + object + '/' + id,
     method: 'GET',
     params: __allowedParams__(allowedParams, params)
-  }, scb, ecb);
+  });
 }
 function update(object, id, data) {
   var params = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-  var scb = arguments[4];
-  var ecb = arguments[5];
 
   var allowedParams = ['returnObject', 'deep'];
   return _utils2.default.http({
@@ -2273,40 +2199,36 @@ function update(object, id, data) {
     method: 'PUT',
     data: data,
     params: __allowedParams__(allowedParams, params)
-  }, scb, ecb);
+  });
 }
-function remove(object, id, scb, ecb) {
+function remove(object, id) {
   return _utils2.default.http({
     url: _constants.URLS.objects + '/' + object + '/' + id,
     method: 'DELETE'
-  }, scb, ecb);
+  });
 }
 
 function get(object, action) {
   var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var scb = arguments[3];
-  var ecb = arguments[4];
 
   return _utils2.default.http({
     url: _constants.URLS.objectsAction + '/' + object + '?name=' + action,
     method: 'GET',
     params: params
-  }, scb, ecb);
+  });
 }
 function post(object, action, data) {
   var params = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-  var scb = arguments[4];
-  var ecb = arguments[5];
 
   return _utils2.default.http({
     url: _constants.URLS.objectsAction + '/' + object + '?name=' + action,
     method: 'POST',
     data: data,
     params: params
-  }, scb, ecb);
+  });
 }
 
-},{"./../constants":4,"./../utils/utils":17}],11:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":18}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2329,29 +2251,25 @@ exports.default = {
 
 function get(name) {
   var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var scb = arguments[2];
-  var ecb = arguments[3];
 
   return _utils2.default.http({
     url: _constants.URLS.query + '/' + name,
     method: 'GET',
     params: params
-  }, scb, ecb);
+  });
 }
 function post(name, data) {
   var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var scb = arguments[3];
-  var ecb = arguments[4];
 
   return _utils2.default.http({
     url: _constants.URLS.query + '/' + name,
     method: 'POST',
     data: data,
     params: params
-  }, scb, ecb);
+  });
 }
 
-},{"./../constants":4,"./../utils/utils":17}],12:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":18}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2360,11 +2278,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+var _es6Promise = require('es6-promise');
+
 var _constants = require('./../constants');
 
 var _utils = require('./../utils/utils');
 
 var _utils2 = _interopRequireDefault(_utils);
+
+var _fns = require('./../utils/fns');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2377,38 +2299,21 @@ exports.default = {
 };
 
 
-function __generateFakeResponse__() {
-  var status = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-  var statusText = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-  var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-  var data = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
-
-  return {
-    status: status,
-    statusText: statusText,
-    headers: headers,
-    data: data
-  };
-}
-function __getUserDetailsFromStorage__(scb, ecb) {
-  return new Promise(function (resolve, reject) {
+function __getUserDetailsFromStorage__() {
+  return new _es6Promise.Promise(function (resolve, reject) {
     var user = _utils2.default.storage.get('user');
     if (!user) {
-      ecb && ecb(__generateFakeResponse__(0, '', [], 'No cached user found. authentication is required.'));
-      reject(__generateFakeResponse__(0, '', [], 'No cached user found. authentication is required.'));
+      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user found. authentication is required.', {}));
     } else {
-      scb && scb(__generateFakeResponse__(200, 'OK', [], user.details));
-      resolve(__generateFakeResponse__(200, 'OK', [], user.details));
+      resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, user.details, {}));
     }
   });
 }
 function getUserDetails() {
   var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-  var scb = arguments[1];
-  var ecb = arguments[2];
 
   if (!force) {
-    return __getUserDetailsFromStorage__(scb, ecb);
+    return __getUserDetailsFromStorage__();
   } else {
     return _utils2.default.http({
       url: _constants.URLS.profile,
@@ -2420,41 +2325,37 @@ function getUserDetails() {
         token: user.token,
         details: _extends({}, user.details, newDetails)
       });
-      return __getUserDetailsFromStorage__(scb, ecb);
+      return __getUserDetailsFromStorage__();
     });
   }
 }
-function getUsername(scb, ecb) {
-  return __getUserDetailsFromStorage__(null, ecb).then(function (response) {
+function getUsername() {
+  return __getUserDetailsFromStorage__().then(function (response) {
     response.data = response.data['username'];
-    scb && scb(response);
     return response;
   });
 }
-function getUserRole(scb, ecb) {
-  return __getUserDetailsFromStorage__(null, ecb).then(function (response) {
+function getUserRole() {
+  return __getUserDetailsFromStorage__().then(function (response) {
     response.data = response.data['role'];
-    scb && scb(response);
     return response;
   });
 }
-function getToken(scb, ecb) {
-  return __getUserDetailsFromStorage__(null, ecb).then(function (response) {
+function getToken() {
+  return __getUserDetailsFromStorage__().then(function (response) {
     response.data = response.data['access_token'];
-    scb && scb(response);
     return response;
   });
 }
-function getRefreshToken(scb, ecb) {
-  return __getUserDetailsFromStorage__(null, ecb).then(function (response) {
+function getRefreshToken() {
+  return __getUserDetailsFromStorage__().then(function (response) {
     response.data = response.data['refresh_token'];
-    scb && scb(response);
     return response;
   });
 }
 
-},{"./../constants":4,"./../utils/utils":17}],13:[function(require,module,exports){
-(function (process){
+},{"./../constants":3,"./../utils/fns":13,"./../utils/utils":18,"es6-promise":1}],12:[function(require,module,exports){
+(function (global){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2466,7 +2367,7 @@ function detect() {
 
   if (new Function("try {return this===global;}catch(e){return false;}")()) {
     result.device = 'pc';
-    switch (process.platform) {
+    switch (global.process.platform) {
       case 'darwin':
         result.os = 'mac';
         break;
@@ -2572,8 +2473,46 @@ function detect() {
   return result;
 }
 
-}).call(this,require('_process'))
-},{"_process":3}],14:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],13:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+exports.__generateFakeResponse__ = __generateFakeResponse__;
+exports.bind = bind;
+function __generateFakeResponse__() {
+  var status = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+  var statusText = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+  var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var data = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
+  var config = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {};
+
+  return {
+    status: status,
+    statusText: statusText,
+    headers: headers,
+    data: data,
+    config: config
+  };
+}
+
+function bind(obj, scope) {
+  Object.keys(obj).forEach(function (key) {
+    if (_typeof(obj[key]) === 'object') {
+      bind(obj[key]);
+    } else if (typeof obj[key] === 'function') {
+      obj[key] = obj[key].bind(scope);
+    }
+  });
+  return obj;
+}
+
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2586,6 +2525,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _es6Promise = require('es6-promise');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Http = function () {
@@ -2594,9 +2535,9 @@ var Http = function () {
 
     _classCallCheck(this, Http);
 
-    if (!window.XMLHttpRequest) throw new Error('XMLHttpRequest is not supported by this platform');
+    if (!XMLHttpRequest) throw new Error('XMLHttpRequest is not supported by this platform');
 
-    this.config = _extends({
+    this.defaults = _extends({
       // url: '/',
       method: 'GET',
       headers: {},
@@ -2691,27 +2632,24 @@ var Http = function () {
     }
   }, {
     key: 'request',
-    value: function request(cfg, scb, ecb) {
+    value: function request() {
       var _this = this;
 
-      return new Promise(function (resolve) {
-        var req = new XMLHttpRequest();
-        var config = _extends({}, _this.config, cfg);
-        if (config.interceptors.request) {
-          config.interceptors.request.call(_this, req, config, resolve);
-        } else {
-          resolve({ req: req, config: config });
-        }
-      }).then(function (_ref) {
-        var req = _ref.req,
-            config = _ref.config;
+      var cfg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-        return new Promise(function (resolve, reject) {
+      return new _es6Promise.Promise(function (resolve) {
+        var config = _extends({}, _this.defaults, cfg);
+        if (config.interceptors.request) {
+          resolve(config.interceptors.request(config));
+        } else {
+          resolve(config);
+        }
+      }).then(function (config) {
+        return new _es6Promise.Promise(function (resolve, reject) {
           if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
-            var res = _this._handleError('url parameter is missing', config);
-            ecb && ecb(res);
-            reject(res);
+            reject(_this._handleError('url parameter is missing', config));
           }
+          var req = new XMLHttpRequest();
           if (config.withCredentials) {
             req.withCredentials = true;
           }
@@ -2721,32 +2659,26 @@ var Http = function () {
           var params = _this._encodeParams(config.params);
           req.open(config.method, '' + (config.baseURL ? config.baseURL + '/' : '') + config.url + (params ? '?' + params : ''), true, config.auth.username, config.auth.password);
           req.ontimeout = function () {
-            var res = _this._handleError('timeout', config);
-            ecb && ecb(res);
-            reject(res);
+            reject(_this._handleError('timeout', config));
           };
           req.onabort = function () {
-            var res = _this._handleError('abort', config);
-            ecb && ecb(res);
-            reject(res);
+            reject(_this._handleError('abort', config));
           };
           req.onreadystatechange = function () {
             var _DONE = XMLHttpRequest.DONE || 4;
             if (req.readyState == _DONE) {
-              var _res = _this._createResponse(req, config);
-              if (_res.status === 200) {
+              var res = _this._createResponse(req, config);
+              if (res.status === 200) {
                 if (config.interceptors.response) {
-                  config.interceptors.response.call(_this, _res, config, resolve, reject, scb, ecb);
+                  resolve(config.interceptors.response(res));
                 } else {
-                  scb && scb(_res);
-                  resolve(_res);
+                  resolve(res);
                 }
               } else {
                 if (config.interceptors.responseError) {
-                  config.interceptors.responseError.call(_this, _res, config, resolve, reject, scb, ecb);
+                  resolve(config.interceptors.responseError(res));
                 } else {
-                  ecb && ecb(_res);
-                  reject(_res);
+                  reject(res);
                 }
               }
             }
@@ -2772,7 +2704,7 @@ function createInstance() {
 
     return Http.prototype.request.apply(context, args);
   };
-  instance.config = context.config;
+  instance.config = context.defaults;
   return instance;
 }
 
@@ -2783,7 +2715,88 @@ http.create = function (config) {
 
 exports.default = http;
 
-},{}],15:[function(require,module,exports){
+},{"es6-promise":1}],15:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.requestInterceptor = requestInterceptor;
+exports.requestErrorInterceptor = requestErrorInterceptor;
+exports.responseInterceptor = responseInterceptor;
+exports.responseErrorInterceptor = responseErrorInterceptor;
+
+var _es6Promise = require('es6-promise');
+
+var _utils = require('./utils');
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _defaults = require('./../defaults');
+
+var _defaults2 = _interopRequireDefault(_defaults);
+
+var _constants = require('./../constants');
+
+var constants = _interopRequireWildcard(_constants);
+
+var _auth = require('./../services/auth');
+
+var _auth2 = _interopRequireDefault(_auth);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  requestInterceptor: requestInterceptor,
+  requestErrorInterceptor: requestErrorInterceptor,
+  responseInterceptor: responseInterceptor,
+  responseErrorInterceptor: responseErrorInterceptor
+};
+function requestInterceptor(config) {
+  if (config.url.indexOf(constants.URLS.token) === -1) {
+    var user = _utils2.default.storage.get('user');
+    if (_defaults2.default.useAnonymousTokenByDefault && !user) {
+      return _auth2.default.useAnonymousAuth().then(function (response) {
+        config.headers = _extends({}, config.headers, _utils2.default.storage.get('user').token);
+        return config;
+      });
+    } else if (user) {
+      config.headers = _extends({}, config.headers, user.token);
+      return config;
+    } else {
+      return config;
+    }
+  } else {
+    return config;
+  }
+}
+
+function requestErrorInterceptor(error) {
+  return _es6Promise.Promise.reject(error);
+}
+
+function responseInterceptor(response) {
+  return response;
+}
+
+function responseErrorInterceptor(error) {
+  if (error.config.url.indexOf(constants.URLS.token) === -1 && _defaults2.default.manageRefreshToken && error.status === 401 && error.data && error.data.Message === 'invalid or expired token') {
+    return _auth2.default.__handleRefreshToken__().then(function (response) {
+      return _utils2.default.http(error.config);
+    }).catch(function (error) {
+      return _es6Promise.Promise.reject(error);
+    });
+  } else {
+    return _es6Promise.Promise.reject(error);
+  }
+}
+
+},{"./../constants":3,"./../defaults":4,"./../services/auth":7,"./utils":18,"es6-promise":1}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2863,7 +2876,7 @@ var Socket = function () {
 
 exports.default = Socket;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2938,7 +2951,7 @@ var Storage = function () {
 
 exports.default = Storage;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2946,5 +2959,5 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {};
 
-},{}]},{},[7])(7)
+},{}]},{},[6])(6)
 });

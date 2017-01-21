@@ -4,7 +4,7 @@ export default {
   useAnonymousTokenByDefault: true,
   signUpToken: null,
   apiUrl: 'https://api.backand.com',
-  storage: window.localStorage,
+  storage: {},
   storagePrefix: 'BACKAND_',
   manageRefreshToken: true,
   runSigninAfterSignup: true,

@@ -66,3 +66,23 @@ export class StorageAbstract {
     // return this.data = {};
    }
 }
+
+export class MemoryStorage extends StorageAbstract{
+  constructor () {
+    super();
+    this.data = {};
+  }
+  setItem (id, val) {
+    return this.data[id] = String(val);
+  }
+  getItem (id) {
+    return this.data.hasOwnProperty(id) ? this.data[id] : null;
+  }
+  removeItem (id) {
+    delete this.data[id];
+    return null;
+  }
+  clear () {
+    return this.data = {};
+  }
+}

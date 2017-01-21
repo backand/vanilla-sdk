@@ -3,7 +3,7 @@ export default function detect ()  {
 
   if(new Function("try {return this===global;}catch(e){return false;}")()) {
     result.device = 'pc'
-    switch (process.platform) {
+    switch (global.process.platform) {
       case 'darwin':
         result.os = 'mac'
         break;

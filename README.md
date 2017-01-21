@@ -17,6 +17,10 @@ $ npm i -S @backand/vanilla-sdk
 ```bash
 $ yarn add @backand/vanilla-sdk
 ```
+- bower:
+```bash
+$ bower install backand-vanilla-sdk
+```
 - download/clone:
 ```bash
 $ git clone https://github.com/backand/vanilla-sdk.git
@@ -104,16 +108,14 @@ config:
 
 ### Methods:
 **NOTE:**
-- **scb == Success Callback, ecb == Error Callback**
-- **scb, ecb are optional parameters**
 - **All Methods return Promise -> .then() .catch() are available**
-- **The final response of each method, including errors is an object with the following attributs: { status, statusText, headers, config, data }**
+- **You can learn more on the response schema from [here](https://github.com/mzabriskie/axios#response-schema)**
 
 #### Authentication:
 ##### Signin
 Signin with username and password in order to get access_token to be used in all other calls. If you don't have users you should use anonymous token only.
 ```javascript
-backand.signin(username, password, scb, ecb)
+backand.signin(username, password)
   .then(res => {
     console.log('signin succeeded with user:' + res.data.username);
   })
@@ -124,7 +126,7 @@ backand.signin(username, password, scb, ecb)
 ##### Signup
 Creates a new user in your app. in signup you must provide the basic details of username email, first name, last name and password:
 ```javascript
-backand.signup(firstName, lastName, email, password, confirmPassword, parameters = {}, scb, ecb)
+backand.signup(firstName, lastName, email, password, confirmPassword, parameters = {})
   .then(res => {
     console.log(res.data);
   })
@@ -135,7 +137,7 @@ backand.signup(firstName, lastName, email, password, confirmPassword, parameters
 ##### Change Password
 Changes the password of the current user:
 ```javascript
-backand.changePassword(oldPassword, newPassword, scb, ecb)
+backand.changePassword(oldPassword, newPassword)
   .then(res => {
     console.log('Password changed');
   })
@@ -148,7 +150,7 @@ backand.changePassword(oldPassword, newPassword, scb, ecb)
 For social, just call sign-in and by default the user will be signed up if needed. The app opens a dialog supplied by the social network.
 you can get the provider list from `backand.getSocialProviders(scb)` method.
 ```javascript
-backand.socialSignin(provider, scb, ecb)
+backand.socialSignin(provider)
   .then(res => {
     console.log('signin succeeded with user:' + res.data.username);
   })
@@ -161,7 +163,7 @@ backand.socialSignin(provider, scb, ecb)
 Fetch, create, update, remove and filter rows, from an Backand object.
 ##### GetList
 ```javascript
-backand.object.getList(object, params, scb, ecb)
+backand.object.getList(object, params)
   .then(res => {
     console.log(res.data);
   })
@@ -178,7 +180,7 @@ let params = {
   pageSize: 20,
   pageNumber: 1
 };
-backand.object.getList(object, params, scb, ecb)
+backand.object.getList(object, params)
   .then(res => {
     console.log(res.data);
   })
@@ -188,7 +190,7 @@ backand.object.getList(object, params, scb, ecb)
 ```
 ##### GetOne
 ```javascript
-backand.object.getOne(object, id, params, scb, ecb)
+backand.object.getOne(object, id, params)
   .then(res => {
     console.log(res.data);
   })
@@ -198,7 +200,7 @@ backand.object.getOne(object, id, params, scb, ecb)
 ```
 ##### Create
 ```javascript
-backand.object.create(object, data, params, scb, ecb)
+backand.object.create(object, data, params)
   .then(res => {
     console.log('object created');
   })
@@ -208,7 +210,7 @@ backand.object.create(object, data, params, scb, ecb)
 ```
 ##### Update
 ```javascript
-backand.object.update(object, id, data, params, scb, ecb)
+backand.object.update(object, id, data, params)
   .then(res => {
     console.log('object updated');
   })
@@ -218,7 +220,7 @@ backand.object.update(object, id, data, params, scb, ecb)
 ```
 ##### Remove
 ```javascript
-backand.object.remove(object, id, scb, ecb)
+backand.object.remove(object, id)
   .then(res => {
     console.log('object removed');
   })
@@ -228,7 +230,7 @@ backand.object.remove(object, id, scb, ecb)
 ```
 ##### Trigger object actions
 ```javascript
-backand.object.action.get(object, action, params, scb, ecb)
+backand.object.action.get(object, action, params)
   .then(res => {
     console.log(res.data);
   })
@@ -250,7 +252,7 @@ backand.on(eventName, data => {
 After you created a server side action in Backand (object -> actions tab -> Backand Files icon -> name: 'files')
 ##### Upload
 ```javascript
-backand.file.upload(object, 'files', filename, filedata, scb, ecb)
+backand.file.upload(object, 'files', filename, filedata)
   .then(res => {
     console.log('file uploaded. url: ' + res.data.url);
   })
@@ -260,7 +262,7 @@ backand.file.upload(object, 'files', filename, filedata, scb, ecb)
 ```
 ##### Remove
 ```javascript
-backand.file.remove(object, 'files', filename, scb, ecb)
+backand.file.remove(object, 'files', filename)
   .then(res => {
     console.log('file deleted');
   })
@@ -275,7 +277,7 @@ Return data about the connected user (getUserDetails, getUsername, getUserRole, 
 ##### GetUserDetails
 Gets the connect user details. The 'force' parameter cause it to fetch data from server (default: false).
 ```javascript
-backand.user.getUserDetails(force, scb, ecb)
+backand.user.getUserDetails(force)
   .then(res => {
     console.log(res.data);
   })
@@ -288,7 +290,7 @@ backand.user.getUserDetails(force, scb, ecb)
 Runs your query at Backand (get/post).
 ##### Get
 ```javascript
-backand.query.get(name, params, scb, ecb)
+backand.query.get(name, params)
   .then(res => {
     console.log(res.data);
   })

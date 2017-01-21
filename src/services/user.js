@@ -1,5 +1,7 @@
+import { Promise } from 'es6-promise'
 import { URLS } from './../constants'
 import utils from './../utils/utils'
+import { __generateFakeResponse__ } from './../utils/fns'
 
 export default {
   getUserDetails,
@@ -9,30 +11,20 @@ export default {
   getRefreshToken,
 }
 
-function __generateFakeResponse__ (status = 0, statusText = '', headers = [], data = '') {
-  return {
-    status,
-    statusText,
-    headers,
-    data
-  }
-}
-function __getUserDetailsFromStorage__ (scb, ecb) {
+function __getUserDetailsFromStorage__ () {
   return new Promise((resolve, reject) => {
     let user = utils.storage.get('user');
     if (!user) {
-      ecb && ecb(__generateFakeResponse__(0, '', [], 'No cached user found. authentication is required.'));
-      reject(__generateFakeResponse__(0, '', [], 'No cached user found. authentication is required.'));
+      reject(__generateFakeResponse__(0, '', {}, 'No cached user found. authentication is required.', {}));
     }
     else {
-      scb && scb(__generateFakeResponse__(200, 'OK', [], user.details));
-      resolve(__generateFakeResponse__(200, 'OK', [], user.details));
+      resolve(__generateFakeResponse__(200, 'OK', {}, user.details, {}));
     }
   });
 }
-function getUserDetails (force = false, scb, ecb) {
+function getUserDetails (force = false) {
   if (!force) {
-    return __getUserDetailsFromStorage__(scb, ecb);
+    return __getUserDetailsFromStorage__();
   }
   else {
     return utils.http({
@@ -46,39 +38,35 @@ function getUserDetails (force = false, scb, ecb) {
         token: user.token,
         details: Object.assign({}, user.details, newDetails)
       });
-      return __getUserDetailsFromStorage__(scb, ecb);
+      return __getUserDetailsFromStorage__();
     });
   }
 }
-function getUsername (scb, ecb) {
-  return __getUserDetailsFromStorage__(null, ecb)
-    .then(response => {
-      response.data = response.data['username'];
-      scb && scb(response);
-      return response;
-    });
+function getUsername () {
+  return __getUserDetailsFromStorage__()
+  .then(response => {
+    response.data = response.data['username'];
+    return response;
+  });
 }
-function getUserRole (scb, ecb) {
-  return __getUserDetailsFromStorage__(null, ecb)
-    .then(response => {
-      response.data = response.data['role'];
-      scb && scb(response);
-      return response;
-    });
+function getUserRole () {
+  return __getUserDetailsFromStorage__()
+  .then(response => {
+    response.data = response.data['role'];
+    return response;
+  });
 }
-function getToken (scb, ecb) {
-  return __getUserDetailsFromStorage__(null, ecb)
-    .then(response => {
-      response.data = response.data['access_token'];
-      scb && scb(response);
-      return response;
-    });
+function getToken () {
+  return __getUserDetailsFromStorage__()
+  .then(response => {
+    response.data = response.data['access_token'];
+    return response;
+  });
 }
-function getRefreshToken (scb, ecb) {
-  return __getUserDetailsFromStorage__(null, ecb)
-    .then(response => {
-      response.data = response.data['refresh_token'];
-      scb && scb(response);
-      return response;
-    });
+function getRefreshToken () {
+  return __getUserDetailsFromStorage__()
+  .then(response => {
+    response.data = response.data['refresh_token'];
+    return response;
+  });
 }
