@@ -1,4 +1,3 @@
-import { Promise } from 'es6-promise'
 import { URLS, EVENTS, SOCIAL_PROVIDERS } from './../constants'
 import defaults from './../defaults'
 import utils from './../utils/utils'

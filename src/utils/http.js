@@ -1,5 +1,3 @@
-import { Promise } from 'es6-promise'
-
 class Http {
   constructor (config = {}) {
     if (!XMLHttpRequest)

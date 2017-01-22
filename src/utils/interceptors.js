@@ -1,4 +1,3 @@
-import { Promise } from 'es6-promise'
 import utils from './utils'
 import defaults from './../defaults'
 import * as constants from './../constants'

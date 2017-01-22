@@ -1,4 +1,3 @@
-import { Promise } from 'es6-promise'
 import { URLS } from './../constants'
 import utils from './../utils/utils'
 import { __generateFakeResponse__ } from './../utils/fns'

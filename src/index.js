@@ -15,6 +15,15 @@ import file from './services/file'
 import query from './services/query'
 import user from './services/user'
 
+// Task: Polyfills
+import { Promise } from 'es6-promise'
+(function(local) {
+  if (local.Promise) {
+   return
+ }
+  local.Promise = Promise;
+})(typeof self !== 'undefined' ? self : new Function('return this')())
+
 // TASK: run tests to identify the runtime environment
 var detector = detect();
 

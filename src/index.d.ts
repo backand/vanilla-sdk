@@ -23,17 +23,17 @@ declare namespace backand {
   let query: any;
   let user: any;
   // auth
-  function useAnonymousAuth (): Promise<Response>;
-  function signin (username: string, password: string): Promise<Response>;
-  function signup (firstName: string, lastName: string, email: string, password: string, confirmPassword: string, parameters?: any): Promise<Response>;
-  function socialSignin (provider: string): Promise<Response>;
-  function socialSigninWithToken (provider: string, token: string): Promise<Response>;
-  function socialSignup (provider: string, email: string): Promise<Response>;
-  function requestResetPassword (username: string): Promise<Response>;
-  function resetPassword (newPassword: string, resetToken: string): Promise<Response>;
-  function changePassword (oldPassword: string, newPassword: string): Promise<Response>;
-  function signout (): Promise<Response>;
-  function getSocialProviders (): Promise<Response>;
+  function useAnonymousAuth (): any;
+  function signin (username: string, password: string): any;
+  function signup (firstName: string, lastName: string, email: string, password: string, confirmPassword: string, parameters?: any): any;
+  function socialSignin (provider: string): any;
+  function socialSigninWithToken (provider: string, token: string): any;
+  function socialSignup (provider: string, email: string): any;
+  function requestResetPassword (username: string): any;
+  function resetPassword (newPassword: string, resetToken: string): any;
+  function changePassword (oldPassword: string, newPassword: string): any;
+  function signout (): any;
+  function getSocialProviders (): any;
   // socket
   function on (eventName: string, callback?: (response?: any) => void): void;
 }

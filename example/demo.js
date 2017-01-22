@@ -27,12 +27,11 @@
       outputElement.innerText = "status: " + response.status + "\n" + JSON.stringify(response.data);
   };
   var errorCallback = function (error) {
-    var response = error.response;
-    // console.log(response);
+    // console.log(error);
     outputElement.innerText = '';
     outputContainer.classList.remove('panel-success');
     outputContainer.classList.add('panel-danger');
-    outputElement.innerText = "status: " + response.status + "\n" + JSON.stringify(response.data);
+    outputElement.innerText = "status: " + error.status + "\n" + JSON.stringify(error.data);
   };
 
   var lastCreatedId = null;

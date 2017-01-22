@@ -1,10 +1,10 @@
 /*********************************************************
  * @backand/vanilla-sdk - Backand SDK for JavaScript
- * @version v1.0.7
+ * @version v1.0.8
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-01-21
+ * @Compiled At: 2017-01-22
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1547,6 +1547,9 @@ var MemoryStorage = exports.MemoryStorage = function (_StorageAbstract) {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+// Task: Polyfills
+
+
 var _defaults = require('./defaults');
 
 var _defaults2 = _interopRequireDefault(_defaults);
@@ -1603,9 +1606,18 @@ var _user = require('./services/user');
 
 var _user2 = _interopRequireDefault(_user);
 
+var _es6Promise = require('es6-promise');
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+(function (local) {
+  if (local.Promise) {
+    return;
+  }
+  local.Promise = _es6Promise.Promise;
+})(typeof self !== 'undefined' ? self : new Function('return this')());
 
 // TASK: run tests to identify the runtime environment
 var detector = (0, _detector2.default)();
@@ -1693,7 +1705,7 @@ backand.init = function () {
 
 module.exports = backand;
 
-},{"./constants":3,"./defaults":4,"./helpers":5,"./services/auth":7,"./services/file":8,"./services/object":9,"./services/query":10,"./services/user":11,"./utils/detector":12,"./utils/http":14,"./utils/interceptors":15,"./utils/socket":16,"./utils/storage":17,"./utils/utils":18}],7:[function(require,module,exports){
+},{"./constants":3,"./defaults":4,"./helpers":5,"./services/auth":7,"./services/file":8,"./services/object":9,"./services/query":10,"./services/user":11,"./utils/detector":12,"./utils/http":14,"./utils/interceptors":15,"./utils/socket":16,"./utils/storage":17,"./utils/utils":18,"es6-promise":1}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1701,8 +1713,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _es6Promise = require('es6-promise');
 
 var _constants = require('./../constants');
 
@@ -1778,7 +1788,7 @@ function __authorize__(tokenData) {
   });
 }
 function __handleRefreshToken__() {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var user = _utils2.default.storage.get('user');
     if (!user || !user.details.refresh_token) {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user or refreshToken found. authentication is required.', {}));
@@ -1791,7 +1801,7 @@ function __handleRefreshToken__() {
   });
 }
 function useAnonymousAuth() {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!_defaults2.default.anonymousToken) {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'anonymousToken is missing', {}));
     } else {
@@ -1861,7 +1871,7 @@ function __getSocialUrl__(providerName, isSignup, isAutoSignUp) {
   return '/user/socialSign' + action + '?provider=' + provider.label + autoSignUpParam + '&response_type=token&client_id=self&redirect_uri=' + provider.url + '&state=';
 }
 function __socialAuth__(provider, isSignUp, spec, email) {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!_constants.SOCIAL_PROVIDERS[provider]) {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Social Provider', {}));
     }
@@ -2047,7 +2057,7 @@ function changePassword(oldPassword, newPassword) {
   });
 }
 function __signoutBody__() {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     _utils2.default.storage.remove('user');
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.disconnect();
@@ -2072,12 +2082,12 @@ function signout() {
   }
 }
 function getSocialProviders() {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     resolve(_constants.SOCIAL_PROVIDERS);
   });
 }
 
-},{"./../constants":3,"./../defaults":4,"./../utils/fns":13,"./../utils/utils":18,"es6-promise":1}],8:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../utils/fns":13,"./../utils/utils":18}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2278,8 +2288,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _es6Promise = require('es6-promise');
-
 var _constants = require('./../constants');
 
 var _utils = require('./../utils/utils');
@@ -2300,7 +2308,7 @@ exports.default = {
 
 
 function __getUserDetailsFromStorage__() {
-  return new _es6Promise.Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var user = _utils2.default.storage.get('user');
     if (!user) {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user found. authentication is required.', {}));
@@ -2354,7 +2362,7 @@ function getRefreshToken() {
   });
 }
 
-},{"./../constants":3,"./../utils/fns":13,"./../utils/utils":18,"es6-promise":1}],12:[function(require,module,exports){
+},{"./../constants":3,"./../utils/fns":13,"./../utils/utils":18}],12:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2525,8 +2533,6 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _es6Promise = require('es6-promise');
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Http = function () {
@@ -2637,7 +2643,7 @@ var Http = function () {
 
       var cfg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      return new _es6Promise.Promise(function (resolve) {
+      return new Promise(function (resolve) {
         var config = _extends({}, _this.defaults, cfg);
         if (config.interceptors.request) {
           resolve(config.interceptors.request(config));
@@ -2645,7 +2651,7 @@ var Http = function () {
           resolve(config);
         }
       }).then(function (config) {
-        return new _es6Promise.Promise(function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
           if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
             reject(_this._handleError('url parameter is missing', config));
           }
@@ -2715,7 +2721,7 @@ http.create = function (config) {
 
 exports.default = http;
 
-},{"es6-promise":1}],15:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2728,8 +2734,6 @@ exports.requestInterceptor = requestInterceptor;
 exports.requestErrorInterceptor = requestErrorInterceptor;
 exports.responseInterceptor = responseInterceptor;
 exports.responseErrorInterceptor = responseErrorInterceptor;
-
-var _es6Promise = require('es6-promise');
 
 var _utils = require('./utils');
 
@@ -2777,7 +2781,7 @@ function requestInterceptor(config) {
 }
 
 function requestErrorInterceptor(error) {
-  return _es6Promise.Promise.reject(error);
+  return Promise.reject(error);
 }
 
 function responseInterceptor(response) {
@@ -2789,14 +2793,14 @@ function responseErrorInterceptor(error) {
     return _auth2.default.__handleRefreshToken__().then(function (response) {
       return _utils2.default.http(error.config);
     }).catch(function (error) {
-      return _es6Promise.Promise.reject(error);
+      return Promise.reject(error);
     });
   } else {
-    return _es6Promise.Promise.reject(error);
+    return Promise.reject(error);
   }
 }
 
-},{"./../constants":3,"./../defaults":4,"./../services/auth":7,"./utils":18,"es6-promise":1}],16:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../services/auth":7,"./utils":18}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
