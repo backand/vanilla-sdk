@@ -1,10 +1,10 @@
 /*********************************************************
  * @backand/vanilla-sdk - Backand SDK for JavaScript
- * @version v1.0.8
+ * @version v1.0.9
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-01-22
+ * @Compiled At: 2017-01-23
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -2817,40 +2817,38 @@ var Socket = function () {
 
     if (!window.io) throw new Error('runSocket is true but socketio-client is not included');
     this.url = url;
-    this.onArr = [];
     this.socket = null;
   }
 
   _createClass(Socket, [{
     key: 'on',
     value: function on(eventName, callback) {
-      this.onArr.push({ eventName: eventName, callback: callback });
+      var _this = this;
+
+      this.socket.on(eventName, function (data) {
+        callback.call(_this, data);
+      });
     }
   }, {
     key: 'connect',
     value: function connect(token, anonymousToken, appName) {
-      var _this = this;
+      var _this2 = this;
 
       this.disconnect();
       this.socket = io.connect(this.url, { 'forceNew': true });
 
       this.socket.on('connect', function () {
         console.info('trying to establish a socket connection to ' + appName + ' ...');
-        _this.socket.emit("login", token, anonymousToken, appName);
+        _this2.socket.emit("login", token, anonymousToken, appName);
       });
 
       this.socket.on('authorized', function () {
         console.info('socket connected');
-        _this.onArr.forEach(function (fn) {
-          _this.socket.on(fn.eventName, function (data) {
-            fn.callback(data);
-          });
-        });
       });
 
       this.socket.on('notAuthorized', function () {
         setTimeout(function () {
-          return _this.disconnect();
+          return _this2.disconnect();
         }, 1000);
       });
 

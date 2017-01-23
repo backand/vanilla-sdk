@@ -1,7 +1,7 @@
 var expect = chai.expect;
 var lastCreatedId = null;
 
-describe('Backand.initiate', () => {
+describe('Backand.init', () => {
   it('should initiate backand namespace', () => {
     expect(backand.init).to.be.an('function');
     backand.init({
@@ -187,19 +187,15 @@ describe('Backand.initiate', () => {
     it('should listen to events from server', function(done) {
       this.timeout(5000);
       backand.on('socket_test', data => {
-        console.log(data);
         expect(data).to.eql('test');
         done();
       });
       setTimeout(()=>{
         backand.object.action.get('items', 'socket_test')
-        .then(res => {
-          console.log(res);
-        })
         .catch(err => {
           done(err);
         })
-      }, 2000);
+      }, 1000);
     });
   });
 });

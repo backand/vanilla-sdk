@@ -12,7 +12,7 @@ import header from 'gulp-header';
 
 const paths = {
     src:  { js: './src/index.js' },
-    dest: { js: './dist', example: './example' }
+    dest: { js: './dist' }
 };
 const pkg = require('./package.json');
 const banner = ['/*********************************************************',
@@ -49,7 +49,6 @@ gulp.task('build', ['ts'], ()=> {
     .pipe(rename('backand.min.js'))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(paths.dest.js))
-    .pipe(gulp.dest(paths.dest.example))
 });
 
 gulp.task('watch', ()=> {
