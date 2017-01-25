@@ -6,17 +6,32 @@
     "dist/backand.min.js"
   ],
   "ignore": [
-    "Bower/*",
-    "Bower",
+    "node_modules",
+    "bower_components",
     "src",
     "package.json",
-    "test",
     ".babelrc",
     ".gitignore",
     "gulpfile.babel.js"
   ],
-  "homepage": "https://github.com/backand/vanilla-sdk",
+  "dependencies": {},
+  "authors": [
+    "Backand"
+  ],
   "license": "MIT",
-  "private": false,
-  "dependencies": {}
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/backand/vanilla-sdk.git"
+  },
+  "homepage": "https://github.com/backand/vanilla-sdk#readme",
+  "keywords": [
+    "Backand",
+    "backend",
+    "backend sdk",
+    "backend js",
+    "backend javascript",
+    "vanilla-sdk",
+    "backend vanilla sdk"
+  ],
+  "private": false
 }
