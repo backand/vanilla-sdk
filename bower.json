@@ -3,7 +3,7 @@
   "description": "Backand SDK for JavaScript",
   "version": "1.0.9",
   "main": [
-    "dist/backand.min.js"
+    "dist/backand.js"
   ],
   "ignore": [
     "node_modules",
