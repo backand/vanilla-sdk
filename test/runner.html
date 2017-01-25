@@ -17,46 +17,9 @@
     <!-- load code you want to test here -->
     <script src="backand.js" data-cover></script>
 
-    <script>
-      $(document).ready(function () {});
-    </script>
-    <script>
-      var tests = [];
-      function notifyBknd(){
-        console.log(JSON.stringify(tests));
-        var html = $('#mocha').html;
-        var currentTime = new Date().toString();
-        console.log("sent results to backand");
-        var settings = {
-            "async": true,
-            "crossDomain": true,
-            "url": "https://api.backand.com/1/objects/action/integrations/?name=SendEmailSendGrid&parameters={'to':'yariv@backand.com','message':'sent from SDK testing. testing time is "+ currentTime + "'}",
-            "method": "POST",
-            "headers": {
-                "Authorization":"Basic ZTJiNzdiMDctMjJmOC00YjBjLTgxZjctMjAzNjYyM2RiZjQ1OmRiYzU0NDUzLWQ3N2YtMTFlNi05OTJmLTBlOTQ5YjZkYjljMA=="
-            },
-            "data": html
-        }
-        $.ajax(settings).done(function (response) {
-            console.log(response);
-        });
-        console.log("finished sent results to backand");
-      }
-    </script>
-
     <!-- load your test files here -->
     <script src="backandTest.js"></script>
 
-    <script>
-      // var runner = mocha.run(notifyBknd)
-      // .on('fail',function (failure){
-      //    tests.push({test:failure.title, state:failure.state,err:failure.err});
-      // })
-      //  .on('pass', function( test,err){
-      //     test.push({test:test.test, state:failure.state,err:failure.err});
-      // });
-      // .on('end', notifyBknd);;
-    </script>
     <script>
       mocha.run();
     </script>
