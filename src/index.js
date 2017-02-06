@@ -60,8 +60,8 @@ backand.init = (config = {}) => {
   // TASK: verify new defaults
   if (!defaults.appName)
     throw new Error('appName is missing');
-  if (!defaults.anonymousToken && defaults.useAnonymousTokenByDefault)
-    throw new Error('useAnonymousTokenByDefault is true but anonymousToken is missing');
+  if (!defaults.anonymousToken)
+    defaults.useAnonymousTokenByDefault = false;
 
   // TASK: init utils
   Object.assign(utils, {
