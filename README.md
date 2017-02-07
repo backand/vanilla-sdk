@@ -5,6 +5,16 @@ vanilla-sdk
 This SDK enables you to communicate comfortably and quickly with your Backand app.
 It requires zero configurations, no installations and no requirements.
 
+## Overview
+Backand's Vanilla SDK is designed for easy integration with plain JavaScript applications, as well as other applications that do not make use of any particular JavaScript framework. If you are working with Angular 1, Angular 2, or Redux, we provide the following wrapper SDKs:
+
+| Platform | SDK link |
+| -------- | -------- |
+| Angular 1 | https://github.com/backand/angular1-sdk |
+| Angular 2 | https://github.com/backand/angular2-sdk |
+| Redux | https://github.com/backand/redux-sdk |
+
+If you are not working with the above platforms, you can simply use this SDK directly with any web application - simply include the SDK in your client-side code, then get started!
 
 ## Installation
 
