@@ -3,11 +3,17 @@ export default class Socket {
     if (!window.io)
       throw new Error('runSocket is true but socketio-client is not included');
     this.url = url;
+    this.onArr = [];
     this.socket = null;
   }
   on (eventName, callback) {
-    this.socket.on(eventName, data => {
-      callback.call(this, data);
+    this.onArr.push({eventName, callback});
+    return Promise.resolve({
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      data: `listener for ${eventName} has been set. pending for a broadcast from the server`,
+      config: {}
     });
   }
   connect (token, anonymousToken, appName) {
@@ -21,6 +27,11 @@ export default class Socket {
 
     this.socket.on('authorized', () => {
       console.info(`socket connected`);
+      this.onArr.forEach(fn => {
+        this.socket.on(fn.eventName, data => {
+          fn.callback(data);
+        });
+      });
     });
 
     this.socket.on('notAuthorized', () => {

@@ -18,6 +18,7 @@ export const URLS = {
   objects: '1/objects',
   objectsAction: '1/objects/action',
   query: '1/query/data',
+  socialProviders: '1/user/socialProviders'
 };
 
 export const SOCIAL_PROVIDERS = {

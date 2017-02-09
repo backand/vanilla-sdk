@@ -28,7 +28,8 @@ import { Promise } from 'es6-promise'
 var detector = detect();
 
 // TASK: set first defaults base on detector results
-defaults["storage"] = (detector.env === 'browser') ? window.localStorage : new helpers.MemoryStorage();
+defaults["storage"]  = (detector.env === 'browser') ? window.localStorage : new helpers.MemoryStorage();
+defaults["isMobile"] = (detector.device === 'mobile' || detector.device === 'tablet');
 
 // TASK: get data from url in social sign-in popup
 if(detector.env !== 'node' && detector.env !== 'react-native' && window.location) {
@@ -110,7 +111,14 @@ backand.init = (config = {}) => {
       defaults.anonymousToken,
       defaults.appName
     );
-    Object.assign(backand, {on: utils.socket.on.bind(utils.socket)});
+    Object.assign(backand, {
+      on: Socket.prototype.on.bind(utils.socket),
+      socket: {
+        connect: Socket.prototype.connect.bind(utils.socket),
+        disconnect: Socket.prototype.disconnect.bind(utils.socket),
+        on: Socket.prototype.on.bind(utils.socket),
+      }
+    });
   }
   if(defaults.exportUtils) {
     Object.assign(backand, { utils });

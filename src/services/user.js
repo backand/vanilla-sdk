@@ -14,7 +14,8 @@ function __getUserDetailsFromStorage__ () {
   return new Promise((resolve, reject) => {
     let user = utils.storage.get('user');
     if (!user) {
-      reject(__generateFakeResponse__(0, '', {}, 'No cached user found. authentication is required.', {}));
+      resolve(__generateFakeResponse__(0, '', {}, null, {}));
+      // reject(__generateFakeResponse__(0, '', {}, 'No cached user found. authentication is required.', {}));
     }
     else {
       resolve(__generateFakeResponse__(200, 'OK', {}, user.details, {}));

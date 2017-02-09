@@ -178,7 +178,7 @@ function __socialAuth__ (provider, isSignUp, spec, email) {
             }
           }
         }
-        popup = window.open(url);
+        popup = cordova.InAppBrowser.open(url, '_blank');
         popup.addEventListener('loadstart', handler, false);
       }
       else if (defaults.mobilePlatform === 'react-native') {
@@ -344,24 +344,33 @@ function __signoutBody__ () {
 }
 function signout () {
   let storeUser = utils.storage.get('user');
-  if(!storeUser.token["Authorization"]) {
-    return __signoutBody__ ();
+  if (storeUser) {
+    if(!storeUser.token["Authorization"]) {
+      return __signoutBody__ ();
+    }
+    else {
+      return utils.http({
+        url: URLS.signout,
+        method: 'GET',
+      })
+      .then(res => {
+        return __signoutBody__ ();
+      })
+      .catch(res => {
+        return __signoutBody__ ();
+      });
+    }
   }
   else {
-    return utils.http({
-      url: URLS.signout,
-      method: 'GET',
-    })
-    .then(res => {
-      return __signoutBody__ ();
-    })
-    .catch(res => {
-      return __signoutBody__ ();
-    });
+    return Promise.reject(__generateFakeResponse__(0, '', {}, 'No cached user found. cannot signout.', {}));
   }
 }
 function getSocialProviders () {
-  return new Promise((resolve, reject) => {
-    resolve(SOCIAL_PROVIDERS);
+  return utils.http({
+    url: URLS.socialProviders,
+    method: 'GET',
+    params: {
+      appName: defaults.appName,
+    }
   });
 }

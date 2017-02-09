@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-02-06
+ * @Compiled At: 2017-02-09
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1373,7 +1373,8 @@ var URLS = exports.URLS = {
   profile: 'api/account/profile',
   objects: '1/objects',
   objectsAction: '1/objects/action',
-  query: '1/query/data'
+  query: '1/query/data',
+  socialProviders: '1/user/socialProviders'
 };
 
 var SOCIAL_PROVIDERS = exports.SOCIAL_PROVIDERS = {
@@ -1624,6 +1625,7 @@ var detector = (0, _detector2.default)();
 
 // TASK: set first defaults base on detector results
 _defaults2.default["storage"] = detector.env === 'browser' ? window.localStorage : new helpers.MemoryStorage();
+_defaults2.default["isMobile"] = detector.device === 'mobile' || detector.device === 'tablet';
 
 // TASK: get data from url in social sign-in popup
 if (detector.env !== 'node' && detector.env !== 'react-native' && window.location) {
@@ -1696,7 +1698,14 @@ backand.init = function () {
   if (_defaults2.default.runSocket) {
     storeUser = _utils2.default.storage.get('user');
     storeUser && _utils2.default.socket.connect(storeUser.token.Authorization || null, _defaults2.default.anonymousToken, _defaults2.default.appName);
-    _extends(backand, { on: _utils2.default.socket.on.bind(_utils2.default.socket) });
+    _extends(backand, {
+      on: _socket2.default.prototype.on.bind(_utils2.default.socket),
+      socket: {
+        connect: _socket2.default.prototype.connect.bind(_utils2.default.socket),
+        disconnect: _socket2.default.prototype.disconnect.bind(_utils2.default.socket),
+        on: _socket2.default.prototype.on.bind(_utils2.default.socket)
+      }
+    });
   }
   if (_defaults2.default.exportUtils) {
     _extends(backand, { utils: _utils2.default });
@@ -1901,7 +1910,7 @@ function __socialAuth__(provider, isSignUp, spec, email) {
               }
             }
           };
-          popup = window.open(url);
+          popup = cordova.InAppBrowser.open(url, '_blank');
           popup.addEventListener('loadstart', handler, false);
         })();
       } else if (_defaults2.default.mobilePlatform === 'react-native') {
@@ -2068,22 +2077,30 @@ function __signoutBody__() {
 }
 function signout() {
   var storeUser = _utils2.default.storage.get('user');
-  if (!storeUser.token["Authorization"]) {
-    return __signoutBody__();
+  if (storeUser) {
+    if (!storeUser.token["Authorization"]) {
+      return __signoutBody__();
+    } else {
+      return _utils2.default.http({
+        url: _constants.URLS.signout,
+        method: 'GET'
+      }).then(function (res) {
+        return __signoutBody__();
+      }).catch(function (res) {
+        return __signoutBody__();
+      });
+    }
   } else {
-    return _utils2.default.http({
-      url: _constants.URLS.signout,
-      method: 'GET'
-    }).then(function (res) {
-      return __signoutBody__();
-    }).catch(function (res) {
-      return __signoutBody__();
-    });
+    return Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user found. cannot signout.', {}));
   }
 }
 function getSocialProviders() {
-  return new Promise(function (resolve, reject) {
-    resolve(_constants.SOCIAL_PROVIDERS);
+  return _utils2.default.http({
+    url: _constants.URLS.socialProviders,
+    method: 'GET',
+    params: {
+      appName: _defaults2.default.appName
+    }
   });
 }
 
@@ -2311,7 +2328,8 @@ function __getUserDetailsFromStorage__() {
   return new Promise(function (resolve, reject) {
     var user = _utils2.default.storage.get('user');
     if (!user) {
-      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user found. authentication is required.', {}));
+      resolve((0, _fns.__generateFakeResponse__)(0, '', {}, null, {}));
+      // reject(__generateFakeResponse__(0, '', {}, 'No cached user found. authentication is required.', {}));
     } else {
       resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, user.details, {}));
     }
@@ -2817,38 +2835,47 @@ var Socket = function () {
 
     if (!window.io) throw new Error('runSocket is true but socketio-client is not included');
     this.url = url;
+    this.onArr = [];
     this.socket = null;
   }
 
   _createClass(Socket, [{
     key: 'on',
     value: function on(eventName, callback) {
-      var _this = this;
-
-      this.socket.on(eventName, function (data) {
-        callback.call(_this, data);
+      this.onArr.push({ eventName: eventName, callback: callback });
+      return Promise.resolve({
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        data: 'listener for ' + eventName + ' has been set. pending for a broadcast from the server',
+        config: {}
       });
     }
   }, {
     key: 'connect',
     value: function connect(token, anonymousToken, appName) {
-      var _this2 = this;
+      var _this = this;
 
       this.disconnect();
       this.socket = io.connect(this.url, { 'forceNew': true });
 
       this.socket.on('connect', function () {
         console.info('trying to establish a socket connection to ' + appName + ' ...');
-        _this2.socket.emit("login", token, anonymousToken, appName);
+        _this.socket.emit("login", token, anonymousToken, appName);
       });
 
       this.socket.on('authorized', function () {
         console.info('socket connected');
+        _this.onArr.forEach(function (fn) {
+          _this.socket.on(fn.eventName, function (data) {
+            fn.callback(data);
+          });
+        });
       });
 
       this.socket.on('notAuthorized', function () {
         setTimeout(function () {
-          return _this2.disconnect();
+          return _this.disconnect();
         }, 1000);
       });
 
