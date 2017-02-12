@@ -10,6 +10,7 @@ import sourcemaps from 'gulp-sourcemaps'
 import rename from 'gulp-rename'
 import header from 'gulp-header'
 import shell from 'gulp-shell'
+import jeditor from 'gulp-json-editor'
 
 const paths = {
     src:  { js: './src/index.js' },
@@ -55,5 +56,13 @@ gulp.task('build', ['ts'], ()=> {
 gulp.task('watch', ()=> {
   gulp.watch('./src/**/*', ['build']);
 });
+
+gulp.task('bower', ()=> {
+  gulp.src('./bower.json')
+  .pipe(jeditor({
+    'version': pkg.version
+  }))
+  .pipe(gulp.dest('./'));
+})
 
 gulp.task('default', ['build']);

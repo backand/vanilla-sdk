@@ -17,8 +17,8 @@
     "dev": "gulp watch",
     "start": "browser-sync start -s ./example/ -f ./dist/ ./example/ --ss ./dist/                 --port 3000",
     "test": "browser-sync start -s ./test/    -f ./dist/ ./test/    --ss ./dist/ ./node_modules/ --port 3000 --index runner.html",
-    "patch": "npm --no-git-tag-version version patch",
-    "version": "npm run build && git add -A && bower version patch -m \"Release version %s\"",
+    "patch": "npm version patch",
+    "version": "npm run build && gulp bower && git add -A",
     "postversion": "git push && git push --tags"
   },
   "author": "Backand",
@@ -36,6 +36,7 @@
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-header": "^1.8.8",
+    "gulp-json-editor": "^2.2.1",
     "gulp-rename": "^1.2.2",
     "gulp-shell": "^0.5.2",
     "gulp-sourcemaps": "^2.2.0",
