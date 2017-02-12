@@ -411,9 +411,11 @@ Event handler for broadcast Socket events.
 
 ###### Sample Code
 ```javascript
-backand.on(eventName, data => {
-  console.log(eventName + 'has been dispatched');
-});
+  //Wait for server updates on 'items' object
+  Backand.on('items_updated', function (data) {
+    //Get the 'items' object that have changed
+    console.log(data);
+  });
 ```
 
 #### File
