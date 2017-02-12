@@ -64,6 +64,10 @@
     document.getElementById('social_btns').appendChild(btn);
   }
 
+  document.getElementById('signout_btn').addEventListener('click', function() {
+      backand.signout().then(successCallback).catch(errorCallback);
+    }, false);
+
   // CRUD
   document.getElementById('getitem_btn').disabled = true;
   document.getElementById('updateitem_btn').disabled = true;
