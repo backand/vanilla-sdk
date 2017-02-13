@@ -85,7 +85,7 @@ function useAnonymousAuth () {
     }
     else {
       let details = {
-        "access_token": defaults.anonymousToken,
+        // "access_token": defaults.anonymousToken,
         "token_type": "AnonymousToken",
         "expires_in": 0,
         "appName": defaults.appName,

@@ -1810,7 +1810,7 @@ function useAnonymousAuth() {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'anonymousToken is missing', {}));
     } else {
       var details = {
-        "access_token": _defaults2.default.anonymousToken,
+        // "access_token": defaults.anonymousToken,
         "token_type": "AnonymousToken",
         "expires_in": 0,
         "appName": _defaults2.default.appName,
