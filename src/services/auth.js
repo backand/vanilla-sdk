@@ -103,7 +103,7 @@ function useAnonymousAuth () {
         },
         details,
       });
-      __dispatchEvent__(EVENTS.SIGNIN);
+      // __dispatchEvent__(EVENTS.SIGNIN);
       if (defaults.runSocket) {
         utils.socket.connect(null, defaults.anonymousToken, defaults.appName);
       }

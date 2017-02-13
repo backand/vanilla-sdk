@@ -30,9 +30,9 @@ function getList (object, params = {}) {
     params: __allowedParams__(allowedParams, params),
   })
   .then(response => {
-    response.data = response.data['data'];
-    if(response.data['totalRows']) { response.totalRows = response.data['totalRows']; }
     if(response.data['relatedObjects']) { response.relatedObjects = response.data['relatedObjects']; }
+    response.totalRows = response.data['totalRows'];
+    response.data = response.data['data'];
     return response;
   });
 }

@@ -175,28 +175,52 @@ describe('Backand SDK', () => {
         return backand.object.action.post('items', 'socket_test', {data: "test"});
       });
     });
-  });
-  describe('backand.file', () => {
-      it('upload', function(done) {
-        this.timeout(0);
-        var file = new File(["test"], 'file2upload');
-        var reader  = new FileReader();
-        reader.readAsDataURL(file);
-        reader.addEventListener("load", function () {
-          backand.file.upload('items', 'files', file.name, reader.result)
-          .then(res => {
-            done();
-          })
-          .catch(err => {
-            done(err);
-          })
-        }, false);
-      });
-      it('remove', function() {
-        this.timeout(0);
-        return backand.file.remove('items','files', 'file2upload');
+    it('field types', function() {
+      this.timeout(0);
+      return backand.object.create('tests', {
+        point: [Math.floor((Math.random() * 10) + 1), Math.floor((Math.random() * 10) + 1)],
+        datetime: new Date(),
+        boolean: Math.random() < 0.5 ? false : true,
+        float: Math.random() * (Math.random() < 0.5 ? -1 : 1),
       });
     });
+    it('filter types', function(done) {
+      this.timeout(0);
+      let boolFilter = Math.random() < 0.5 ? false : true;
+      backand.object.getList('tests', {
+        filter: [backand.helpers.filter.create('boolean', backand.helpers.filter.operators.boolean.equals, boolFilter)],
+        sort: [backand.helpers.sort.create('datetime', backand.helpers.sort.orders.desc)]
+      })
+      .then(res => {
+        res.data.forEach(elem => expect(elem.boolean).to.be[boolFilter]);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      })
+    });
+  });
+  describe('backand.file', () => {
+    it('upload', function(done) {
+      this.timeout(0);
+      var file = new File(["test"], 'file2upload');
+      var reader  = new FileReader();
+      reader.readAsDataURL(file);
+      reader.addEventListener("load", function () {
+        backand.file.upload('items', 'files', file.name, reader.result)
+        .then(res => {
+          done();
+        })
+        .catch(err => {
+          done(err);
+        })
+      }, false);
+    });
+    it('remove', function() {
+      this.timeout(0);
+      return backand.file.remove('items','files', 'file2upload');
+    });
+  });
   describe('backand.query', () => {
     it('get', function() {
       this.timeout(0);

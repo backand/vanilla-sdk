@@ -1828,7 +1828,7 @@ function useAnonymousAuth() {
         },
         details: details
       });
-      __dispatchEvent__(_constants.EVENTS.SIGNIN);
+      // __dispatchEvent__(EVENTS.SIGNIN);
       if (_defaults2.default.runSocket) {
         _utils2.default.socket.connect(null, _defaults2.default.anonymousToken, _defaults2.default.appName);
       }
@@ -2186,13 +2186,11 @@ function getList(object) {
     method: 'GET',
     params: __allowedParams__(allowedParams, params)
   }).then(function (response) {
-    response.data = response.data['data'];
-    if (response.data['totalRows']) {
-      response.totalRows = response.data['totalRows'];
-    }
     if (response.data['relatedObjects']) {
       response.relatedObjects = response.data['relatedObjects'];
     }
+    response.totalRows = response.data['totalRows'];
+    response.data = response.data['data'];
     return response;
   });
 }

@@ -147,4 +147,12 @@
     console.log('items_updated');
     console.log(data);
   });
+
+  window.addEventListener(backand.constants.EVENTS.SIGNIN, function (e) {
+    console.log(e);
+  }, false);
+  window.addEventListener(backand.constants.EVENTS.SIGNOUT, function (e) {
+    console.log(e);
+  }, false);
+
 })();
