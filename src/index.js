@@ -113,11 +113,6 @@ backand.init = (config = {}) => {
     );
     Object.assign(backand, {
       on: Socket.prototype.on.bind(utils.socket),
-      socket: {
-        connect: Socket.prototype.connect.bind(utils.socket),
-        disconnect: Socket.prototype.disconnect.bind(utils.socket),
-        on: Socket.prototype.on.bind(utils.socket),
-      }
     });
   }
   if(defaults.exportUtils) {

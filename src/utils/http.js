@@ -11,7 +11,7 @@ class Http {
       interceptors: {},
       withCredentials: false,
       responseType: 'json',
-      // timeout: null,
+      timeout: 4000,
       auth: {
        username: null,
        password: null
@@ -98,8 +98,8 @@ class Http {
             reject(this._handleError('url parameter is missing', config));
           }
           let req = new XMLHttpRequest();
-          if (config.withCredentials) { req.withCredentials = true }
-          if (config.timeout) { req.timeout = true }
+          req.withCredentials = config.withCredentials || false;
+          req.timeout = config.timeout || 0;
           let params = this._encodeParams(config.params);
           req.open(config.method, `${config.baseURL ? config.baseURL+'/' : ''}${config.url}${params ? '?'+params : ''}`, true, config.auth.username, config.auth.password);
           req.ontimeout = () => {

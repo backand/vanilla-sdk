@@ -1699,12 +1699,7 @@ backand.init = function () {
     storeUser = _utils2.default.storage.get('user');
     storeUser && _utils2.default.socket.connect(storeUser.token.Authorization || null, _defaults2.default.anonymousToken, _defaults2.default.appName);
     _extends(backand, {
-      on: _socket2.default.prototype.on.bind(_utils2.default.socket),
-      socket: {
-        connect: _socket2.default.prototype.connect.bind(_utils2.default.socket),
-        disconnect: _socket2.default.prototype.disconnect.bind(_utils2.default.socket),
-        on: _socket2.default.prototype.on.bind(_utils2.default.socket)
-      }
+      on: _socket2.default.prototype.on.bind(_utils2.default.socket)
     });
   }
   if (_defaults2.default.exportUtils) {
@@ -2191,8 +2186,13 @@ function getList(object) {
     method: 'GET',
     params: __allowedParams__(allowedParams, params)
   }).then(function (response) {
-    var totalRows = response.data['totalRows'];
     response.data = response.data['data'];
+    if (response.data['totalRows']) {
+      response.totalRows = response.data['totalRows'];
+    }
+    if (response.data['relatedObjects']) {
+      response.relatedObjects = response.data['relatedObjects'];
+    }
     return response;
   });
 }
@@ -2569,7 +2569,7 @@ var Http = function () {
       interceptors: {},
       withCredentials: false,
       responseType: 'json',
-      // timeout: null,
+      timeout: 4000,
       auth: {
         username: null,
         password: null
@@ -2674,12 +2674,8 @@ var Http = function () {
             reject(_this._handleError('url parameter is missing', config));
           }
           var req = new XMLHttpRequest();
-          if (config.withCredentials) {
-            req.withCredentials = true;
-          }
-          if (config.timeout) {
-            req.timeout = true;
-          }
+          req.withCredentials = config.withCredentials || false;
+          req.timeout = config.timeout || 0;
           var params = _this._encodeParams(config.params);
           req.open(config.method, '' + (config.baseURL ? config.baseURL + '/' : '') + config.url + (params ? '?' + params : ''), true, config.auth.username, config.auth.password);
           req.ontimeout = function () {
