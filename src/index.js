@@ -14,6 +14,7 @@ import object from './services/object'
 import file from './services/file'
 import query from './services/query'
 import user from './services/user'
+import analytics from './services/analytics'
 
 // Task: Polyfills
 import { Promise } from 'es6-promise'
@@ -31,8 +32,8 @@ var detector = detect();
 defaults["storage"]  = (detector.env === 'browser') ? window.localStorage : new helpers.MemoryStorage();
 defaults["isMobile"] = (detector.device === 'mobile' || detector.device === 'tablet');
 
-// TASK: get data from url in social sign-in popup
 if(detector.env !== 'node' && detector.env !== 'react-native' && window.location) {
+  // TASK: get data from url in social sign-in popup
   let dataMatch = /(data|error)=(.+)/.exec(window.location.href);
   if (dataMatch && dataMatch[1] && dataMatch[2]) {
     let data = {
@@ -46,6 +47,12 @@ if(detector.env !== 'node' && detector.env !== 'react-native' && window.location
       localStorage.setItem('SOCIAL_DATA', JSON.stringify(data));
     }
   }
+
+  // TASK: add segment analytics to head tag
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.innerText = analytics;
+  document.getElementsByTagName('head')[0].appendChild(script);
 }
 
 let backand = {

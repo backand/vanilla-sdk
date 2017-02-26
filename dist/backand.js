@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-02-14
+ * @Compiled At: 2017-02-27
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1607,6 +1607,10 @@ var _user = require('./services/user');
 
 var _user2 = _interopRequireDefault(_user);
 
+var _analytics = require('./services/analytics');
+
+var _analytics2 = _interopRequireDefault(_analytics);
+
 var _es6Promise = require('es6-promise');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -1627,8 +1631,8 @@ var detector = (0, _detector2.default)();
 _defaults2.default["storage"] = detector.env === 'browser' ? window.localStorage : new helpers.MemoryStorage();
 _defaults2.default["isMobile"] = detector.device === 'mobile' || detector.device === 'tablet';
 
-// TASK: get data from url in social sign-in popup
 if (detector.env !== 'node' && detector.env !== 'react-native' && window.location) {
+  // TASK: get data from url in social sign-in popup
   var dataMatch = /(data|error)=(.+)/.exec(window.location.href);
   if (dataMatch && dataMatch[1] && dataMatch[2]) {
     var data = {
@@ -1641,6 +1645,12 @@ if (detector.env !== 'node' && detector.env !== 'react-native' && window.locatio
       localStorage.setItem('SOCIAL_DATA', JSON.stringify(data));
     }
   }
+
+  // TASK: add segment analytics to head tag
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.innerText = _analytics2.default;
+  document.getElementsByTagName('head')[0].appendChild(script);
 }
 
 var backand = {
@@ -1709,7 +1719,15 @@ backand.init = function () {
 
 module.exports = backand;
 
-},{"./constants":3,"./defaults":4,"./helpers":5,"./services/auth":7,"./services/file":8,"./services/object":9,"./services/query":10,"./services/user":11,"./utils/detector":12,"./utils/http":14,"./utils/interceptors":15,"./utils/socket":16,"./utils/storage":17,"./utils/utils":18,"es6-promise":1}],7:[function(require,module,exports){
+},{"./constants":3,"./defaults":4,"./helpers":5,"./services/analytics":7,"./services/auth":8,"./services/file":9,"./services/object":10,"./services/query":11,"./services/user":12,"./utils/detector":13,"./utils/http":15,"./utils/interceptors":16,"./utils/socket":17,"./utils/storage":18,"./utils/utils":19,"es6-promise":1}],7:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = "!function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error(\"Segment snippet included twice.\");else{analytics.invoked=!0;analytics.methods=[\"trackSubmit\",\"trackClick\",\"trackLink\",\"trackForm\",\"pageview\",\"identify\",\"reset\",\"group\",\"track\",\"ready\",\"alias\",\"debug\",\"page\",\"once\",\"off\",\"on\"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t){var e=document.createElement(\"script\");e.type=\"text/javascript\";e.async=!0;e.src=(\"https:\"===document.location.protocol?\"https://\":\"http://\")+\"cdn.segment.com/analytics.js/v1/\"+t+\"/analytics.min.js\";var n=document.getElementsByTagName(\"script\")[0];n.parentNode.insertBefore(e,n)};analytics.SNIPPET_VERSION=\"4.0.0\";\nanalytics.load(\"hbAGffWTKHq2CcWndS7m2lCX3nHJzmYN\");\nanalytics.page();\n}}();";
+
+},{}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2099,7 +2117,7 @@ function getSocialProviders() {
   });
 }
 
-},{"./../constants":3,"./../defaults":4,"./../utils/fns":13,"./../utils/utils":18}],8:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../utils/fns":14,"./../utils/utils":19}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2140,7 +2158,7 @@ function remove(object, fileAction, filename) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":18}],9:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":19}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2253,7 +2271,7 @@ function post(object, action, data) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":18}],10:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":19}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2294,7 +2312,7 @@ function post(name, data) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":18}],11:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":19}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2378,7 +2396,7 @@ function getRefreshToken() {
   });
 }
 
-},{"./../constants":3,"./../utils/fns":13,"./../utils/utils":18}],12:[function(require,module,exports){
+},{"./../constants":3,"./../utils/fns":14,"./../utils/utils":19}],13:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2498,7 +2516,7 @@ function detect() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2536,7 +2554,7 @@ function bind(obj, scope) {
   return obj;
 }
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2733,7 +2751,7 @@ http.create = function (config) {
 
 exports.default = http;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2812,7 +2830,7 @@ function responseErrorInterceptor(error) {
   }
 }
 
-},{"./../constants":3,"./../defaults":4,"./../services/auth":7,"./utils":18}],16:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../services/auth":8,"./utils":19}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2887,7 +2905,7 @@ var Socket = function () {
 
 exports.default = Socket;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2962,7 +2980,7 @@ var Storage = function () {
 
 exports.default = Storage;
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
