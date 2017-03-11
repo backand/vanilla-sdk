@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-02-27
+ * @Compiled At: 2017-03-06
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1395,16 +1395,25 @@ exports.default = {
   anonymousToken: null,
   useAnonymousTokenByDefault: true,
   signUpToken: null,
-  apiUrl: 'https://api.backand.com',
+
+  apiUrl: 'https://api.backand.com', // debug
+  exportUtils: false, // debug
+
   storage: {},
   storagePrefix: 'BACKAND_',
+
   manageRefreshToken: true,
   runSigninAfterSignup: true,
+
   runSocket: false,
-  socketUrl: 'https://socket.backand.com',
-  exportUtils: false,
+  socketUrl: 'https://socket.backand.com', // debug
+
   isMobile: false,
-  mobilePlatform: 'ionic'
+  mobilePlatform: 'ionic',
+
+  runOffline: false,
+  allowUpdatesinOfflineMode: false,
+  forcOffline: false // debug
 };
 
 },{}],5:[function(require,module,exports){
@@ -1587,6 +1596,8 @@ var _detector = require('./utils/detector');
 
 var _detector2 = _interopRequireDefault(_detector);
 
+var _fns = require('./utils/fns');
+
 var _auth = require('./services/auth');
 
 var _auth2 = _interopRequireDefault(_auth);
@@ -1675,6 +1686,7 @@ backand.init = function () {
     http: _http2.default.create({
       baseURL: _defaults2.default.apiUrl
     }),
+    offline: !navigator.onLine || _defaults2.default.forcOffline,
     detector: detector
   });
   if (_defaults2.default.runSocket) {
@@ -1694,6 +1706,23 @@ backand.init = function () {
   var storeUser = _utils2.default.storage.get('user');
   if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== _defaults2.default.anonymousToken || !_defaults2.default.useAnonymousTokenByDefault)) {
     _utils2.default.storage.remove('user');
+  }
+
+  // TASK: set offline events
+  function __updateOnlineStatus__(event) {
+    if (!navigator.onLine) {
+      (0, _fns.__dispatchEvent__)('startOfflineMode');
+    } else {
+      (0, _fns.__dispatchEvent__)('endOfflineMode');
+    }
+  }
+  if ((_defaults2.default.runOffline || _defaults2.default.forcOffline) && _utils2.default.detector.env === 'browser') {
+    window.addEventListener('online', __updateOnlineStatus__);
+    window.addEventListener('offline', __updateOnlineStatus__);
+  }
+  // TASK: set offline storage
+  if (!_utils2.default.storage.get('cache')) {
+    _utils2.default.storage.set('cache', {});
   }
 
   // TASK: expose backand namespace to window
@@ -1719,7 +1748,7 @@ backand.init = function () {
 
 module.exports = backand;
 
-},{"./constants":3,"./defaults":4,"./helpers":5,"./services/analytics":7,"./services/auth":8,"./services/file":9,"./services/object":10,"./services/query":11,"./services/user":12,"./utils/detector":13,"./utils/http":15,"./utils/interceptors":16,"./utils/socket":17,"./utils/storage":18,"./utils/utils":19,"es6-promise":1}],7:[function(require,module,exports){
+},{"./constants":3,"./defaults":4,"./helpers":5,"./services/analytics":7,"./services/auth":8,"./services/file":9,"./services/object":10,"./services/query":11,"./services/user":12,"./utils/detector":13,"./utils/fns":14,"./utils/http":15,"./utils/interceptors":16,"./utils/socket":17,"./utils/storage":18,"./utils/utils":19,"es6-promise":1}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1766,21 +1795,6 @@ exports.default = {
 };
 
 
-function __dispatchEvent__(name) {
-  var event = void 0;
-  if (_defaults2.default.isMobile || _utils2.default.detector.env === 'node') return;
-  if (document.createEvent) {
-    event = document.createEvent('Event');
-    event.initEvent(name, true, true);
-    event.eventName = name;
-    window.dispatchEvent(event);
-  } else if (document.createEventObject) {
-    event = document.createEventObject();
-    event.eventType = name;
-    event.eventName = name;
-    window.fireEvent('on' + event.eventType, event);
-  }
-}
 function __authorize__(tokenData) {
   var data = [];
   Object.keys(tokenData).forEach(function (key) {
@@ -1802,7 +1816,7 @@ function __authorize__(tokenData) {
       },
       details: response.data
     });
-    __dispatchEvent__(_constants.EVENTS.SIGNIN);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNIN);
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
     }
@@ -1878,7 +1892,7 @@ function signup(firstName, lastName, email, password, confirmPassword) {
       parameters: parameters
     }
   }).then(function (response) {
-    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
     if (_defaults2.default.runSigninAfterSignup) {
       return signin(response.data.username, password);
     } else {
@@ -1979,7 +1993,7 @@ function socialSignin(provider) {
   var spec = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'left=1, top=1, width=500, height=560';
 
   return __socialAuth__(provider, false, spec, '').then(function (response) {
-    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
     return __authorize__({
       accessToken: response.data.access_token
     });
@@ -2001,7 +2015,7 @@ function socialSigninWithToken(provider, token) {
       },
       details: response.data
     });
-    __dispatchEvent__(_constants.EVENTS.SIGNIN);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNIN);
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
     }
@@ -2038,7 +2052,7 @@ function socialSignup(provider, email) {
   var spec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'left=1, top=1, width=500, height=560';
 
   return __socialAuth__(provider, true, spec, email).then(function (response) {
-    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
     if (_defaults2.default.runSigninAfterSignup) {
       return __authorize__({
         accessToken: response.data.access_token
@@ -2084,7 +2098,7 @@ function __signoutBody__() {
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.disconnect();
     }
-    __dispatchEvent__(_constants.EVENTS.SIGNOUT);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNOUT);
     resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, _utils2.default.storage.get('user'), {}));
   });
 }
@@ -2165,11 +2179,19 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _constants = require('./../constants');
+
+var _defaults = require('./../defaults');
+
+var _defaults2 = _interopRequireDefault(_defaults);
 
 var _utils = require('./../utils/utils');
 
 var _utils2 = _interopRequireDefault(_utils);
+
+var _fns = require('./../utils/fns');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2198,18 +2220,34 @@ function __allowedParams__(allowedParams, params) {
 function getList(object) {
   var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-  var allowedParams = ['pageSize', 'pageNumber', 'filter', 'sort', 'search', 'exclude', 'deep', 'relatedObjects'];
+  var allowedParams = __allowedParams__(['pageSize', 'pageNumber', 'filter', 'sort', 'search', 'exclude', 'deep', 'relatedObjects'], params);
+  var key = (0, _fns.hash)(object + JSON.stringify(allowedParams));
   return _utils2.default.http({
     url: _constants.URLS.objects + '/' + object,
     method: 'GET',
-    params: __allowedParams__(allowedParams, params)
+    params: allowedParams
   }).then(function (response) {
     if (response.data['relatedObjects']) {
       response.relatedObjects = response.data['relatedObjects'];
     }
     response.totalRows = response.data['totalRows'];
     response.data = response.data['data'];
+
+    // offline
+    if (_defaults2.default.forcOffline) {
+      return Promise.reject('forcOffline');
+    }
+    var c = {};
+    c[key] = response;
+    _utils2.default.storage.set('cache', _extends(_utils2.default.storage.get('cache'), c));
+
     return response;
+  }).catch(function (err) {
+    if (!_utils2.default.offline) {
+      return Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, err, {}));
+    } else {
+      return Promise.resolve(_utils2.default.storage.get('cache')[key] || (0, _fns.__generateFakeResponse__)(200, 'OK', {}, [], {}));
+    }
   });
 }
 function create(object, data) {
@@ -2271,7 +2309,7 @@ function post(object, action, data) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":19}],11:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../utils/fns":14,"./../utils/utils":19}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2526,7 +2564,20 @@ Object.defineProperty(exports, "__esModule", {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 exports.__generateFakeResponse__ = __generateFakeResponse__;
+exports.__dispatchEvent__ = __dispatchEvent__;
 exports.bind = bind;
+exports.hash = hash;
+
+var _utils = require('./utils');
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _defaults = require('./../defaults');
+
+var _defaults2 = _interopRequireDefault(_defaults);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function __generateFakeResponse__() {
   var status = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
   var statusText = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
@@ -2543,6 +2594,26 @@ function __generateFakeResponse__() {
   };
 }
 
+function __dispatchEvent__(name) {
+  var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  var event = void 0;
+  if (_defaults2.default.isMobile || _utils2.default.detector.env === 'node') return;
+  if (document.createEvent) {
+    event = document.createEvent('Event');
+    event.initEvent(name, true, true);
+    event.eventName = name;
+    event.data = data;
+    window.dispatchEvent(event);
+  } else if (document.createEventObject) {
+    event = document.createEventObject();
+    event.eventType = name;
+    event.eventName = name;
+    event.data = data;
+    window.fireEvent('on' + event.eventType, event);
+  }
+}
+
 function bind(obj, scope) {
   Object.keys(obj).forEach(function (key) {
     if (_typeof(obj[key]) === 'object') {
@@ -2554,7 +2625,18 @@ function bind(obj, scope) {
   return obj;
 }
 
-},{}],15:[function(require,module,exports){
+function hash(str) {
+  var hash = 5381,
+      i = str.length;
+
+  while (i) {
+    hash = hash * 33 ^ str.charCodeAt(--i);
+  }
+
+  return hash >>> 0;
+}
+
+},{"./../defaults":4,"./utils":19}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

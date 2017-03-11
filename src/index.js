@@ -8,6 +8,7 @@ import Http from './utils/http'
 import interceptors from './utils/interceptors'
 import Socket from './utils/socket'
 import detect from './utils/detector'
+import { __dispatchEvent__ } from './utils/fns'
 
 import auth from './services/auth'
 import object from './services/object'
@@ -77,6 +78,7 @@ backand.init = (config = {}) => {
     http: Http.create({
       baseURL: defaults.apiUrl
     }),
+    offline: !navigator.onLine || defaults.forcOffline,
     detector,
   });
   if (defaults.runSocket) {
@@ -96,6 +98,24 @@ backand.init = (config = {}) => {
   let storeUser = utils.storage.get('user');
   if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== defaults.anonymousToken || !defaults.useAnonymousTokenByDefault)) {
     utils.storage.remove('user');
+  }
+
+  // TASK: set offline events
+  function __updateOnlineStatus__(event) {
+    if(!navigator.onLine) {
+      __dispatchEvent__('startOfflineMode')
+    }
+    else {
+      __dispatchEvent__('endOfflineMode')
+    }
+  }
+  if ((defaults.runOffline || defaults.forcOffline) && utils.detector.env === 'browser') {
+    window.addEventListener('online',  __updateOnlineStatus__);
+    window.addEventListener('offline', __updateOnlineStatus__);
+  }
+  // TASK: set offline storage
+  if (!utils.storage.get('cache')) {
+    utils.storage.set('cache', {});
   }
 
   // TASK: expose backand namespace to window

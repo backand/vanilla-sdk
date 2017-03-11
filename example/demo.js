@@ -13,7 +13,9 @@
     anonymousToken: '82cfcfe8-c718-4621-8bb6-cd600e23487f',
     runSocket: true,
     // useAnonymousTokenByDefault: false,
-    // storage: new backand.helpers.MemoryStorage()
+    // storage: new backand.helpers.MemoryStorage(),
+    runOffline: false,
+    forcOffline: true,
   });
 
   var outputContainer = document.getElementById('outputContainer');
