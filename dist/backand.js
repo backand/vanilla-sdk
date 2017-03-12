@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-02-27
+ * @Compiled At: 2017-03-12
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -2175,8 +2175,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = {
   getList: getList,
-  create: create,
   getOne: getOne,
+  create: create,
   update: update,
   remove: remove,
   action: {
@@ -2196,13 +2196,13 @@ function __allowedParams__(allowedParams, params) {
   return newParams;
 }
 function getList(object) {
-  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-  var allowedParams = ['pageSize', 'pageNumber', 'filter', 'sort', 'search', 'exclude', 'deep', 'relatedObjects'];
+  var params = __allowedParams__(['pageSize', 'pageNumber', 'filter', 'sort', 'search', 'exclude', 'deep', 'relatedObjects'], options);
   return _utils2.default.http({
     url: _constants.URLS.objects + '/' + object,
     method: 'GET',
-    params: __allowedParams__(allowedParams, params)
+    params: params
   }).then(function (response) {
     if (response.data['relatedObjects']) {
       response.relatedObjects = response.data['relatedObjects'];
@@ -2212,59 +2212,80 @@ function getList(object) {
     return response;
   });
 }
-function create(object, data) {
-  var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-  var allowedParams = ['returnObject', 'deep'];
-  return _utils2.default.http({
-    url: _constants.URLS.objects + '/' + object,
-    method: 'POST',
-    data: data,
-    params: __allowedParams__(allowedParams, params)
-  });
-}
 function getOne(object, id) {
-  var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-  var allowedParams = ['deep', 'exclude', 'level'];
+  var params = __allowedParams__(['deep', 'exclude', 'level'], options);
   return _utils2.default.http({
     url: _constants.URLS.objects + '/' + object + '/' + id,
-    method: 'GET',
-    params: __allowedParams__(allowedParams, params)
-  });
-}
-function update(object, id, data) {
-  var params = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-
-  var allowedParams = ['returnObject', 'deep'];
-  return _utils2.default.http({
-    url: _constants.URLS.objects + '/' + object + '/' + id,
-    method: 'PUT',
-    data: data,
-    params: __allowedParams__(allowedParams, params)
-  });
-}
-function remove(object, id) {
-  return _utils2.default.http({
-    url: _constants.URLS.objects + '/' + object + '/' + id,
-    method: 'DELETE'
-  });
-}
-
-function get(object, action) {
-  var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-  return _utils2.default.http({
-    url: _constants.URLS.objectsAction + '/' + object + '?name=' + action,
     method: 'GET',
     params: params
   });
 }
-function post(object, action, data) {
-  var params = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+function create(object, data) {
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var parameters = arguments[3];
 
+  var params = __allowedParams__(['returnObject', 'deep'], options);
+  if (parameters) {
+    params.parameters = parameters;
+  }
   return _utils2.default.http({
-    url: _constants.URLS.objectsAction + '/' + object + '?name=' + action,
+    url: _constants.URLS.objects + '/' + object,
+    method: 'POST',
+    data: data,
+    params: params
+  });
+}
+function update(object, id, data) {
+  var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+  var parameters = arguments[4];
+
+  var params = __allowedParams__(['returnObject', 'deep'], options);
+  if (parameters) {
+    params.parameters = parameters;
+  }
+  return _utils2.default.http({
+    url: _constants.URLS.objects + '/' + object + '/' + id,
+    method: 'PUT',
+    data: data,
+    params: params
+  });
+}
+function remove(object, id, parameters) {
+  var params = {};
+  if (parameters) {
+    params.parameters = parameters;
+  }
+  return _utils2.default.http({
+    url: _constants.URLS.objects + '/' + object + '/' + id,
+    method: 'DELETE',
+    params: params
+  });
+}
+
+function get(object, action, parameters) {
+  var params = {
+    name: action
+  };
+  if (parameters) {
+    params.parameters = parameters;
+  }
+  return _utils2.default.http({
+    url: _constants.URLS.objectsAction + '/' + object,
+    method: 'GET',
+    params: params
+  });
+}
+function post(object, action, data, parameters) {
+  var params = {
+    name: action
+  };
+  if (parameters) {
+    params.parameters = parameters;
+  }
+  return _utils2.default.http({
+    url: _constants.URLS.objectsAction + '/' + object,
     method: 'POST',
     data: data,
     params: params
