@@ -170,9 +170,40 @@ describe('Backand SDK', () => {
         this.timeout(0);
         return backand.object.action.get('items', 'socket_test');
       });
+      it('get with params', function(done) {
+        this.timeout(0);
+        let parameters = {param1: 'test1', param2: 'test2'};
+        backand.object.action.get('items', 'params', parameters)
+        .then(res => {
+          console.log(res);
+          expect(res.data).to.eql({
+            "param1": "test1",
+            "param2": "test2"
+          });
+          done();
+        })
+        .catch(err => {
+          done(err);
+        })
+      });
+
       it('post', function() {
         this.timeout(0);
         return backand.object.action.post('items', 'socket_test', {data: "test"});
+      });
+      it('post with params', function(done) {
+        this.timeout(0);
+        backand.object.action.post('items', 'params_post', {data: "test"})
+            .then(res => {
+              console.log(res);
+              expect(res.data).to.eql({
+                "data": "test"
+              });
+              done();
+            })
+            .catch(err => {
+              done(err);
+            })
       });
     });
     it('field types', function() {
