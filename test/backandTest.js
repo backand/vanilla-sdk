@@ -175,7 +175,6 @@ describe('Backand SDK', () => {
         let parameters = {param1: 'test1', param2: 'test2'};
         backand.object.action.get('items', 'params', parameters)
         .then(res => {
-          console.log(res);
           expect(res.data).to.eql({
             "param1": "test1",
             "param2": "test2"
@@ -194,16 +193,13 @@ describe('Backand SDK', () => {
       it('post with params', function(done) {
         this.timeout(0);
         backand.object.action.post('items', 'params_post', {data: "test"})
-            .then(res => {
-              console.log(res);
-              expect(res.data).to.eql({
-                "data": "test"
-              });
-              done();
-            })
-            .catch(err => {
-              done(err);
-            })
+        .then(res => {
+          expect(res.data).to.eql({"data": "test"});
+          done();
+        })
+        .catch(err => {
+          done(err);
+        })
       });
     });
     it('field types', function() {
@@ -257,41 +253,29 @@ describe('Backand SDK', () => {
       this.timeout(0);
       return backand.query.get('getItemsCount');
     });
-    it('query with params', function(done) {
+    it('query GET with params', function(done) {
       this.timeout(0);
       let parameters = {param1: 'test'};
       backand.query.get('params', parameters)
-        .then(res => {
-          console.log(res);
-          expect(res.data).to.eql(
-          [
-            {
-              "param1": "test"
-            }
-          ]);
-          done();
-        })
-        .catch(err => {
-          done(err);
-        })
+      .then(res => {
+        expect(res.data).to.eql([{"param1": "test"}]);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      })
     });
     it('query POST with params', function(done) {
       this.timeout(0);
       let parameters = {param1: 'test'};
-      backand.query.post('params', {}, parameters)
-        .then(res => {
-          console.log(res);
-          expect(res.data).to.eql(
-              [
-                {
-                  "param1": "test"
-                }
-              ]);
-          done();
-        })
-        .catch(err => {
-          done(err);
-        })
+      backand.query.post('params', parameters)
+      .then(res => {
+        expect(res.data).to.eql([{"param1": "test"}]);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      })
     });
   });
   describe('backand.user', () => {

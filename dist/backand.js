@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-03-12
+ * @Compiled At: 2017-03-13
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1631,26 +1631,30 @@ var detector = (0, _detector2.default)();
 _defaults2.default["storage"] = detector.env === 'browser' ? window.localStorage : new helpers.MemoryStorage();
 _defaults2.default["isMobile"] = detector.device === 'mobile' || detector.device === 'tablet';
 
-if (detector.env !== 'node' && detector.env !== 'react-native' && window.location) {
+if (detector.env === 'browser') {
   // TASK: get data from url in social sign-in popup
-  var dataMatch = /(data|error)=(.+)/.exec(window.location.href);
-  if (dataMatch && dataMatch[1] && dataMatch[2]) {
-    var data = {
-      data: JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')))
-    };
-    data.status = dataMatch[1] === 'data' ? 200 : 0;
-    if (detector.type !== 'Internet Explorer') {
-      window.opener.postMessage(JSON.stringify(data), location.origin);
-    } else {
-      localStorage.setItem('SOCIAL_DATA', JSON.stringify(data));
+  if (window.location) {
+    var dataMatch = /(data|error)=(.+)/.exec(window.location.href);
+    if (dataMatch && dataMatch[1] && dataMatch[2]) {
+      var data = {
+        data: JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')))
+      };
+      data.status = dataMatch[1] === 'data' ? 200 : 0;
+      if (detector.type !== 'Internet Explorer') {
+        window.opener.postMessage(JSON.stringify(data), location.origin);
+      } else {
+        localStorage.setItem('SOCIAL_DATA', JSON.stringify(data));
+      }
     }
   }
 
   // TASK: add segment analytics to head tag
-  var script = document.createElement('script');
-  script.type = 'text/javascript';
-  script.innerText = _analytics2.default;
-  document.getElementsByTagName('head')[0].appendChild(script);
+  // if(document) {
+  //   var script = document.createElement('script');
+  //   script.type = 'text/javascript';
+  //   script.innerText = analytics;
+  //   document.getElementsByTagName('head')[0].appendChild(script);
+  // }
 }
 
 var backand = {
@@ -2313,22 +2317,26 @@ exports.default = {
 };
 
 
-function get(name) {
-  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
+function get(name, parameters) {
+  console.warn('NOTE: this method will be deprecated soon. please use backand.query.post instead');
+  var params = {};
+  if (parameters) {
+    params.parameters = parameters;
+  }
   return _utils2.default.http({
     url: _constants.URLS.query + '/' + name,
     method: 'GET',
     params: params
   });
 }
-function post(name, data) {
-  var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
+function post(name, parameters) {
+  var params = {};
+  if (parameters) {
+    params.parameters = parameters;
+  }
   return _utils2.default.http({
     url: _constants.URLS.query + '/' + name,
     method: 'POST',
-    data: data,
     params: params
   });
 }

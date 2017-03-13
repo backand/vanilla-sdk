@@ -32,27 +32,31 @@ var detector = detect();
 defaults["storage"]  = (detector.env === 'browser') ? window.localStorage : new helpers.MemoryStorage();
 defaults["isMobile"] = (detector.device === 'mobile' || detector.device === 'tablet');
 
-if(detector.env !== 'node' && detector.env !== 'react-native' && window.location) {
+if(detector.env === 'browser') {
   // TASK: get data from url in social sign-in popup
-  let dataMatch = /(data|error)=(.+)/.exec(window.location.href);
-  if (dataMatch && dataMatch[1] && dataMatch[2]) {
-    let data = {
-      data: JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')))
-    }
-    data.status = (dataMatch[1] === 'data') ? 200 : 0;
-    if (detector.type !== 'Internet Explorer') {
-      window.opener.postMessage(JSON.stringify(data), location.origin);
-    }
-    else {
-      localStorage.setItem('SOCIAL_DATA', JSON.stringify(data));
+  if(window.location) {
+    let dataMatch = /(data|error)=(.+)/.exec(window.location.href);
+    if (dataMatch && dataMatch[1] && dataMatch[2]) {
+      let data = {
+        data: JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')))
+      }
+      data.status = (dataMatch[1] === 'data') ? 200 : 0;
+      if (detector.type !== 'Internet Explorer') {
+        window.opener.postMessage(JSON.stringify(data), location.origin);
+      }
+      else {
+        localStorage.setItem('SOCIAL_DATA', JSON.stringify(data));
+      }
     }
   }
 
   // TASK: add segment analytics to head tag
-  var script = document.createElement('script');
-  script.type = 'text/javascript';
-  script.innerText = analytics;
-  document.getElementsByTagName('head')[0].appendChild(script);
+  // if(document) {
+  //   var script = document.createElement('script');
+  //   script.type = 'text/javascript';
+  //   script.innerText = analytics;
+  //   document.getElementsByTagName('head')[0].appendChild(script);
+  // }
 }
 
 let backand = {

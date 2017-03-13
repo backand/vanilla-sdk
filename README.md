@@ -225,17 +225,17 @@ backand.socialSignin(provider)
 The following methods perform create, retrieve, update, and delete functionality on a Back& object.
 
 ##### GetList
-Fetches a list of records from the specified object. Uses `params` to store filter data
+Fetches a list of records from the specified object. Uses `options` to store filter data
 
 ###### Parameters
 | name | type | description |
 | ---- | ---- | ----------- |
 | object | string | Name of the Back& object to work with |
-| params | object | A hash of filter parameters. Allowed parameters are: `pageSize`, `pageNumber`, `filter`, `sort`, `search`, `exclude`, `deep`, `relatedObjects` |
+| options | object | A hash of filter options. Allowed options are: `pageSize`, `pageNumber`, `filter`, `sort`, `search`, `exclude`, `deep`, `relatedObjects` |
 
 ###### Sample Code
 ```javascript
-backand.object.getList(object, params)
+backand.object.getList(object, options)
   .then(res => {
     console.log(res.data);
   })
@@ -244,16 +244,16 @@ backand.object.getList(object, params)
   });
 ```
 
-###### Sample Code with filter params
+###### Sample Code with filter options
 ```javascript
-let params = {
+let options = {
   sort: backand.helpers.sort.create('creationDate', backand.helpers.sort.orders.desc),
   exclude: backand.helpers.exclude.options.all,
   filter: backand.helpers.filter.create('user', backand.helpers.filter.operators.relation.in, userId),
   pageSize: 20,
   pageNumber: 1
 };
-backand.object.getList(object, params)
+backand.object.getList(object, options)
   .then(res => {
     console.log(res.data);
   })
@@ -263,7 +263,6 @@ backand.object.getList(object, params)
 ```
 
 ##### GetOne
-
 Retrieves a single record from the specified object.
 
 ###### Parameters
@@ -271,12 +270,12 @@ Retrieves a single record from the specified object.
 | name | type | description |
 | ---- | ---- | ----------- |
 | object | string | Name of the Back& object to work with |
-| id | integer | ID of the record to retrieve, subject to the filter specified in `params` |
-| params | object | A hash of filter parameters. Allowed parameters are: `deep`, `exclude`, `level` |
+| id | integer | ID of the record to retrieve, subject to the filter specified in `options` |
+| options | object | A hash of filter options. Allowed options are: `deep`, `exclude`, `level` |
 
 ###### Sample Code
 ```javascript
-backand.object.getOne(object, id, params)
+backand.object.getOne(object, id, options)
   .then(res => {
     console.log(res.data);
   })
@@ -286,7 +285,6 @@ backand.object.getOne(object, id, params)
 ```
 
 ##### Create
-
 Creates a record with the provided data in the specified object
 
 ###### Parameters
@@ -295,11 +293,30 @@ Creates a record with the provided data in the specified object
 | ---- | ---- | ----------- |
 | object | string | Name of the Back& object to work with |
 | data | object | Data to use in the creation of the new record |
-| params | object | A hash of filter parameters. Allowed parameters are: `returnObject`, `deep` |
+| options | object | A hash of filter options. Allowed options are: `returnObject`, `deep` |
+| parameters | object | Parameters for the action to operate upon |
 
 ###### Sample Code
 ```javascript
-backand.object.create(object, data, params)
+backand.object.create(object, data, options, parameters)
+  .then(res => {
+    console.log('object created');
+  })
+  .catch(err => {
+    console.log(err);
+  });
+```
+
+###### Sample Code with filter options and parameters
+```javascript
+let options = {
+  returnObject: true
+};
+let parameters = {
+  inputParameter1: 'value1',
+  inputParameter2: 'value2'
+};
+backand.object.create(object, data, options, parameters)
   .then(res => {
     console.log('object created');
   })
@@ -318,11 +335,12 @@ Updates a record with the specified ID in the specified object with the provided
 | object | string | Name of the Back& object to work with |
 | id | integer | ID of the object to update |
 | data | object | Data to update the record with |
-| params | object | A hash of filter parameters. Allowed parameters are: `returnObject`, `deep` |
+| options | object | A hash of filter options. Allowed options are: `returnObject`, `deep` |
+| parameters | object | Parameters for the action to operate upon |
 
 ###### Sample Code
 ```javascript
-backand.object.update(object, id, data, params)
+backand.object.update(object, id, data, options, parameters)
   .then(res => {
     console.log('object updated');
   })
@@ -340,10 +358,11 @@ Deletes a record from the specified object with the specified ID
 | ---- | ---- | ----------- |
 | object | string | Name of the Back& object to work with |
 | id | integer | ID of the object to update |
+| parameters | object | Parameters for the action to operate upon |
 
 ###### Sample Code
 ```javascript
-backand.object.remove(object, id)
+backand.object.remove(object, id, parameters)
   .then(res => {
     console.log('object removed');
   })
@@ -361,11 +380,11 @@ Triggers custom actions that operate via HTTP GET requests
 | ---- | ---- | ----------- |
 | object | string | Name of the Back& object to work with |
 | action | string | Name of the action to trigger |
-| params | object | Parameters for the action to operate upon |
+| parameters | object | Parameters for the action to operate upon |
 
 ###### Sample Code
 ```javascript
-backand.object.action.get(object, action, params)
+backand.object.action.get(object, action, parameters)
   .then(res => {
     console.log(res.data);
   })
@@ -384,11 +403,11 @@ Triggers custom actions that operate via HTTP POST requests
 | object | string | Name of the Back& object to work with |
 | action | string | Name of the action to trigger |
 | data | object | Object data to send as the body of the POST request |
-| params | object | Parameters for the action to operate upon |
+| parameters | object | Parameters for the action to operate upon |
 
 ###### Sample Code
 ```javascript
-backand.object.action.post(object, action, data, params)
+backand.object.action.post(object, action, data, parameters)
   .then(res => {
     console.log(res.data);
   })
@@ -491,17 +510,18 @@ backand.user.getUserDetails(force)
 The `query` property lets you initiate a custom Back& query using either HTTP GET or HTTP POST.
 
 ##### get
-Calls a custom query using a HTTP GET
+Calls a custom query using a HTTP GET<br/>
+**NOTE: this method will be deprecated soon. please use backand.query.post instead**
 
 ###### Parameters
 | name | type | description |
 | ---- | ---- | ----------- |
 | name | string | The name of the query to work with |
-| params | object | Parameters to be passed to the query |
+| parameters | object | Parameters to be passed to the query |
 
 ###### Sample Code
 ```javascript
-backand.query.get(name, params)
+backand.query.get(name, parameters)
   .then(res => {
     console.log(res.data);
   })
@@ -517,12 +537,11 @@ Calls a custom query using a HTTP POST
 | name | type | description |
 | ---- | ---- | ----------- |
 | name | string | The name of the query to work with |
-| data | object | Data to be included in the body of the HTTP POST |
-| params | object | Parameters to be passed to the query |
+| parameters | object | Parameters to be passed to the query |
 
 ###### Sample Code
 ```javascript
-backand.query.post(name, data, params)
+backand.query.post(name, parameters)
   .then(res => {
     console.log(res.data);
   })
