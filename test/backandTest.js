@@ -257,6 +257,42 @@ describe('Backand SDK', () => {
       this.timeout(0);
       return backand.query.get('getItemsCount');
     });
+    it('query with params', function(done) {
+      this.timeout(0);
+      let parameters = {param1: 'test'};
+      backand.query.get('params', parameters)
+        .then(res => {
+          console.log(res);
+          expect(res.data).to.eql(
+          [
+            {
+              "param1": "test"
+            }
+          ]);
+          done();
+        })
+        .catch(err => {
+          done(err);
+        })
+    });
+    it('query POST with params', function(done) {
+      this.timeout(0);
+      let parameters = {param1: 'test'};
+      backand.query.post('params', {}, parameters)
+        .then(res => {
+          console.log(res);
+          expect(res.data).to.eql(
+              [
+                {
+                  "param1": "test"
+                }
+              ]);
+          done();
+        })
+        .catch(err => {
+          done(err);
+        })
+    });
   });
   describe('backand.user', () => {
     it('getUserDetails', function() {
