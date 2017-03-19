@@ -72,6 +72,30 @@ describe('Backand SDK', () => {
         done(err);
       })
     });
+    it('requestResetPassword user exists', function(done){
+      this.timeout(0);
+      backand.requestResetPassword('testsdk@backand.com')
+        .then(res => {
+          console.log(res);
+          expect(res.data).to.eql('');
+          done();
+        })
+        .catch(err => {
+          done(err);
+        })
+    });
+    it('requestResetPassword user does not exists', function(done){
+      this.timeout(0);
+      backand.requestResetPassword('tttt@backand.com')
+          .then(res => {
+            done();
+          })
+          .catch(err => {
+            console.log(err)
+            expect(err.data).to.eql('The username is not correct or does not belong to this app.');
+            done();
+          })
+    });
     it('getUserDetails', function(done) {
       this.timeout(0);
       backand.user.getUserDetails(true)
