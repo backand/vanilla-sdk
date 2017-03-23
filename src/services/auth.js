@@ -147,7 +147,7 @@ function __getSocialUrl__ (providerName, isSignup, isAutoSignUp) {
   let provider = SOCIAL_PROVIDERS[providerName];
   let action = isSignup ? 'up' : 'in';
   let autoSignUpParam = `&signupIfNotSignedIn=${(!isSignup && isAutoSignUp) ? 'true' : 'false'}`;
-  return `/user/socialSign${action}?provider=${provider.label}${autoSignUpParam}&response_type=token&client_id=self&redirect_uri=${provider.url}&state=`;
+  return `/user/socialSign${action}?provider=${provider.name}${autoSignUpParam}&response_type=token&client_id=self&redirect_uri=${provider.url}&state=`;
 }
 function __socialAuth__ (provider, isSignUp, spec, email) {
   return new Promise((resolve, reject) => {

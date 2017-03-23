@@ -25,5 +25,7 @@ export const SOCIAL_PROVIDERS = {
   github: {name: 'github', label: 'Github', url: 'www.github.com', css: {backgroundColor: '#444'}, id: 1},
   google: {name: 'google', label: 'Google', url: 'www.google.com', css: {backgroundColor: '#dd4b39'}, id: 2},
   facebook: {name: 'facebook', label: 'Facebook', url: 'www.facebook.com', css: {backgroundColor: '#3b5998'}, id: 3},
-  twitter: {name: 'twitter', label: 'Twitter', url: 'www.twitter.com', css: {backgroundColor: '#55acee'}, id: 4}
+  twitter: {name: 'twitter', label: 'Twitter', url: 'www.twitter.com', css: {backgroundColor: '#55acee'}, id: 4},
+  azuread: {name: 'azuread', label: 'Azure Active Directory', url: 'www.azuread.com', css: {backgroundColor: '#3b9844'}, id: 5},
+  adfs: {name: 'adfs', label: 'ADFS', url: 'www.adfs.com', css: {backgroundColor: '#3b9844'}, id: 6},
 };

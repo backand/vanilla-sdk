@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-03-14
+ * @Compiled At: 2017-03-23
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1381,7 +1381,9 @@ var SOCIAL_PROVIDERS = exports.SOCIAL_PROVIDERS = {
   github: { name: 'github', label: 'Github', url: 'www.github.com', css: { backgroundColor: '#444' }, id: 1 },
   google: { name: 'google', label: 'Google', url: 'www.google.com', css: { backgroundColor: '#dd4b39' }, id: 2 },
   facebook: { name: 'facebook', label: 'Facebook', url: 'www.facebook.com', css: { backgroundColor: '#3b5998' }, id: 3 },
-  twitter: { name: 'twitter', label: 'Twitter', url: 'www.twitter.com', css: { backgroundColor: '#55acee' }, id: 4 }
+  twitter: { name: 'twitter', label: 'Twitter', url: 'www.twitter.com', css: { backgroundColor: '#55acee' }, id: 4 },
+  azuread: { name: 'azuread', label: 'Azure Active Directory', url: 'www.azuread.com', css: { backgroundColor: '#3b9844' }, id: 5 },
+  adfs: { name: 'adfs', label: 'ADFS', url: 'www.adfs.com', css: { backgroundColor: '#3b9844' }, id: 6 }
 };
 
 },{}],4:[function(require,module,exports){
@@ -1894,7 +1896,7 @@ function __getSocialUrl__(providerName, isSignup, isAutoSignUp) {
   var provider = _constants.SOCIAL_PROVIDERS[providerName];
   var action = isSignup ? 'up' : 'in';
   var autoSignUpParam = '&signupIfNotSignedIn=' + (!isSignup && isAutoSignUp ? 'true' : 'false');
-  return '/user/socialSign' + action + '?provider=' + provider.label + autoSignUpParam + '&response_type=token&client_id=self&redirect_uri=' + provider.url + '&state=';
+  return '/user/socialSign' + action + '?provider=' + provider.name + autoSignUpParam + '&response_type=token&client_id=self&redirect_uri=' + provider.url + '&state=';
 }
 function __socialAuth__(provider, isSignUp, spec, email) {
   return new Promise(function (resolve, reject) {
