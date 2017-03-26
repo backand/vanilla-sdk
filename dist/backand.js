@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-03-23
+ * @Compiled At: 2017-03-25
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1397,16 +1397,24 @@ exports.default = {
   anonymousToken: null,
   useAnonymousTokenByDefault: true,
   signUpToken: null,
-  apiUrl: 'https://api.backand.com',
+
+  apiUrl: 'https://api.backand.com', // debug
+  exportUtils: false, // debug
+
   storage: {},
   storagePrefix: 'BACKAND_',
+
   manageRefreshToken: true,
   runSigninAfterSignup: true,
+
   runSocket: false,
-  socketUrl: 'https://socket.backand.com',
-  exportUtils: false,
+  socketUrl: 'https://socket.backand.com', // debug
+
   isMobile: false,
-  mobilePlatform: 'ionic'
+  mobilePlatform: 'ionic',
+
+  runOffline: false,
+  allowUpdatesinOfflineMode: false
 };
 
 },{}],5:[function(require,module,exports){
@@ -1548,6 +1556,8 @@ var MemoryStorage = exports.MemoryStorage = function (_StorageAbstract) {
 },{}],6:[function(require,module,exports){
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 // Task: Polyfills
@@ -1588,6 +1598,8 @@ var _socket2 = _interopRequireDefault(_socket);
 var _detector = require('./utils/detector');
 
 var _detector2 = _interopRequireDefault(_detector);
+
+var _fns = require('./utils/fns');
 
 var _auth = require('./services/auth');
 
@@ -1681,6 +1693,8 @@ backand.init = function () {
     http: _http2.default.create({
       baseURL: _defaults2.default.apiUrl
     }),
+    offline: !navigator.onLine,
+    forcOffline: false,
     detector: detector
   });
   if (_defaults2.default.runSocket) {
@@ -1702,6 +1716,85 @@ backand.init = function () {
     _utils2.default.storage.remove('user');
   }
 
+  // TASK: set offline events
+  function __updateOnlineStatus__(event) {
+    if (_utils2.default.offline) {
+      (0, _fns.__dispatchEvent__)('startOfflineMode');
+      console.info('SDK started offline mode');
+    } else {
+      (function () {
+        (0, _fns.__dispatchEvent__)('endOfflineMode');
+        console.info('SDK finished offline mode');
+
+        var requests = _utils2.default.storage.get('queue');
+        requests.forEach(function (request, index) {
+          (0, _fns.__dispatchEvent__)('beforeUpdateOfflineItem', {
+            request: request.payload,
+            next: function next() {
+              var cacnel = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+              if (!cacnel) {
+                _object2.default[request.action].apply(null, request.params).then(function (response) {
+                  (0, _fns.__dispatchEvent__)('afterUpdateOfflineItem', {
+                    request: request.payload,
+                    response: response
+                  });
+                });
+              }
+              requests.shift();
+              _utils2.default.storage.set('queue', requests);
+            }
+          });
+        });
+      })();
+    }
+  }
+  if (_defaults2.default.runOffline && _utils2.default.detector.env === 'browser') {
+    window.addEventListener('online', __updateOnlineStatus__);
+    window.addEventListener('offline', __updateOnlineStatus__);
+  }
+  // TASK: set offline storage
+  if (!_utils2.default.storage.get('cache')) {
+    _utils2.default.storage.set('cache', {});
+  }
+  if (!_utils2.default.storage.get('queue')) {
+    _utils2.default.storage.set('queue', []);
+  }
+  // TASK: set offline api
+  var offline = {
+    forcOffline: function forcOffline() {
+      var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+      if (force) {
+        _utils2.default.offline = true;
+        _utils2.default.forcOffline = true;
+        (0, _fns.__dispatchEvent__)('offline');
+      } else {
+        _utils2.default.offline = !navigator.onLine;
+        _utils2.default.forcOffline = false;
+        (0, _fns.__dispatchEvent__)('online');
+      }
+    },
+    get cache() {
+      return _utils2.default.storage.get('cache');
+    },
+    set cache(obj) {
+      if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object') {
+        throw new Error('cache must be an object of {hash: data} pairs.');
+      }
+      _utils2.default.storage.set('cache', obj);
+    },
+    get queue() {
+      return _utils2.default.storage.get('queue');
+    },
+    set queue(arr) {
+      if (!Array.isArray(arr)) {
+        throw new Error('queue must be an array of requestDescriptor objects.');
+      }
+      _utils2.default.storage.set('cache', arr);
+    }
+  };
+
   // TASK: expose backand namespace to window
   delete backand.init;
   _extends(backand, _auth2.default, {
@@ -1709,7 +1802,8 @@ backand.init = function () {
     object: _object2.default,
     file: _file2.default,
     query: _query2.default,
-    user: _user2.default
+    user: _user2.default,
+    offline: offline
   });
   if (_defaults2.default.runSocket) {
     storeUser = _utils2.default.storage.get('user');
@@ -1725,7 +1819,7 @@ backand.init = function () {
 
 module.exports = backand;
 
-},{"./constants":3,"./defaults":4,"./helpers":5,"./services/analytics":7,"./services/auth":8,"./services/file":9,"./services/object":10,"./services/query":11,"./services/user":12,"./utils/detector":13,"./utils/http":15,"./utils/interceptors":16,"./utils/socket":17,"./utils/storage":18,"./utils/utils":19,"es6-promise":1}],7:[function(require,module,exports){
+},{"./constants":3,"./defaults":4,"./helpers":5,"./services/analytics":7,"./services/auth":8,"./services/file":9,"./services/object":10,"./services/query":11,"./services/user":12,"./utils/detector":13,"./utils/fns":14,"./utils/http":15,"./utils/interceptors":16,"./utils/socket":17,"./utils/storage":18,"./utils/utils":19,"es6-promise":1}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1772,21 +1866,6 @@ exports.default = {
 };
 
 
-function __dispatchEvent__(name) {
-  var event = void 0;
-  if (_defaults2.default.isMobile || _utils2.default.detector.env === 'node') return;
-  if (document.createEvent) {
-    event = document.createEvent('Event');
-    event.initEvent(name, true, true);
-    event.eventName = name;
-    window.dispatchEvent(event);
-  } else if (document.createEventObject) {
-    event = document.createEventObject();
-    event.eventType = name;
-    event.eventName = name;
-    window.fireEvent('on' + event.eventType, event);
-  }
-}
 function __authorize__(tokenData) {
   var data = [];
   Object.keys(tokenData).forEach(function (key) {
@@ -1808,7 +1887,7 @@ function __authorize__(tokenData) {
       },
       details: response.data
     });
-    __dispatchEvent__(_constants.EVENTS.SIGNIN);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNIN);
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
     }
@@ -1884,7 +1963,7 @@ function signup(firstName, lastName, email, password, confirmPassword) {
       parameters: parameters
     }
   }).then(function (response) {
-    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
     if (_defaults2.default.runSigninAfterSignup) {
       return signin(response.data.username, password);
     } else {
@@ -1985,7 +2064,7 @@ function socialSignin(provider) {
   var spec = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'left=1, top=1, width=500, height=560';
 
   return __socialAuth__(provider, false, spec, '').then(function (response) {
-    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
     return __authorize__({
       accessToken: response.data.access_token
     });
@@ -2007,7 +2086,7 @@ function socialSigninWithToken(provider, token) {
       },
       details: response.data
     });
-    __dispatchEvent__(_constants.EVENTS.SIGNIN);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNIN);
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
     }
@@ -2044,7 +2123,7 @@ function socialSignup(provider, email) {
   var spec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'left=1, top=1, width=500, height=560';
 
   return __socialAuth__(provider, true, spec, email).then(function (response) {
-    __dispatchEvent__(_constants.EVENTS.SIGNUP);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
     if (_defaults2.default.runSigninAfterSignup) {
       return __authorize__({
         accessToken: response.data.access_token
@@ -2090,7 +2169,7 @@ function __signoutBody__() {
     if (_defaults2.default.runSocket) {
       _utils2.default.socket.disconnect();
     }
-    __dispatchEvent__(_constants.EVENTS.SIGNOUT);
+    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNOUT);
     resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, _utils2.default.storage.get('user'), {}));
   });
 }
@@ -2173,9 +2252,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _constants = require('./../constants');
 
+var _defaults = require('./../defaults');
+
+var _defaults2 = _interopRequireDefault(_defaults);
+
 var _utils = require('./../utils/utils');
 
 var _utils2 = _interopRequireDefault(_utils);
+
+var _fns = require('./../utils/fns');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2205,28 +2290,44 @@ function getList(object) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
   var params = __allowedParams__(['pageSize', 'pageNumber', 'filter', 'sort', 'search', 'exclude', 'deep', 'relatedObjects'], options);
-  return _utils2.default.http({
-    url: _constants.URLS.objects + '/' + object,
-    method: 'GET',
-    params: params
-  }).then(function (response) {
-    if (response.data['relatedObjects']) {
-      response.relatedObjects = response.data['relatedObjects'];
-    }
-    response.totalRows = response.data['totalRows'];
-    response.data = response.data['data'];
-    return response;
-  });
+  var key = (0, _fns.hash)('getList' + object + JSON.stringify(params));
+  if (!_utils2.default.offline || !_defaults2.default.runOffline) {
+    return _utils2.default.http({
+      url: _constants.URLS.objects + '/' + object,
+      method: 'GET',
+      params: params
+    }).then(function (response) {
+      // fix response.data.data
+      if (response.data['relatedObjects']) {
+        response.relatedObjects = response.data['relatedObjects'];
+      }
+      response.totalRows = response.data['totalRows'];
+      response.data = response.data['data'];
+      // end fix
+      (0, _fns.__cacheData__)(key, response);
+      return response;
+    });
+  } else {
+    return Promise.resolve(_utils2.default.storage.get('cache')[key] || (0, _fns.__generateFakeResponse__)(200, 'OK', {}, [], {}));
+  }
 }
 function getOne(object, id) {
   var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
   var params = __allowedParams__(['deep', 'exclude', 'level'], options);
-  return _utils2.default.http({
-    url: _constants.URLS.objects + '/' + object + '/' + id,
-    method: 'GET',
-    params: params
-  });
+  var key = (0, _fns.hash)('getOne' + object + id);
+  if (!_utils2.default.offline || !_defaults2.default.runOffline) {
+    return _utils2.default.http({
+      url: _constants.URLS.objects + '/' + object + '/' + id,
+      method: 'GET',
+      params: params
+    }).then(function (response) {
+      (0, _fns.__cacheData__)(key, response);
+      return response;
+    });
+  } else {
+    return Promise.resolve(_utils2.default.storage.get('cache')[key] || (0, _fns.__generateFakeResponse__)(200, 'OK', {}, {}, {}));
+  }
 }
 function create(object, data) {
   var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -2236,12 +2337,22 @@ function create(object, data) {
   if (parameters) {
     params.parameters = parameters;
   }
-  return _utils2.default.http({
+  var request = {
     url: _constants.URLS.objects + '/' + object,
     method: 'POST',
     data: data,
     params: params
-  });
+  };
+  if (!_utils2.default.offline || !_defaults2.default.runOffline) {
+    return _utils2.default.http(request);
+  } else {
+    (0, _fns.__queueRequest__)({
+      action: 'create',
+      params: [object, data, options, parameters],
+      payload: request
+    });
+    return Promise.resolve((0, _fns.__generateFakeResponse__)(1, 'QUEUE', {}, {}, {}));
+  }
 }
 function update(object, id, data) {
   var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
@@ -2251,23 +2362,49 @@ function update(object, id, data) {
   if (parameters) {
     params.parameters = parameters;
   }
-  return _utils2.default.http({
+  var request = {
     url: _constants.URLS.objects + '/' + object + '/' + id,
     method: 'PUT',
     data: data,
     params: params
-  });
+  };
+  if (!_utils2.default.offline || !_defaults2.default.runOffline || !_defaults2.default.allowUpdatesinOfflineMode) {
+    return _utils2.default.http(request).then(function (response) {
+      (0, _fns.__deleteCacheData__)((0, _fns.hash)('getOne' + object + id));
+      return response;
+    });
+  } else {
+    (0, _fns.__queueRequest__)({
+      action: 'update',
+      params: [object, id, data, options, parameters],
+      payload: request
+    });
+    return Promise.resolve((0, _fns.__generateFakeResponse__)(1, 'QUEUE', {}, {}, {}));
+  }
 }
 function remove(object, id, parameters) {
   var params = {};
   if (parameters) {
     params.parameters = parameters;
   }
-  return _utils2.default.http({
+  var request = {
     url: _constants.URLS.objects + '/' + object + '/' + id,
     method: 'DELETE',
     params: params
-  });
+  };
+  if (!_utils2.default.offline || !_defaults2.default.runOffline || !_defaults2.default.allowUpdatesinOfflineMode) {
+    return _utils2.default.http(request).then(function (response) {
+      (0, _fns.__deleteCacheData__)((0, _fns.hash)('getOne' + object + id));
+      return response;
+    });
+  } else {
+    (0, _fns.__queueRequest__)({
+      action: 'remove',
+      params: [object, id, parameters],
+      payload: request
+    });
+    return Promise.resolve((0, _fns.__generateFakeResponse__)(1, 'QUEUE', {}, {}, {}));
+  }
 }
 
 function get(object, action, parameters) {
@@ -2298,7 +2435,7 @@ function post(object, action, data, parameters) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":19}],11:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../utils/fns":14,"./../utils/utils":19}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2307,9 +2444,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _constants = require('./../constants');
 
+var _defaults = require('./../defaults');
+
+var _defaults2 = _interopRequireDefault(_defaults);
+
 var _utils = require('./../utils/utils');
 
 var _utils2 = _interopRequireDefault(_utils);
+
+var _fns = require('./../utils/fns');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2325,25 +2468,41 @@ function get(name, parameters) {
   if (parameters) {
     params.parameters = parameters;
   }
-  return _utils2.default.http({
-    url: _constants.URLS.query + '/' + name,
-    method: 'GET',
-    params: params
-  });
+  var key = (0, _fns.hash)('query.get' + name + JSON.stringify(params));
+  if (!_utils2.default.offline || !_defaults2.default.runOffline) {
+    return _utils2.default.http({
+      url: _constants.URLS.query + '/' + name,
+      method: 'GET',
+      params: params
+    }).then(function (response) {
+      (0, _fns.__cacheData__)(key, response);
+      return response;
+    });
+  } else {
+    return Promise.resolve(_utils2.default.storage.get('cache')[key] || (0, _fns.__generateFakeResponse__)(200, 'OK', {}, {}, {}));
+  }
 }
 function post(name, parameters) {
   var params = {};
   if (parameters) {
     params.parameters = parameters;
   }
-  return _utils2.default.http({
-    url: _constants.URLS.query + '/' + name,
-    method: 'POST',
-    params: params
-  });
+  var key = (0, _fns.hash)('query.post' + name + JSON.stringify(params));
+  if (!_utils2.default.offline || !_defaults2.default.runOffline) {
+    return _utils2.default.http({
+      url: _constants.URLS.query + '/' + name,
+      method: 'POST',
+      params: params
+    }).then(function (response) {
+      (0, _fns.__cacheData__)(key, response);
+      return response;
+    });
+  } else {
+    return Promise.resolve(_utils2.default.storage.get('cache')[key] || (0, _fns.__generateFakeResponse__)(200, 'OK', {}, {}, {}));
+  }
 }
 
-},{"./../constants":3,"./../utils/utils":19}],12:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../utils/fns":14,"./../utils/utils":19}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2556,8 +2715,26 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 exports.__generateFakeResponse__ = __generateFakeResponse__;
+exports.__dispatchEvent__ = __dispatchEvent__;
+exports.__cacheData__ = __cacheData__;
+exports.__deleteCacheData__ = __deleteCacheData__;
+exports.__queueRequest__ = __queueRequest__;
 exports.bind = bind;
+exports.hash = hash;
+
+var _utils = require('./utils');
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _defaults = require('./../defaults');
+
+var _defaults2 = _interopRequireDefault(_defaults);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function __generateFakeResponse__() {
   var status = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
   var statusText = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
@@ -2574,6 +2751,52 @@ function __generateFakeResponse__() {
   };
 }
 
+function __dispatchEvent__(name) {
+  var addons = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  var event = void 0;
+  if (_defaults2.default.isMobile || _utils2.default.detector.env === 'node') return;
+  if (window.CustomEvent) {
+    event = new CustomEvent(name);
+    event.eventName = name;
+    _extends(event, addons);
+    window.dispatchEvent(event);
+  } else if (document.createEvent) {
+    event = document.createEvent('Event');
+    event.initEvent(name, false, false);
+    event.eventName = name;
+    _extends(event, addons);
+    window.dispatchEvent(event);
+  } else if (document.createEventObject) {
+    event = document.createEventObject();
+    event.eventType = name;
+    event.eventName = name;
+    _extends(event, addons);
+    window.fireEvent('on' + event.eventType, event);
+  }
+}
+
+function __cacheData__(key, response) {
+  var c = {};
+  c[key] = response;
+  c[key].config = {
+    fromCache: true
+  };
+  _utils2.default.storage.set('cache', _extends(_utils2.default.storage.get('cache'), c));
+}
+
+function __deleteCacheData__(key) {
+  var c = _utils2.default.storage.get('cache');
+  delete c[key];
+  _utils2.default.storage.set('cache', c);
+}
+
+function __queueRequest__(request) {
+  var a = _utils2.default.storage.get('queue');
+  a.push(request);
+  _utils2.default.storage.set('queue', a);
+}
+
 function bind(obj, scope) {
   Object.keys(obj).forEach(function (key) {
     if (_typeof(obj[key]) === 'object') {
@@ -2585,7 +2808,18 @@ function bind(obj, scope) {
   return obj;
 }
 
-},{}],15:[function(require,module,exports){
+function hash(str) {
+  var hash = 5381,
+      i = str.length;
+
+  while (i) {
+    hash = hash * 33 ^ str.charCodeAt(--i);
+  }
+
+  return hash >>> 0;
+}
+
+},{"./../defaults":4,"./utils":19}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2723,33 +2957,40 @@ var Http = function () {
           var req = new XMLHttpRequest();
           req.withCredentials = config.withCredentials || false;
           req.timeout = config.timeout || 0;
-          var params = _this._encodeParams(config.params);
-          req.open(config.method, '' + (config.baseURL ? config.baseURL + '/' : '') + config.url + (params ? '?' + params : ''), true, config.auth.username, config.auth.password);
           req.ontimeout = function () {
             reject(_this._handleError('timeout', config));
           };
           req.onabort = function () {
             reject(_this._handleError('abort', config));
           };
+          req.onerror = function () {
+            reject(_this._handleError('networkError', config));
+          };
           req.onreadystatechange = function () {
-            var _DONE = XMLHttpRequest.DONE || 4;
-            if (req.readyState == _DONE) {
-              var res = _this._createResponse(req, config);
-              if (res.status === 200) {
-                if (config.interceptors.response) {
-                  resolve(config.interceptors.response(res));
-                } else {
-                  resolve(res);
-                }
+            if (req.readyState !== 4) {
+              return;
+            }
+            if (req.status === 0 && !(req.responseURL && req.responseURL.indexOf('file:') === 0)) {
+              return;
+            }
+
+            var res = _this._createResponse(req, config);
+            if (res.status === 200) {
+              if (config.interceptors.response) {
+                resolve(config.interceptors.response(res));
               } else {
-                if (config.interceptors.responseError) {
-                  resolve(config.interceptors.responseError(res));
-                } else {
-                  reject(res);
-                }
+                resolve(res);
+              }
+            } else {
+              if (config.interceptors.responseError) {
+                resolve(config.interceptors.responseError(res));
+              } else {
+                reject(res);
               }
             }
           };
+          var params = _this._encodeParams(config.params);
+          req.open(config.method, '' + (config.baseURL ? config.baseURL + '/' : '') + config.url + (params ? '?' + params : ''), true, config.auth.username, config.auth.password);
           _this._setHeaders(req, config.headers);
           _this._setData(req, config.data);
         });
@@ -2800,6 +3041,8 @@ var _utils = require('./utils');
 
 var _utils2 = _interopRequireDefault(_utils);
 
+var _fns = require('./fns');
+
 var _defaults = require('./../defaults');
 
 var _defaults2 = _interopRequireDefault(_defaults);
@@ -2823,6 +3066,9 @@ exports.default = {
   responseErrorInterceptor: responseErrorInterceptor
 };
 function requestInterceptor(config) {
+  if (_utils2.default.forcOffline) {
+    return Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'networkError (forcOffline is enabled).', {}));
+  }
   if (config.url.indexOf(constants.URLS.token) === -1) {
     var user = _utils2.default.storage.get('user');
     if (_defaults2.default.useAnonymousTokenByDefault && !user) {
@@ -2861,7 +3107,7 @@ function responseErrorInterceptor(error) {
   }
 }
 
-},{"./../constants":3,"./../defaults":4,"./../services/auth":8,"./utils":19}],17:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../services/auth":8,"./fns":14,"./utils":19}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

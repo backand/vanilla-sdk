@@ -8,6 +8,7 @@ import Http from './utils/http'
 import interceptors from './utils/interceptors'
 import Socket from './utils/socket'
 import detect from './utils/detector'
+import { __dispatchEvent__ } from './utils/fns'
 
 import auth from './services/auth'
 import object from './services/object'
@@ -81,6 +82,8 @@ backand.init = (config = {}) => {
     http: Http.create({
       baseURL: defaults.apiUrl
     }),
+    offline: !navigator.onLine,
+    forcOffline: false,
     detector,
   });
   if (defaults.runSocket) {
@@ -102,6 +105,81 @@ backand.init = (config = {}) => {
     utils.storage.remove('user');
   }
 
+  // TASK: set offline events
+  function __updateOnlineStatus__(event) {
+    if(utils.offline) {
+      __dispatchEvent__('startOfflineMode');
+      console.info('SDK started offline mode')
+    }
+    else {
+      __dispatchEvent__('endOfflineMode');
+      console.info('SDK finished offline mode');
+
+      let requests = utils.storage.get('queue');
+      requests.forEach((request, index) => {
+        __dispatchEvent__('beforeUpdateOfflineItem', {
+          request: request.payload,
+          next: function(cacnel = false) {
+            if(!cacnel) {
+              object[request.action].apply(null, request.params).then((response) => {
+                __dispatchEvent__('afterUpdateOfflineItem', {
+                  request: request.payload,
+                  response
+                });
+              });
+            }
+            requests.shift();
+            utils.storage.set('queue', requests);
+          }
+        });
+      });
+    }
+  }
+  if (defaults.runOffline && utils.detector.env === 'browser') {
+    window.addEventListener('online',  __updateOnlineStatus__);
+    window.addEventListener('offline', __updateOnlineStatus__);
+  }
+  // TASK: set offline storage
+  if (!utils.storage.get('cache')) {
+    utils.storage.set('cache', {});
+  }
+  if (!utils.storage.get('queue')) {
+    utils.storage.set('queue', []);
+  }
+  // TASK: set offline api
+  const offline = {
+    forcOffline: (force = true) => {
+      if(force) {
+        utils.offline = true;
+        utils.forcOffline = true;
+        __dispatchEvent__('offline')
+      }
+      else {
+        utils.offline = !navigator.onLine;
+        utils.forcOffline = false;
+        __dispatchEvent__('online');
+      }
+    },
+    get cache() {
+      return utils.storage.get('cache')
+    },
+    set cache(obj) {
+      if(typeof obj !== 'object') {
+        throw new Error('cache must be an object of {hash: data} pairs.');
+      }
+      utils.storage.set('cache', obj);
+    },
+    get queue() {
+      return utils.storage.get('queue')
+    },
+    set queue(arr) {
+      if(!Array.isArray(arr)) {
+        throw new Error('queue must be an array of requestDescriptor objects.');
+      }
+      utils.storage.set('cache', arr);
+    },
+  };
+
   // TASK: expose backand namespace to window
   delete backand.init;
   Object.assign(
@@ -113,6 +191,7 @@ backand.init = (config = {}) => {
       file,
       query,
       user,
+      offline,
     }
   );
   if(defaults.runSocket) {

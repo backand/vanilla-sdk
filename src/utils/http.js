@@ -100,36 +100,43 @@ class Http {
           let req = new XMLHttpRequest();
           req.withCredentials = config.withCredentials || false;
           req.timeout = config.timeout || 0;
-          let params = this._encodeParams(config.params);
-          req.open(config.method, `${config.baseURL ? config.baseURL+'/' : ''}${config.url}${params ? '?'+params : ''}`, true, config.auth.username, config.auth.password);
           req.ontimeout = () => {
             reject(this._handleError('timeout', config));
           };
           req.onabort = () => {
             reject(this._handleError('abort', config));
           };
+          req.onerror = () => {
+            reject(this._handleError('networkError', config));
+          };
           req.onreadystatechange = () => {
-            let _DONE = XMLHttpRequest.DONE || 4;
-            if (req.readyState == _DONE) {
-              let res = this._createResponse(req, config);
-              if (res.status === 200){
-                if (config.interceptors.response) {
-                  resolve(config.interceptors.response(res));
-                }
-                else {
-                  resolve(res);
-                }
+            if (req.readyState !== 4) {
+              return;
+            }
+            if (req.status === 0 && !(req.responseURL && req.responseURL.indexOf('file:') === 0)) {
+              return;
+            }
+
+            let res = this._createResponse(req, config);
+            if (res.status === 200){
+              if (config.interceptors.response) {
+                resolve(config.interceptors.response(res));
               }
               else {
-                if (config.interceptors.responseError) {
-                  resolve(config.interceptors.responseError(res));
-                }
-                else {
-                  reject(res);
-                }
+                resolve(res);
+              }
+            }
+            else {
+              if (config.interceptors.responseError) {
+                resolve(config.interceptors.responseError(res));
+              }
+              else {
+                reject(res);
               }
             }
           }
+          let params = this._encodeParams(config.params);
+          req.open(config.method, `${config.baseURL ? config.baseURL+'/' : ''}${config.url}${params ? '?'+params : ''}`, true, config.auth.username, config.auth.password);
           this._setHeaders(req, config.headers);
           this._setData(req, config.data);
         });

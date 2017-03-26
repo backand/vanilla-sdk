@@ -13,7 +13,9 @@
     anonymousToken: '82cfcfe8-c718-4621-8bb6-cd600e23487f',
     runSocket: true,
     // useAnonymousTokenByDefault: false,
-    // storage: new backand.helpers.MemoryStorage()
+    // storage: new backand.helpers.MemoryStorage(),
+    runOffline: true,
+    allowUpdatesinOfflineMode: true
   });
 
   var outputContainer = document.getElementById('outputContainer');
@@ -21,6 +23,7 @@
   var objectName = "items";
 
   var successCallback = function (response) {
+      // console.log(response);
       outputElement.innerText = '';
       outputContainer.classList.remove('panel-danger');
       outputContainer.classList.add('panel-success');
@@ -76,10 +79,12 @@
   document.getElementById('postitem_btn').addEventListener('click', function() {
     backand.object.create(objectName, { name:'test', description:'new item' }, {returnObject: true})
     .then(function (response) {
-      lastCreatedId = response.data.__metadata.id;
-      document.getElementById('getitem_btn').disabled = false;
-      document.getElementById('updateitem_btn').disabled = false;
-      document.getElementById('deleteitem_btn').disabled = false;
+      if (response.data.__metadata) {
+        lastCreatedId = response.data.__metadata.id;
+        document.getElementById('getitem_btn').disabled = false;
+        document.getElementById('updateitem_btn').disabled = false;
+        document.getElementById('deleteitem_btn').disabled = false;
+      }
       successCallback(response);
     })
     .catch(errorCallback)
@@ -153,6 +158,13 @@
   }, false);
   window.addEventListener(backand.constants.EVENTS.SIGNOUT, function (e) {
     console.log(e);
+  }, false);
+  window.addEventListener('beforeUpdateOfflineItem', function (e) {
+    console.log(e.request);
+    e.next();
+  }, false);
+  window.addEventListener('afterUpdateOfflineItem', function (e) {
+    console.log(e.response);
   }, false);
 
 })();

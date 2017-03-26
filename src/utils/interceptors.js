@@ -1,4 +1,5 @@
 import utils from './utils'
+import { __generateFakeResponse__ } from './fns'
 import defaults from './../defaults'
 import * as constants from './../constants'
 import auth from './../services/auth'
@@ -11,6 +12,9 @@ export default {
 }
 
 export function requestInterceptor (config) {
+  if (utils.forcOffline) {
+    return Promise.reject(__generateFakeResponse__(0, '', {}, 'networkError (forcOffline is enabled).', {}));
+  }
   if (config.url.indexOf(constants.URLS.token) === -1) {
     let user = utils.storage.get('user');
     if (defaults.useAnonymousTokenByDefault && !user) {
