@@ -1,6 +1,6 @@
 {
   "name": "@backand/vanilla-sdk",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Backand SDK for JavaScript",
   "main": "./dist/backand.js",
   "types": "./dist/backand.d.ts",
