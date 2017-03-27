@@ -11,7 +11,7 @@ class Http {
       interceptors: {},
       withCredentials: false,
       responseType: 'json',
-      timeout: 4000,
+      timeout: 0,
       auth: {
        username: null,
        password: null
