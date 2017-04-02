@@ -251,6 +251,41 @@ describe('Backand SDK', () => {
       })
     });
   });
+  describe('backand.bulk', () => {
+    it('create', function(done) {
+      this.timeout(0);
+      backand.object.create('items',{
+        name:'test',
+        description:'new item'
+      })
+      .then(res => {
+        lastCreatedId = res.data.__metadata.id;
+        done();
+      })
+      .catch(err => {
+        done(err);
+      })
+    });
+    it('general', function() {
+      this.timeout(0);
+      return backand.bulk.general([
+        {
+          "method": "PUT",
+          "url": "https://api.backand.com/1/objects/items/"+lastCreatedId,
+          "data": { name:'test', description:'old item 1' }
+        },
+        {
+          "method": "PUT",
+          "url": "https://api.backand.com/1/objects/items/"+lastCreatedId,
+          "data": { name:'test', description:'old item 2' }
+        },
+        {
+          "method": "DELETE",
+          "url": "https://api.backand.com/1/objects/items/"+lastCreatedId
+        }
+      ]);
+    });
+  });
   describe('backand.file', () => {
     it('upload', function(done) {
       this.timeout(0);
@@ -308,6 +343,16 @@ describe('Backand SDK', () => {
       return backand.user.getUserDetails(true);
     });
   });
+  // describe('backand.fn', () => {
+  //   it('get', function() {
+  //     this.timeout(0);
+  //     return backand.fn.get('');
+  //   });
+  //   it('post', function() {
+  //     this.timeout(0);
+  //     return backand.fn.post('', {});
+  //   });
+  // });
   describe('backand.helpers', () => {
     it('should have some impotant keys', () => {
       expect(backand.helpers).to.include.keys('filter', 'sort', 'exclude', 'StorageAbstract', 'MemoryStorage');

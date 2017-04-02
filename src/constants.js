@@ -18,6 +18,8 @@ export const URLS = {
   objects: '1/objects',
   objectsAction: '1/objects/action',
   query: '1/query/data',
+  bulk: '1/bulk',
+  fn: '1/function',
   socialProviders: '1/user/socialProviders'
 };
 

@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-03-28
+ * @Compiled At: 2017-04-02
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1374,6 +1374,8 @@ var URLS = exports.URLS = {
   objects: '1/objects',
   objectsAction: '1/objects/action',
   query: '1/query/data',
+  bulk: '1/bulk',
+  fn: '1/function',
   socialProviders: '1/user/socialProviders'
 };
 
@@ -1613,6 +1615,14 @@ var _analytics = require('./services/analytics');
 
 var _analytics2 = _interopRequireDefault(_analytics);
 
+var _function = require('./services/function');
+
+var _function2 = _interopRequireDefault(_function);
+
+var _bulk = require('./services/bulk');
+
+var _bulk2 = _interopRequireDefault(_bulk);
+
 var _es6Promise = require('es6-promise');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -1709,7 +1719,9 @@ backand.init = function () {
     object: _object2.default,
     file: _file2.default,
     query: _query2.default,
-    user: _user2.default
+    user: _user2.default,
+    fn: _function2.default,
+    bulk: _bulk2.default
   });
   if (_defaults2.default.runSocket) {
     storeUser = _utils2.default.storage.get('user');
@@ -1725,7 +1737,7 @@ backand.init = function () {
 
 module.exports = backand;
 
-},{"./constants":3,"./defaults":4,"./helpers":5,"./services/analytics":7,"./services/auth":8,"./services/file":9,"./services/object":10,"./services/query":11,"./services/user":12,"./utils/detector":13,"./utils/http":15,"./utils/interceptors":16,"./utils/socket":17,"./utils/storage":18,"./utils/utils":19,"es6-promise":1}],7:[function(require,module,exports){
+},{"./constants":3,"./defaults":4,"./helpers":5,"./services/analytics":7,"./services/auth":8,"./services/bulk":9,"./services/file":10,"./services/function":11,"./services/object":12,"./services/query":13,"./services/user":14,"./utils/detector":15,"./utils/http":17,"./utils/interceptors":18,"./utils/socket":19,"./utils/storage":20,"./utils/utils":21,"es6-promise":1}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2123,7 +2135,35 @@ function getSocialProviders() {
   });
 }
 
-},{"./../constants":3,"./../defaults":4,"./../utils/fns":14,"./../utils/utils":19}],9:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../utils/fns":16,"./../utils/utils":21}],9:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _constants = require('./../constants');
+
+var _utils = require('./../utils/utils');
+
+var _utils2 = _interopRequireDefault(_utils);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  general: general
+};
+
+
+function general(data) {
+  return _utils2.default.http({
+    url: '' + _constants.URLS.bulk,
+    method: 'POST',
+    data: data
+  });
+}
+
+},{"./../constants":3,"./../utils/utils":21}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2164,7 +2204,52 @@ function remove(object, fileAction, filename) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":19}],10:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":21}],11:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _constants = require('./../constants');
+
+var _utils = require('./../utils/utils');
+
+var _utils2 = _interopRequireDefault(_utils);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  get: get,
+  post: post
+};
+
+
+function get(name, parameters) {
+  var params = {};
+  if (parameters) {
+    params.parameters = parameters;
+  }
+  return _utils2.default.http({
+    url: _constants.URLS.fn + '/' + name,
+    method: 'GET',
+    params: params
+  });
+}
+function post(name, data, parameters) {
+  var params = {};
+  if (parameters) {
+    params.parameters = parameters;
+  }
+  return _utils2.default.http({
+    url: _constants.URLS.fn + '/' + name,
+    method: 'POST',
+    data: data,
+    params: params
+  });
+}
+
+},{"./../constants":3,"./../utils/utils":21}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2298,7 +2383,7 @@ function post(object, action, data, parameters) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":19}],11:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":21}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2343,7 +2428,7 @@ function post(name, parameters) {
   });
 }
 
-},{"./../constants":3,"./../utils/utils":19}],12:[function(require,module,exports){
+},{"./../constants":3,"./../utils/utils":21}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2427,7 +2512,7 @@ function getRefreshToken() {
   });
 }
 
-},{"./../constants":3,"./../utils/fns":14,"./../utils/utils":19}],13:[function(require,module,exports){
+},{"./../constants":3,"./../utils/fns":16,"./../utils/utils":21}],15:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2547,7 +2632,7 @@ function detect() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2585,7 +2670,7 @@ function bind(obj, scope) {
   return obj;
 }
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2782,7 +2867,7 @@ http.create = function (config) {
 
 exports.default = http;
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2861,7 +2946,7 @@ function responseErrorInterceptor(error) {
   }
 }
 
-},{"./../constants":3,"./../defaults":4,"./../services/auth":8,"./utils":19}],17:[function(require,module,exports){
+},{"./../constants":3,"./../defaults":4,"./../services/auth":8,"./utils":21}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2936,7 +3021,7 @@ var Socket = function () {
 
 exports.default = Socket;
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3011,7 +3096,7 @@ var Storage = function () {
 
 exports.default = Storage;
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

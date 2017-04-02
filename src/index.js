@@ -15,6 +15,8 @@ import file from './services/file'
 import query from './services/query'
 import user from './services/user'
 import analytics from './services/analytics'
+import fn from './services/function'
+import bulk from './services/bulk'
 
 // Task: Polyfills
 import { Promise } from 'es6-promise'
@@ -113,6 +115,8 @@ backand.init = (config = {}) => {
       file,
       query,
       user,
+      fn,
+      bulk
     }
   );
   if(defaults.runSocket) {
