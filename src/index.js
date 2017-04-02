@@ -14,6 +14,7 @@ import auth from './services/auth'
 import object from './services/object'
 import file from './services/file'
 import query from './services/query'
+import offline from './services/offline'
 import user from './services/user'
 import analytics from './services/analytics'
 
@@ -84,6 +85,7 @@ backand.init = (config = {}) => {
     }),
     offline: !navigator.onLine,
     forcOffline: false,
+    offlineAt: null,
     detector,
   });
   if (defaults.runSocket) {
@@ -108,6 +110,7 @@ backand.init = (config = {}) => {
   // TASK: set offline events
   function __updateOnlineStatus__(event) {
     if(utils.offline) {
+      utils.offlineAt = new Date();
       __dispatchEvent__('startOfflineMode');
       console.info('SDK started offline mode')
     }
@@ -117,27 +120,55 @@ backand.init = (config = {}) => {
 
       let requests = utils.storage.get('queue');
       requests.forEach((request, index) => {
-        __dispatchEvent__('beforeUpdateOfflineItem', {
+        __dispatchEvent__('beforeExecuteOfflineItem', {
           request: request.payload,
-          next: function(cacnel = false) {
-            if(!cacnel) {
-              object[request.action].apply(null, request.params).then((response) => {
-                __dispatchEvent__('afterUpdateOfflineItem', {
+          execute: function() {
+            if(request.action === 'create') {
+              object[request.action].apply(null, request.params).then(response => {
+                __dispatchEvent__('afterExecuteOfflineItem', {
+                  request: request.payload,
+                  response
+                });
+              }).catch(response => {
+                __dispatchEvent__('afterExecuteOfflineItem', {
                   request: request.payload,
                   response
                 });
               });
             }
-            requests.shift();
-            utils.storage.set('queue', requests);
+            else {
+              object.getOne(request.params[0], request.params[1]).then((response) => {
+                if(!response.data.updatedAt) {
+                  return Promise.reject('Cannot update this object, object is missing updatedAt property');
+                }
+                if(new Date(response.data.updatedAt) > utils.offlineAt) {
+                  return Promise.reject('Cannot update this object, object was updated after you entered offline mode');
+                }
+                return object[request.action].apply(null, request.params);
+              }).then(response => {
+                __dispatchEvent__('afterExecuteOfflineItem', {
+                  request: request.payload,
+                  response
+                });
+              }).catch(response => {
+                __dispatchEvent__('afterExecuteOfflineItem', {
+                  request: request.payload,
+                  response
+                });
+              });
+            }
           }
         });
+        requests.shift();
+        utils.storage.set('queue', requests);
       });
     }
   }
   if (defaults.runOffline && utils.detector.env === 'browser') {
     window.addEventListener('online',  __updateOnlineStatus__);
     window.addEventListener('offline', __updateOnlineStatus__);
+    window.addEventListener('beforeExecuteOfflineItem', defaults.beforeExecuteOfflineItem);
+    window.addEventListener('afterExecuteOfflineItem', defaults.afterExecuteOfflineItem);
   }
   // TASK: set offline storage
   if (!utils.storage.get('cache')) {
@@ -146,39 +177,6 @@ backand.init = (config = {}) => {
   if (!utils.storage.get('queue')) {
     utils.storage.set('queue', []);
   }
-  // TASK: set offline api
-  const offline = {
-    forcOffline: (force = true) => {
-      if(force) {
-        utils.offline = true;
-        utils.forcOffline = true;
-        __dispatchEvent__('offline')
-      }
-      else {
-        utils.offline = !navigator.onLine;
-        utils.forcOffline = false;
-        __dispatchEvent__('online');
-      }
-    },
-    get cache() {
-      return utils.storage.get('cache')
-    },
-    set cache(obj) {
-      if(typeof obj !== 'object') {
-        throw new Error('cache must be an object of {hash: data} pairs.');
-      }
-      utils.storage.set('cache', obj);
-    },
-    get queue() {
-      return utils.storage.get('queue')
-    },
-    set queue(arr) {
-      if(!Array.isArray(arr)) {
-        throw new Error('queue must be an array of requestDescriptor objects.');
-      }
-      utils.storage.set('cache', arr);
-    },
-  };
 
   // TASK: expose backand namespace to window
   delete backand.init;

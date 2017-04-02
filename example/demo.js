@@ -15,7 +15,14 @@
     // useAnonymousTokenByDefault: false,
     // storage: new backand.helpers.MemoryStorage(),
     runOffline: true,
-    allowUpdatesinOfflineMode: true
+    allowUpdatesinOfflineMode: true,
+    beforeExecuteOfflineItem: (e) => {
+      console.log(e.request);
+      e.execute();
+    },
+    afterExecuteOfflineItem: (e) => {
+      console.log(e.response);
+    },
   });
 
   var outputContainer = document.getElementById('outputContainer');
@@ -159,12 +166,4 @@
   window.addEventListener(backand.constants.EVENTS.SIGNOUT, function (e) {
     console.log(e);
   }, false);
-  window.addEventListener('beforeUpdateOfflineItem', function (e) {
-    console.log(e.request);
-    e.next();
-  }, false);
-  window.addEventListener('afterUpdateOfflineItem', function (e) {
-    console.log(e.response);
-  }, false);
-
 })();

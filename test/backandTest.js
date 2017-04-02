@@ -1,5 +1,6 @@
 var expect = chai.expect;
 var lastCreatedId = null;
+var offlineId = null;
 
 describe('Backand SDK', () => {
   describe('backand.init', () => {
@@ -9,7 +10,10 @@ describe('Backand SDK', () => {
         appName: 'sdk',
         signUpToken: '851692ae-eb94-4f18-87ee-075255e67748',
         anonymousToken: '82cfcfe8-c718-4621-8bb6-cd600e23487f',
-        runSocket: true
+        runSocket: true,
+        runOffline: true,
+        allowUpdatesinOfflineMode: true,
+        exportUtils: true,
       });
       expect(backand).to.be.an('object');
       expect(backand).to.include.keys(
@@ -20,6 +24,7 @@ describe('Backand SDK', () => {
         'file',
         'query',
         'user',
+        'offline',
         'useAnonymousAuth',
         'signin',
         'signup',
@@ -316,6 +321,12 @@ describe('Backand SDK', () => {
   describe('backand.constants', () => {
     it('should have some impotant keys', () => {
       expect(backand.constants).to.include.keys('EVENTS', 'URLS', 'SOCIAL_PROVIDERS');
+    });
+  });
+  describe('backand.offline', () => {
+    it('should have cache and queue in localStorage', () => {
+      expect(backand.utils.storage.get('cache')).to.be.an('object');
+      expect(backand.utils.storage.get('queue')).to.be.an('array');
     });
   });
   describe('backand.on', () => {
