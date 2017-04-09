@@ -1,6 +1,6 @@
 /*********************************************************
  * @backand/vanilla-sdk - Backand SDK for JavaScript
- * @version v1.1.9
+ * @version v1.1.10
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
