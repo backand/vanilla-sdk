@@ -98,10 +98,10 @@ class Http {
             reject(this._handleError('url parameter is missing', config));
           }
           let req = new XMLHttpRequest();
-          req.withCredentials = config.withCredentials || false;
-          req.timeout = config.timeout || 0;
           let params = this._encodeParams(config.params);
           req.open(config.method, `${config.baseURL ? config.baseURL+'/' : ''}${config.url}${params ? '?'+params : ''}`, true, config.auth.username, config.auth.password);
+          req.withCredentials = config.withCredentials || false;
+          req.timeout = config.timeout || 0;
           req.ontimeout = () => {
             reject(this._handleError('timeout', config));
           };

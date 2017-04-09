@@ -26,6 +26,6 @@ function post (name, parameters) {
   return utils.http({
     url: `${URLS.query}/${name}`,
     method: 'POST',
-    params,
+    data: params,
   });
 }

@@ -19,7 +19,7 @@ export const URLS = {
   objectsAction: '1/objects/action',
   query: '1/query/data',
   bulk: '1/bulk',
-  fn: '1/function',
+  fn: '1/function/general',
   socialProviders: '1/user/socialProviders'
 };
 

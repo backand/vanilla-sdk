@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-04-02
+ * @Compiled At: 2017-04-05
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1375,7 +1375,7 @@ var URLS = exports.URLS = {
   objectsAction: '1/objects/action',
   query: '1/query/data',
   bulk: '1/bulk',
-  fn: '1/function',
+  fn: '1/function/general',
   socialProviders: '1/user/socialProviders'
 };
 
@@ -2424,7 +2424,7 @@ function post(name, parameters) {
   return _utils2.default.http({
     url: _constants.URLS.query + '/' + name,
     method: 'POST',
-    params: params
+    data: params
   });
 }
 
@@ -2806,10 +2806,10 @@ var Http = function () {
             reject(_this._handleError('url parameter is missing', config));
           }
           var req = new XMLHttpRequest();
-          req.withCredentials = config.withCredentials || false;
-          req.timeout = config.timeout || 0;
           var params = _this._encodeParams(config.params);
           req.open(config.method, '' + (config.baseURL ? config.baseURL + '/' : '') + config.url + (params ? '?' + params : ''), true, config.auth.username, config.auth.password);
+          req.withCredentials = config.withCredentials || false;
+          req.timeout = config.timeout || 0;
           req.ontimeout = function () {
             reject(_this._handleError('timeout', config));
           };

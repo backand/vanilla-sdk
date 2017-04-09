@@ -343,16 +343,16 @@ describe('Backand SDK', () => {
       return backand.user.getUserDetails(true);
     });
   });
-  // describe('backand.fn', () => {
-  //   it('get', function() {
-  //     this.timeout(0);
-  //     return backand.fn.get('');
-  //   });
-  //   it('post', function() {
-  //     this.timeout(0);
-  //     return backand.fn.post('', {});
-  //   });
-  // });
+  describe('backand.fn', () => {
+    it('get', function() {
+      this.timeout(0);
+      return backand.fn.get('fnTest', {param: 'test'});
+    });
+    it('post', function() {
+      this.timeout(0);
+      return backand.fn.post('fnTest', {}, {param: 'test'});
+    });
+  });
   describe('backand.helpers', () => {
     it('should have some impotant keys', () => {
       expect(backand.helpers).to.include.keys('filter', 'sort', 'exclude', 'StorageAbstract', 'MemoryStorage');
