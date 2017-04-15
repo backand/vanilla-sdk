@@ -171,11 +171,13 @@ backand.init = (config = {}) => {
     window.addEventListener('afterExecuteOfflineItem', defaults.afterExecuteOfflineItem);
   }
   // TASK: set offline storage
-  if (!utils.storage.get('cache')) {
-    utils.storage.set('cache', {});
-  }
-  if (!utils.storage.get('queue')) {
-    utils.storage.set('queue', []);
+  if (defaults.runOffline) {
+    if (!utils.storage.get('cache')) {
+      utils.storage.set('cache', {});
+    }
+    if (!utils.storage.get('queue')) {
+      utils.storage.set('queue', []);
+    }
   }
 
   // TASK: expose backand namespace to window

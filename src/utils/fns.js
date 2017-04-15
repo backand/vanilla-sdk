@@ -38,24 +38,30 @@ export function __dispatchEvent__ (name, addons = {}) {
 }
 
 export function __cacheData__ (key, response) {
-  let c = {};
-  c[key] = response;
-  c[key].config = {
-    fromCache: true
+  if (defaults.runOffline) {
+    let c = {};
+    c[key] = response;
+    c[key].config = {
+      fromCache: true
+    }
+    utils.storage.set('cache', Object.assign(utils.storage.get('cache'), c));
   }
-  utils.storage.set('cache', Object.assign(utils.storage.get('cache'), c));
 }
 
 export function __deleteCacheData__ (key) {
-  let c = utils.storage.get('cache');
-  delete c[key];
-  utils.storage.set('cache', c);
+  if (defaults.runOffline) {
+    let c = utils.storage.get('cache');
+    delete c[key];
+    utils.storage.set('cache', c);
+  }
 }
 
 export function __queueRequest__ (request) {
-  let a = utils.storage.get('queue');
-  a.push(request);
-  utils.storage.set('queue', a);
+  if (defaults.runOffline) {
+    let a = utils.storage.get('queue');
+    a.push(request);
+    utils.storage.set('queue', a);
+  }
 }
 
 export function bind (obj, scope) {

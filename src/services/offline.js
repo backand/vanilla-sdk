@@ -4,7 +4,7 @@ import { __dispatchEvent__ } from './../utils/fns'
 export default {
   forcOffline,
   get cache() {
-    return utils.storage.get('cache')
+    return utils.storage.get('cache');
   },
   set cache(obj) {
     if(typeof obj !== 'object') {
@@ -13,7 +13,7 @@ export default {
     utils.storage.set('cache', obj);
   },
   get queue() {
-    return utils.storage.get('queue')
+    return utils.storage.get('queue');
   },
   set queue(arr) {
     if(!Array.isArray(arr)) {

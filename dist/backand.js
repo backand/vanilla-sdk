@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-04-02
+ * @Compiled At: 2017-04-15
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1787,11 +1787,13 @@ backand.init = function () {
     window.addEventListener('afterExecuteOfflineItem', _defaults2.default.afterExecuteOfflineItem);
   }
   // TASK: set offline storage
-  if (!_utils2.default.storage.get('cache')) {
-    _utils2.default.storage.set('cache', {});
-  }
-  if (!_utils2.default.storage.get('queue')) {
-    _utils2.default.storage.set('queue', []);
+  if (_defaults2.default.runOffline) {
+    if (!_utils2.default.storage.get('cache')) {
+      _utils2.default.storage.set('cache', {});
+    }
+    if (!_utils2.default.storage.get('queue')) {
+      _utils2.default.storage.set('queue', []);
+    }
   }
 
   // TASK: expose backand namespace to window
@@ -2830,24 +2832,30 @@ function __dispatchEvent__(name) {
 }
 
 function __cacheData__(key, response) {
-  var c = {};
-  c[key] = response;
-  c[key].config = {
-    fromCache: true
-  };
-  _utils2.default.storage.set('cache', _extends(_utils2.default.storage.get('cache'), c));
+  if (_defaults2.default.runOffline) {
+    var c = {};
+    c[key] = response;
+    c[key].config = {
+      fromCache: true
+    };
+    _utils2.default.storage.set('cache', _extends(_utils2.default.storage.get('cache'), c));
+  }
 }
 
 function __deleteCacheData__(key) {
-  var c = _utils2.default.storage.get('cache');
-  delete c[key];
-  _utils2.default.storage.set('cache', c);
+  if (_defaults2.default.runOffline) {
+    var c = _utils2.default.storage.get('cache');
+    delete c[key];
+    _utils2.default.storage.set('cache', c);
+  }
 }
 
 function __queueRequest__(request) {
-  var a = _utils2.default.storage.get('queue');
-  a.push(request);
-  _utils2.default.storage.set('queue', a);
+  if (_defaults2.default.runOffline) {
+    var a = _utils2.default.storage.get('queue');
+    a.push(request);
+    _utils2.default.storage.set('queue', a);
+  }
 }
 
 function bind(obj, scope) {
