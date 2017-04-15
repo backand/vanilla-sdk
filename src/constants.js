@@ -1,7 +1,11 @@
 export const EVENTS = {
   SIGNIN: 'SIGNIN',
   SIGNOUT: 'SIGNOUT',
-  SIGNUP: 'SIGNUP'
+  SIGNUP: 'SIGNUP',
+  SOM: 'startOfflineMode',
+  EOM: 'endOfflineMode',
+  BEOI: 'beforeExecuteOfflineItem',
+  AEOI: 'afterExecuteOfflineItem'
 };
 
 export const URLS = {

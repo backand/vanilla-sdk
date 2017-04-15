@@ -101,6 +101,11 @@ The available parameters for the `config` parameter are:
 | **socketUrl** | string | Sets the socket url of backand servers | *optional* | `https://socket.backand.com` |
 | **isMobile** | boolean | Determines whether the sdk is part of a mobile application | *optional* | `false` |
 | **mobilePlatform** | string | sets the platform used to build the mobile application ('ionic'/'react-native') | *optional* | 'ionic' |
+| **runOffline** | boolean | Determines whether the sdk should run its offline actions. (cache data and requests)  | *optional* | `false` |
+| **allowUpdatesinOfflineMode** | boolean | Determines whether the sdk will allow to update or delete objects in offline mode. if true, all objects must contain an updatedAt property that should be smaller than the time the SDK entered offline mode. | *optional* | `false` |
+| **beforeExecuteOfflineItem** | function | Sets the function to be called before each cached request. the event param contains the request object and the execute function that must be called in order to dispatch the request | *optional* | `(e) => { e.execute() }` |
+| **afterExecuteOfflineItem** | function | Sets the function to be called after each cached request. the event param contains the request object and the response object | *optional* | `(e) => { }` |
+
 
 ### SDK Properties:
 
@@ -126,7 +131,10 @@ By default, the Back& SDK emits the following events that your code can respond 
 | SIGNIN  | dispatched on signin  | window.addEventListener(backand.constants.EVENTS.SIGNIN, (e)=>{}, false);  |
 | SIGNOUT | dispatched on signout | window.addEventListener(backand.constants.EVENTS.SIGNOUT, (e)=>{}, false); |
 | SIGNUP  | dispatched on signup  | window.addEventListener(backand.constants.EVENTS.SIGNUP, (e)=>{}, false);  |
-
+| startOfflineMode  | dispatched on start offline mode  | window.addEventListener(backand.constants.EVENTS.SOM, (e)=>{}, false);  |
+| endOfflineMode  | dispatched on end offline mode  | window.addEventListener(backand.constants.EVENTS.EOM, (e)=>{}, false);  |
+| beforeExecuteOfflineItem  | dispatched before execute offline item from queue  | window.addEventListener(backand.constants.EVENTS.BEOI, (e)=>{}, false);  |
+| afterExecuteOfflineItem  | dispatched after execute offline item from queue  | window.addEventListener(backand.constants.EVENTS.AEOI, (e)=>{}, false);  |
 
 ### SDK Methods:
 **NOTE:**
@@ -548,6 +556,45 @@ backand.query.post(name, parameters)
   .catch(err => {
     console.log(err);
   });
+```
+
+#### Offline:
+The `offline` property lets you control over the SDK's offline mode.
+
+##### forcOffline
+Simulates the behavior of the SDK's when enters offline mode<br/>
+
+###### Parameters
+| name | type | description |
+| ---- | ---- | ----------- |
+| force | boolean | Forces the SDK to enter/exit offline mode. **Default: TRUE** |
+
+###### Sample Code
+```javascript
+// Enter offline mode
+backand.offline.forcOffline();
+// Exit offline mode
+backand.offline.forcOffline(false);
+```
+
+##### cache
+An object in which the cached data is stored<br/>
+
+###### Sample Code
+```javascript
+backand.offline.cache;
+// ***We do not recommend editing this object***
+backand.offline.cache = {};
+```
+
+##### queue
+An array in which the Create/Update/Delete http requests are stored for a later dispatch<br/>
+
+###### Sample Code
+```javascript
+backand.offline.queue;
+// ***We do not recommend editing this array***
+backand.offline.queue = [];
 ```
 
 ## Examples and further reading
