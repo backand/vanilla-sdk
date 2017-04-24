@@ -76,6 +76,40 @@ describe('Backand SDK', () => {
         done(err);
       })
     });
+    it('signup without parameters', function(done) {
+      this.timeout(0);
+      var r = Date.now() + '1';
+      var email = 'testsdk_' + r + '@backand.io';
+      backand.signup('first','last',email,'Password1','Password1')
+        .then(res => {
+          expect(res.data.username).to.eql(email);
+          done();
+        })
+        .catch(err => {
+          done(err);
+        })
+    });
+    it('signup with parameters', function(done) {
+      this.timeout(0);
+      var r = Date.now() + '2';
+      var email = 'testsdk_' + r + '@backand.io';
+      var company = 'com'+r;
+      backand.signup('first','last',email,'Password1','Password1',{company: company})
+        .then(res => {
+          expect(res.data.username).to.eql(email);
+          backand.object.getList('users', {
+            filter: [backand.helpers.filter.create('company', backand.helpers.filter.operators.text.equals, company)],
+            sort: [backand.helpers.sort.create('id', backand.helpers.sort.orders.desc)]
+          })
+            .then(res => {
+              expect(res.data[0].company).to.eql(company);
+              done();
+            });
+        })
+        .catch(err => {
+          done(err);
+        })
+    });
     it('requestResetPassword user exists', function(done){
       this.timeout(0);
       backand.requestResetPassword('testsdk@backand.com')
