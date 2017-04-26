@@ -136,14 +136,20 @@ describe('Backand SDK', () => {
     });
     it('getUserDetails', function(done) {
       this.timeout(0);
-      backand.user.getUserDetails(true)
-      .then(res => {
-        expect(res.data.username).to.eql('testsdk@backand.com');
-        done();
-      })
-      .catch(err => {
-        done(err);
-      })
+      backand.signin('testsdk@backand.com', 'Password1')
+        .then(res => {
+          backand.user.getUserDetails(true)
+            .then(res => {
+              expect(res.data.username).to.eql('testsdk@backand.com');
+              done();
+            })
+            .catch(err => {
+              done(err);
+            })
+        })
+        .catch(err => {
+          done(err);
+        });
     });
     it('changePassword', function() {
       this.timeout(0);
@@ -384,11 +390,11 @@ describe('Backand SDK', () => {
   describe('backand.fn', () => {
     it('get', function() {
       this.timeout(0);
-      return backand.fn.get('fnTest', {param: 'test'});
+      return backand.fn.get('lmTest1', {param: 'test'});
     });
     it('post', function() {
       this.timeout(0);
-      return backand.fn.post('fnTest', {}, {param: 'test'});
+      return backand.fn.post('lmTest1', {}, {param: 'test'});
     });
   });
   describe('backand.helpers', () => {
