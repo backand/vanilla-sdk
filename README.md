@@ -103,8 +103,6 @@ The available parameters for the `config` parameter are:
 | **mobilePlatform** | string | sets the platform used to build the mobile application ('ionic'/'react-native') | *optional* | 'ionic' |
 | **runOffline** | boolean | Determines whether the sdk should run pending offline actions. (cached data and queued requests)  | *optional* | `false` |
 | **allowUpdatesinOfflineMode** | boolean | Determines whether the sdk will allow object updates or deletion while in offline mode. When set to "true", all objects must contain a field, "updatedAt", that needs to be before the SDK entered offline mode. Any update/delete operations on fields with an "updatedAt" that occurs after the SDK entered offline mode will fail. | *optional* | `false` |
-| **beforeExecuteOfflineItem** | function | Sets a callback to execute prior to sending each request queued up in offline mode. The "event" parameter contains the request object, and the executable function that is called in order to dispatch the request.| *optional* | `(e) => { e.execute() }` |
-| **afterExecuteOfflineItem** | function | Sets a callback to execute upon receiving the result from an offline request that has been sent to the server. The "event" parameter will contain both the request and response objects. | *optional* | `(e) => { }` |
 
 
 ### SDK Properties:
@@ -132,10 +130,10 @@ By default, the Back& SDK emits the following events that your code can respond 
 | SIGNIN  | dispatched on signin  | window.addEventListener(backand.constants.EVENTS.SIGNIN, (e)=>{}, false);  |
 | SIGNOUT | dispatched on signout | window.addEventListener(backand.constants.EVENTS.SIGNOUT, (e)=>{}, false); |
 | SIGNUP  | dispatched on signup  | window.addEventListener(backand.constants.EVENTS.SIGNUP, (e)=>{}, false);  |
-| startOfflineMode  | dispatched on start offline mode  | window.addEventListener(backand.constants.EVENTS.SOM, (e)=>{}, false);  |
-| endOfflineMode  | dispatched on end offline mode  | window.addEventListener(backand.constants.EVENTS.EOM, (e)=>{}, false);  |
-| beforeExecuteOfflineItem  | dispatched before execute offline item from queue  | window.addEventListener(backand.constants.EVENTS.BEOI, (e)=>{}, false);  |
-| afterExecuteOfflineItem  | dispatched after execute offline item from queue  | window.addEventListener(backand.constants.EVENTS.AEOI, (e)=>{}, false);  |
+| START_OFFLINE_MODE  | dispatched on start offline mode  | window.addEventListener(backand.constants.EVENTS.START_OFFLINE_MODE, (e)=>{}, false);  |
+| END_OFFLINE_MODE  | dispatched on end offline mode  | window.addEventListener(backand.constants.EVENTS.END_OFFLINE_MODE, (e)=>{}, false);  |
+| BEFORE_EXECUTE_OFFLINE  | dispatched before execute offline item from queue  | window.addEventListener(backand.constants.EVENTS.BEFORE_EXECUTE_OFFLINE, (e)=>{}, false);  |
+| AFTER_EXECUTE_OFFLINE  | dispatched after execute offline item from queue  | window.addEventListener(backand.constants.EVENTS.AFTER_EXECUTE_OFFLINE, (e)=>{}, false);  |
 
 ### SDK Methods:
 **NOTE:**
@@ -560,10 +558,10 @@ backand.query.post(name, parameters)
 ```
 
 #### Offline:
-The `offline` property allows you to control the SDK's offline mode.
+The `offline` property allows you to control the SDK's offline mode. When the SDK detects that it has lost internet connection, it will queue requests internally. Based on the configuration provided to the init() function, this can result in either a delay prior to call execution or an error response to any update or delete calls. Once internet connection is restored, the queued commands are sent to the server, and the responses should be handled asynchronously through standard promise resolution
 
-##### forcOffline
-This function is used to enable and disable offline mode. When true, the SDK will operate in offline mode. When false, the SDK will communicate over the web. <br/>
+##### forceOffline
+This function is used to enable and disable offline mode for debugging purposes. When true, the SDK will operate in offline mode. When false, the SDK will communicate over the web. <br/>
 
 ###### Parameters
 | name | type | description |
@@ -573,19 +571,9 @@ This function is used to enable and disable offline mode. When true, the SDK wil
 ###### Sample Code
 ```javascript
 // Enter offline mode
-backand.offline.forcOffline(true);
+backand.offline.forceOffline(true);
 // Exit offline mode
-backand.offline.forcOffline(false);
-```
-
-##### cache
-All cached data for offline requests are stored in this object.<br/>
-
-###### Sample Code
-```javascript
-backand.offline.cache;
-// ***We do not recommend editing this object***
-backand.offline.cache = {};
+backand.offline.forceOffline(false);
 ```
 
 ##### queue
@@ -594,8 +582,6 @@ All requests queued during offline mode are stored here. These operations will b
 ###### Sample Code
 ```javascript
 backand.offline.queue;
-// ***We do not recommend editing this array***
-backand.offline.queue = [];
 ```
 
 ## Examples and further reading
