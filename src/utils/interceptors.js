@@ -12,8 +12,8 @@ export default {
 }
 
 export function requestInterceptor (config) {
-  if (utils.forcOffline) {
-    return Promise.reject(__generateFakeResponse__(0, '', {}, 'networkError (forcOffline is enabled).', {}));
+  if (utils.forceOffline) {
+    return Promise.reject(__generateFakeResponse__(0, '', {}, 'networkError (forceOffline is enabled).', {}));
   }
   if (config.url.indexOf(constants.URLS.token) === -1) {
     let user = utils.storage.get('user');

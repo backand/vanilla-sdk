@@ -3,7 +3,7 @@ var lastCreatedId = null;
 var offlineId = null;
 
 describe('Backand SDK', () => {
-  describe('backand.init', () => {
+  describe.only('backand.init', () => {
     it('should initiate backand namespace', () => {
       expect(backand.init).to.be.an('function');
       backand.init({
@@ -323,10 +323,81 @@ describe('Backand SDK', () => {
       expect(backand.constants).to.include.keys('EVENTS', 'URLS', 'SOCIAL_PROVIDERS');
     });
   });
-  describe('backand.offline', () => {
+  describe.only('backand.offline', () => {
     it('should have cache and queue in localStorage', () => {
       expect(backand.utils.storage.get('cache')).to.be.an('object');
       expect(backand.utils.storage.get('queue')).to.be.an('array');
+      expect(backand.offline.cache).to.be.an('object');
+      expect(backand.offline.queue).to.be.an('array');
+    });
+    it('should cache getList calls', function(done) {
+      this.timeout(0);
+      var response;
+      backand.object.getList('offline').then(res => {
+        response = res;
+        backand.offline.setOfflineMode(true);
+        return backand.object.getList('offline');
+      }).then(res => {
+        expect(res).to.eql(response);
+        return backand.object.getList('items');
+      }).then(res => {
+        expect(res.data).to.eql([]);
+        backand.offline.setOfflineMode(false);
+        done();
+      }).catch(err => {
+        done(err);
+      });
+    });
+    it('should cache getOne calls', function(done) {
+      this.timeout(0);
+      var response;
+      backand.object.getOne('offline', 3).then(res => {
+        response = res;
+        backand.offline.setOfflineMode(true);
+        return backand.object.getOne('offline', 3);
+      }).then(res => {
+        expect(res).to.eql(response);
+        backand.offline.setOfflineMode(false);
+        done();
+      }).catch(err => {
+        done(err);
+      })
+    });
+    it('should cache query calls', function(done) {
+      this.timeout(0);
+      var response;
+      let parameters = {param1: 'test'};
+      backand.query.post('params', parameters).then(res => {
+        response = res;
+        backand.offline.setOfflineMode(true);
+        return backand.query.post('params', parameters);
+      }).then(res => {
+        expect(res).to.eql(response);
+        backand.offline.setOfflineMode(false);
+        done();
+      }).catch(err => {
+        done(err);
+      })
+    });
+    it.only('should queue create calls', function(done) {
+      this.timeout(0);
+      backand.offline.setOfflineMode(true);
+      backand.defaults.beforeExecuteOfflineItem = (request, execute) => { if(request.data.text !== 'DontCheckMe') execute() };
+      backand.defaults.afterExecuteOfflineItem = (request, response) => { console.log(response) };
+      backand.object.create('offline', {text:'test'}).then(res => {
+        expect(res.status).to.eql(1);
+        return backand.object.create('offline', {text:'DontCheckMe'})
+      }).then(res => {
+        expect(res.status).to.eql(1);
+        return backand.object.create('offline', {text:'test3'})
+      }).then(res => {
+        expect(res.status).to.eql(1);
+        expect(backand.offline.queue.length).to.eql(3);
+        backand.offline.setOfflineMode(false);
+        done();
+      }).catch(err => {
+        done(err);
+      })
     });
   });
   describe('backand.on', () => {

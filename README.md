@@ -561,7 +561,7 @@ backand.query.post(name, parameters)
 #### Offline:
 The `offline` property lets you control over the SDK's offline mode.
 
-##### forcOffline
+##### forceOffline
 Simulates the behavior of the SDK's when enters offline mode<br/>
 
 ###### Parameters
@@ -572,9 +572,9 @@ Simulates the behavior of the SDK's when enters offline mode<br/>
 ###### Sample Code
 ```javascript
 // Enter offline mode
-backand.offline.forcOffline();
+backand.offline.forceOffline();
 // Exit offline mode
-backand.offline.forcOffline(false);
+backand.offline.forceOffline(false);
 ```
 
 ##### cache

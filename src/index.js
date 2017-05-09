@@ -84,7 +84,7 @@ backand.init = (config = {}) => {
       baseURL: defaults.apiUrl
     }),
     offline: !navigator.onLine,
-    forcOffline: false,
+    forceOffline: false,
     offlineAt: null,
     detector,
   });
@@ -108,6 +108,38 @@ backand.init = (config = {}) => {
   }
 
   // TASK: set offline events
+  function processReqs(requests) {
+    let request = requests.shift();
+    if(!request) {
+      return;
+    }
+    defaults.beforeExecuteOfflineItem(request.payload, function() {
+      if(request.action === 'create') {
+        object[request.action].apply(null, request.params).then(response => {
+          defaults.afterExecuteOfflineItem(request.payload, response);
+        }).catch(response => {
+          defaults.afterExecuteOfflineItem(request.payload, response);
+        });
+      }
+      else {
+        object.getOne(request.params[0], request.params[1]).then((response) => {
+          if(!response.data.updatedAt) {
+            return Promise.reject('Cannot update this object, object is missing updatedAt property');
+          }
+          if(new Date(response.data.updatedAt) > utils.offlineAt) {
+            return Promise.reject('Cannot update this object, object was updated after you entered offline mode');
+          }
+          return object[request.action].apply(null, request.params);
+        }).then(response => {
+          defaults.afterExecuteOfflineItem(request.payload, response);
+        }).catch(response => {
+          defaults.afterExecuteOfflineItem(request.payload, response);
+        });
+      }
+    });
+    utils.storage.set('queue', requests);
+    processReqs(utils.storage.get('queue'));
+  }
   function __updateOnlineStatus__(event) {
     if(utils.offline) {
       utils.offlineAt = new Date();
@@ -117,58 +149,12 @@ backand.init = (config = {}) => {
     else {
       __dispatchEvent__('endOfflineMode');
       console.info('SDK finished offline mode');
-
-      let requests = utils.storage.get('queue');
-      requests.forEach((request, index) => {
-        __dispatchEvent__('beforeExecuteOfflineItem', {
-          request: request.payload,
-          execute: function() {
-            if(request.action === 'create') {
-              object[request.action].apply(null, request.params).then(response => {
-                __dispatchEvent__('afterExecuteOfflineItem', {
-                  request: request.payload,
-                  response
-                });
-              }).catch(response => {
-                __dispatchEvent__('afterExecuteOfflineItem', {
-                  request: request.payload,
-                  response
-                });
-              });
-            }
-            else {
-              object.getOne(request.params[0], request.params[1]).then((response) => {
-                if(!response.data.updatedAt) {
-                  return Promise.reject('Cannot update this object, object is missing updatedAt property');
-                }
-                if(new Date(response.data.updatedAt) > utils.offlineAt) {
-                  return Promise.reject('Cannot update this object, object was updated after you entered offline mode');
-                }
-                return object[request.action].apply(null, request.params);
-              }).then(response => {
-                __dispatchEvent__('afterExecuteOfflineItem', {
-                  request: request.payload,
-                  response
-                });
-              }).catch(response => {
-                __dispatchEvent__('afterExecuteOfflineItem', {
-                  request: request.payload,
-                  response
-                });
-              });
-            }
-          }
-        });
-        requests.shift();
-        utils.storage.set('queue', requests);
-      });
+      processReqs(utils.storage.get('queue'));
     }
   }
   if (defaults.runOffline && utils.detector.env === 'browser') {
     window.addEventListener('online',  __updateOnlineStatus__);
     window.addEventListener('offline', __updateOnlineStatus__);
-    window.addEventListener('beforeExecuteOfflineItem', defaults.beforeExecuteOfflineItem);
-    window.addEventListener('afterExecuteOfflineItem', defaults.afterExecuteOfflineItem);
   }
   // TASK: set offline storage
   if (defaults.runOffline) {

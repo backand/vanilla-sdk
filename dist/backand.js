@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-04-16
+ * @Compiled At: 2017-04-18
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1358,10 +1358,8 @@ var EVENTS = exports.EVENTS = {
   SIGNIN: 'SIGNIN',
   SIGNOUT: 'SIGNOUT',
   SIGNUP: 'SIGNUP',
-  SOM: 'startOfflineMode',
-  EOM: 'endOfflineMode',
-  BEOI: 'beforeExecuteOfflineItem',
-  AEOI: 'afterExecuteOfflineItem'
+  START_OFFLINE: 'startOfflineMode',
+  END_OFFLINE: 'endOfflineMode'
 };
 
 var URLS = exports.URLS = {
@@ -1419,10 +1417,10 @@ exports.default = {
 
   runOffline: false,
   allowUpdatesinOfflineMode: false,
-  beforeExecuteOfflineItem: function beforeExecuteOfflineItem(e) {
-    e.execute();
+  beforeExecuteOfflineItem: function beforeExecuteOfflineItem(request, execute) {
+    execute();
   },
-  afterExecuteOfflineItem: function afterExecuteOfflineItem(e) {}
+  afterExecuteOfflineItem: function afterExecuteOfflineItem(request, response) {}
 };
 
 },{}],5:[function(require,module,exports){
@@ -1704,7 +1702,7 @@ backand.init = function () {
       baseURL: _defaults2.default.apiUrl
     }),
     offline: !navigator.onLine,
-    forcOffline: false,
+    forceOffline: false,
     offlineAt: null,
     detector: detector
   });
@@ -1728,67 +1726,51 @@ backand.init = function () {
   }
 
   // TASK: set offline events
+  function processReqs(requests) {
+    var request = requests.shift();
+    if (!request) {
+      return;
+    }
+    _defaults2.default.beforeExecuteOfflineItem(request.payload, function () {
+      if (request.action === 'create') {
+        _object2.default[request.action].apply(null, request.params).then(function (response) {
+          _defaults2.default.afterExecuteOfflineItem(request.payload, response);
+        }).catch(function (response) {
+          _defaults2.default.afterExecuteOfflineItem(request.payload, response);
+        });
+      } else {
+        _object2.default.getOne(request.params[0], request.params[1]).then(function (response) {
+          if (!response.data.updatedAt) {
+            return _es6Promise.Promise.reject('Cannot update this object, object is missing updatedAt property');
+          }
+          if (new Date(response.data.updatedAt) > _utils2.default.offlineAt) {
+            return _es6Promise.Promise.reject('Cannot update this object, object was updated after you entered offline mode');
+          }
+          return _object2.default[request.action].apply(null, request.params);
+        }).then(function (response) {
+          _defaults2.default.afterExecuteOfflineItem(request.payload, response);
+        }).catch(function (response) {
+          _defaults2.default.afterExecuteOfflineItem(request.payload, response);
+        });
+      }
+    });
+    _utils2.default.storage.set('queue', requests);
+    processReqs(_utils2.default.storage.get('queue'));
+  }
   function __updateOnlineStatus__(event) {
     if (_utils2.default.offline) {
       _utils2.default.offlineAt = new Date();
       (0, _fns.__dispatchEvent__)('startOfflineMode');
       console.info('SDK started offline mode');
     } else {
-      (function () {
-        (0, _fns.__dispatchEvent__)('endOfflineMode');
-        console.info('SDK finished offline mode');
-
-        var requests = _utils2.default.storage.get('queue');
-        requests.forEach(function (request, index) {
-          (0, _fns.__dispatchEvent__)('beforeExecuteOfflineItem', {
-            request: request.payload,
-            execute: function execute() {
-              if (request.action === 'create') {
-                _object2.default[request.action].apply(null, request.params).then(function (response) {
-                  (0, _fns.__dispatchEvent__)('afterExecuteOfflineItem', {
-                    request: request.payload,
-                    response: response
-                  });
-                }).catch(function (response) {
-                  (0, _fns.__dispatchEvent__)('afterExecuteOfflineItem', {
-                    request: request.payload,
-                    response: response
-                  });
-                });
-              } else {
-                _object2.default.getOne(request.params[0], request.params[1]).then(function (response) {
-                  if (!response.data.updatedAt) {
-                    return _es6Promise.Promise.reject('Cannot update this object, object is missing updatedAt property');
-                  }
-                  if (new Date(response.data.updatedAt) > _utils2.default.offlineAt) {
-                    return _es6Promise.Promise.reject('Cannot update this object, object was updated after you entered offline mode');
-                  }
-                  return _object2.default[request.action].apply(null, request.params);
-                }).then(function (response) {
-                  (0, _fns.__dispatchEvent__)('afterExecuteOfflineItem', {
-                    request: request.payload,
-                    response: response
-                  });
-                }).catch(function (response) {
-                  (0, _fns.__dispatchEvent__)('afterExecuteOfflineItem', {
-                    request: request.payload,
-                    response: response
-                  });
-                });
-              }
-            }
-          });
-          requests.shift();
-          _utils2.default.storage.set('queue', requests);
-        });
-      })();
+      (0, _fns.__dispatchEvent__)('endOfflineMode');
+      console.info('SDK finished offline mode');
+      processReqs(_utils2.default.storage.get('queue'));
     }
   }
   if (_defaults2.default.runOffline && _utils2.default.detector.env === 'browser') {
     window.addEventListener('online', __updateOnlineStatus__);
     window.addEventListener('offline', __updateOnlineStatus__);
-    window.addEventListener('beforeExecuteOfflineItem', _defaults2.default.beforeExecuteOfflineItem);
-    window.addEventListener('afterExecuteOfflineItem', _defaults2.default.afterExecuteOfflineItem);
   }
   // TASK: set offline storage
   if (_defaults2.default.runOffline) {
@@ -2447,8 +2429,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _utils = require('./../utils/utils');
 
 var _utils2 = _interopRequireDefault(_utils);
@@ -2458,38 +2438,30 @@ var _fns = require('./../utils/fns');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-  forcOffline: forcOffline,
+  setOfflineMode: setOfflineMode,
   get cache() {
     return _utils2.default.storage.get('cache');
   },
-  set cache(obj) {
-    if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object') {
-      throw new Error('cache must be an object of {hash: data} pairs.');
-    }
-    _utils2.default.storage.set('cache', obj);
-  },
+  // set cache(obj) {
+  //   if(typeof obj !== 'object') {
+  //     throw new Error('cache must be an object of {hash: data} pairs.');
+  //   }
+  //   utils.storage.set('cache', obj);
+  // },
   get queue() {
     return _utils2.default.storage.get('queue');
-  },
-  set queue(arr) {
-    if (!Array.isArray(arr)) {
-      throw new Error('queue must be an array of requestDescriptor objects.');
-    }
-    _utils2.default.storage.set('cache', arr);
   }
 };
 
 
-function forcOffline() {
-  var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-
+function setOfflineMode(force) {
   if (force) {
     _utils2.default.offline = true;
-    _utils2.default.forcOffline = true;
+    _utils2.default.forceOffline = true;
     (0, _fns.__dispatchEvent__)('offline');
   } else {
     _utils2.default.offline = !navigator.onLine;
-    _utils2.default.forcOffline = false;
+    _utils2.default.forceOffline = false;
     (0, _fns.__dispatchEvent__)('online');
   }
 }
@@ -3131,8 +3103,8 @@ exports.default = {
   responseErrorInterceptor: responseErrorInterceptor
 };
 function requestInterceptor(config) {
-  if (_utils2.default.forcOffline) {
-    return Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'networkError (forcOffline is enabled).', {}));
+  if (_utils2.default.forceOffline) {
+    return Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'networkError (forceOffline is enabled).', {}));
   }
   if (config.url.indexOf(constants.URLS.token) === -1) {
     var user = _utils2.default.storage.get('user');
