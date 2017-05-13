@@ -18,8 +18,7 @@ export function requestInterceptor (config) {
   if (config.url.indexOf(constants.URLS.token) === -1) {
     let user = utils.storage.get('user');
     if (defaults.useAnonymousTokenByDefault && !user) {
-      return auth.useAnonymousAuth()
-      .then(response => {
+      return auth.useAnonymousAuth().then(response => {
         config.headers = Object.assign({}, config.headers, utils.storage.get('user').token);
         return config;
       });

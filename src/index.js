@@ -108,17 +108,27 @@ backand.init = (config = {}) => {
   }
 
   // TASK: set offline events
+  function afterProcessReq(request, response) {
+    defaults.afterExecuteOfflineItem(request.payload, response);
+    return processReqs(utils.storage.get('queue'));
+  }
+
   function processReqs(requests) {
+    if(utils.offline) {
+      // When enter offline mode during the process
+      return;
+    }
     let request = requests.shift();
+    utils.storage.set('queue', requests);
     if(!request) {
       return;
     }
     defaults.beforeExecuteOfflineItem(request.payload, function() {
       if(request.action === 'create') {
         object[request.action].apply(null, request.params).then(response => {
-          defaults.afterExecuteOfflineItem(request.payload, response);
+          return afterProcessReq(request, response);
         }).catch(response => {
-          defaults.afterExecuteOfflineItem(request.payload, response);
+          return afterProcessReq(request, response);
         });
       }
       else {
@@ -131,14 +141,12 @@ backand.init = (config = {}) => {
           }
           return object[request.action].apply(null, request.params);
         }).then(response => {
-          defaults.afterExecuteOfflineItem(request.payload, response);
+          return afterProcessReq(request, response);
         }).catch(response => {
-          defaults.afterExecuteOfflineItem(request.payload, response);
+          return afterProcessReq(request, response);
         });
       }
     });
-    utils.storage.set('queue', requests);
-    processReqs(utils.storage.get('queue'));
   }
   function __updateOnlineStatus__(event) {
     if(utils.offline) {

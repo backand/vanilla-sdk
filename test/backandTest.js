@@ -382,8 +382,12 @@ describe('Backand SDK', () => {
     it.only('should queue create calls', function(done) {
       this.timeout(0);
       backand.offline.setOfflineMode(true);
-      backand.defaults.beforeExecuteOfflineItem = (request, execute) => { if(request.data.text !== 'DontCheckMe') execute() };
-      backand.defaults.afterExecuteOfflineItem = (request, response) => { console.log(response) };
+      backand.defaults.beforeExecuteOfflineItem = (request, execute) => {
+        if(request.data.text !== 'DontCheckMe') execute()
+      };
+      backand.defaults.afterExecuteOfflineItem = (request, response) => {
+        console.log(response)
+      };
       backand.object.create('offline', {text:'test'}).then(res => {
         expect(res.status).to.eql(1);
         return backand.object.create('offline', {text:'DontCheckMe'})
