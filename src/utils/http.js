@@ -84,8 +84,11 @@ class Http {
     }
   }
   request (cfg = {}) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       let config = Object.assign({}, this.defaults, cfg);
+      if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
+        reject(this._handleError('url parameter is missing', config));
+      }
       if (config.interceptors.request) {
         resolve(config.interceptors.request(config));
       }
@@ -94,9 +97,6 @@ class Http {
       }
     }).then((config) => {
         return new Promise((resolve, reject) => {
-          if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
-            reject(this._handleError('url parameter is missing', config));
-          }
           let req = new XMLHttpRequest();
           let params = this._encodeParams(config.params);
           req.open(config.method, `${config.baseURL ? config.baseURL+'/' : ''}${config.url}${params ? '?'+params : ''}`, true, config.auth.username, config.auth.password);

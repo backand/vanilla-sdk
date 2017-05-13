@@ -110,6 +110,7 @@ backand.init = (config = {}) => {
     backand,
     auth,
     {
+      invoke: utils.http,
       defaults,
       object,
       file,
