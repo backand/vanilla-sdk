@@ -2,8 +2,8 @@ export const EVENTS = {
   SIGNIN: 'SIGNIN',
   SIGNOUT: 'SIGNOUT',
   SIGNUP: 'SIGNUP',
-  START_OFFLINE: 'startOfflineMode',
-  END_OFFLINE: 'endOfflineMode'
+  START_OFFLINE_MODE: 'startOfflineMode',
+  END_OFFLINE_MODE: 'endOfflineMode'
 };
 
 export const URLS = {
