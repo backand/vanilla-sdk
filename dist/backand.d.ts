@@ -23,6 +23,8 @@ declare namespace backand {
   let query: any;
   let user: any;
   let offline: any;
+  let bulk: any;
+  let fn: any;
   // auth
   function useAnonymousAuth (): any;
   function signin (username: string, password: string): any;

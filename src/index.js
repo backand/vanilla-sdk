@@ -17,6 +17,8 @@ import query from './services/query'
 import offline from './services/offline'
 import user from './services/user'
 import analytics from './services/analytics'
+import fn from './services/function'
+import bulk from './services/bulk'
 
 // Task: Polyfills
 import { Promise } from 'es6-promise'
@@ -176,12 +178,15 @@ backand.init = (config = {}) => {
     backand,
     auth,
     {
+      invoke: utils.http,
       defaults,
       object,
       file,
       query,
       user,
       offline,
+      fn,
+      bulk
     }
   );
   if(defaults.runSocket) {

@@ -11,7 +11,7 @@ class Http {
       interceptors: {},
       withCredentials: false,
       responseType: 'json',
-      timeout: 4000,
+      timeout: 0,
       auth: {
        username: null,
        password: null
@@ -84,8 +84,11 @@ class Http {
     }
   }
   request (cfg = {}) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       let config = Object.assign({}, this.defaults, cfg);
+      if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
+        reject(this._handleError('url parameter is missing', config));
+      }
       if (config.interceptors.request) {
         resolve(config.interceptors.request(config));
       }
@@ -94,10 +97,9 @@ class Http {
       }
     }).then((config) => {
         return new Promise((resolve, reject) => {
-          if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
-            reject(this._handleError('url parameter is missing', config));
-          }
           let req = new XMLHttpRequest();
+          let params = this._encodeParams(config.params);
+          req.open(config.method, `${config.baseURL ? config.baseURL+'/' : ''}${config.url}${params ? '?'+params : ''}`, true, config.auth.username, config.auth.password);
           req.withCredentials = config.withCredentials || false;
           req.timeout = config.timeout || 0;
           req.ontimeout = () => {
@@ -106,37 +108,28 @@ class Http {
           req.onabort = () => {
             reject(this._handleError('abort', config));
           };
-          req.onerror = () => {
-            reject(this._handleError('networkError', config));
-          };
           req.onreadystatechange = () => {
-            if (req.readyState !== 4) {
-              return;
-            }
-            if (req.status === 0 && !(req.responseURL && req.responseURL.indexOf('file:') === 0)) {
-              return;
-            }
-
-            let res = this._createResponse(req, config);
-            if (res.status === 200){
-              if (config.interceptors.response) {
-                resolve(config.interceptors.response(res));
+            let _DONE = XMLHttpRequest.DONE || 4;
+            if (req.readyState == _DONE) {
+              let res = this._createResponse(req, config);
+              if (res.status === 200){
+                if (config.interceptors.response) {
+                  resolve(config.interceptors.response(res));
+                }
+                else {
+                  resolve(res);
+                }
               }
               else {
-                resolve(res);
-              }
-            }
-            else {
-              if (config.interceptors.responseError) {
-                resolve(config.interceptors.responseError(res));
-              }
-              else {
-                reject(res);
+                if (config.interceptors.responseError) {
+                  resolve(config.interceptors.responseError(res));
+                }
+                else {
+                  reject(res);
+                }
               }
             }
           }
-          let params = this._encodeParams(config.params);
-          req.open(config.method, `${config.baseURL ? config.baseURL+'/' : ''}${config.url}${params ? '?'+params : ''}`, true, config.auth.username, config.auth.password);
           this._setHeaders(req, config.headers);
           this._setData(req, config.data);
         });
