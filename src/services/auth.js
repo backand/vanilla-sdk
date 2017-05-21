@@ -1,7 +1,7 @@
 import { URLS, EVENTS, SOCIAL_PROVIDERS } from './../constants'
 import defaults from './../defaults'
 import utils from './../utils/utils'
-import { __generateFakeResponse__ } from './../utils/fns'
+import { __generateFakeResponse__, __dispatchEvent__ } from './../utils/fns'
 
 export default {
   __handleRefreshToken__,
@@ -18,23 +18,6 @@ export default {
   getSocialProviders,
 }
 
-function __dispatchEvent__ (name) {
-  let event;
-  if(defaults.isMobile || utils.detector.env === 'node')
-    return;
-  if (document.createEvent) {
-    event = document.createEvent('Event');
-    event.initEvent(name, true, true);
-    event.eventName = name;
-    window.dispatchEvent(event);
-  }
-  else if (document.createEventObject) {
-    event = document.createEventObject();
-    event.eventType = name;
-    event.eventName = name;
-    window.fireEvent('on' + event.eventType, event);
-  }
-}
 function __authorize__ (tokenData) {
   let data = [];
   Object.keys(tokenData).forEach(key => {

@@ -3,14 +3,24 @@ export default {
   anonymousToken: null,
   useAnonymousTokenByDefault: true,
   signUpToken: null,
-  apiUrl: 'https://api.backand.com',
+
+  apiUrl: 'https://api.backand.com', // debug
+  exportUtils: false, // debug
+
   storage: {},
   storagePrefix: 'BACKAND_',
+
   manageRefreshToken: true,
   runSigninAfterSignup: true,
+
   runSocket: false,
-  socketUrl: 'https://socket.backand.com',
-  exportUtils: false,
+  socketUrl: 'https://socket.backand.com', // debug
+
   isMobile: false,
   mobilePlatform: 'ionic',
+
+  runOffline: false,
+  allowUpdatesinOfflineMode: false,
+  beforeExecuteOfflineItem: (request) => { return true },
+  afterExecuteOfflineItem: (response, request) => { },
 };

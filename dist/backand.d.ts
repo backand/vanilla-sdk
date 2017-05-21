@@ -22,6 +22,7 @@ declare namespace backand {
   let file: any;
   let query: any;
   let user: any;
+  let offline: any;
   let bulk: any;
   let fn: any;
   // auth

@@ -1,6 +1,7 @@
 "use strict";
 var expect = chai.expect;
 var lastCreatedId = null;
+var offlineId = null;
 
 describe('Backand SDK', () => {
   before(function() {
@@ -13,7 +14,10 @@ describe('Backand SDK', () => {
         appName: 'sdk',
         signUpToken: '851692ae-eb94-4f18-87ee-075255e67748',
         anonymousToken: '82cfcfe8-c718-4621-8bb6-cd600e23487f',
-        runSocket: true
+        runSocket: true,
+        runOffline: true,
+        allowUpdatesinOfflineMode: true,
+        exportUtils: true,
       });
       expect(backand).to.be.an('object');
       expect(backand).to.include.keys(
@@ -24,6 +28,7 @@ describe('Backand SDK', () => {
         'file',
         'query',
         'user',
+        'offline',
         'useAnonymousAuth',
         'signin',
         'signup',
@@ -405,6 +410,118 @@ describe('Backand SDK', () => {
   describe('backand.constants', () => {
     it('should have some impotant keys', () => {
       expect(backand.constants).to.include.keys('EVENTS', 'URLS', 'SOCIAL_PROVIDERS');
+    });
+  });
+  describe('backand.offline', () => {
+    it('should have cache and queue in localStorage', () => {
+      expect(backand.utils.storage.get('cache')).to.be.an('object');
+      expect(backand.utils.storage.get('queue')).to.be.an('array');
+      expect(backand.offline.cache).to.be.an('object');
+      expect(backand.offline.queue).to.be.an('array');
+      backand.utils.storage.set('cache', {});
+      backand.utils.storage.set('queue', []);
+    });
+    it('should cache getList calls', function(done) {
+      this.timeout(0);
+      var response;
+      backand.object.getList('offline').then(res => {
+        response = res;
+        backand.offline.setOfflineMode(true);
+        return backand.object.getList('offline');
+      }).then(res => {
+        expect(res).to.eql(response);
+        return backand.object.getList('items');
+      }).then(res => {
+        expect(res.data).to.eql([]);
+        backand.offline.setOfflineMode(false);
+        done();
+      }).catch(err => {
+        done(err);
+      });
+    });
+    it('should cache getOne calls', function(done) {
+      this.timeout(0);
+      var response;
+      backand.object.getOne('offline', 3).then(res => {
+        response = res;
+        backand.offline.setOfflineMode(true);
+        return backand.object.getOne('offline', 3);
+      }).then(res => {
+        expect(res).to.eql(response);
+        backand.offline.setOfflineMode(false);
+        done();
+      }).catch(err => {
+        done(err);
+      })
+    });
+    it('should cache query calls', function(done) {
+      this.timeout(0);
+      var response;
+      let parameters = {param1: 'test'};
+      backand.query.post('params', parameters).then(res => {
+        response = res;
+        backand.offline.setOfflineMode(true);
+        return backand.query.post('params', parameters);
+      }).then(res => {
+        expect(res).to.eql(response);
+        backand.offline.setOfflineMode(false);
+        done();
+      }).catch(err => {
+        done(err);
+      })
+    });
+    it('should queue create calls', function(done) {
+      this.timeout(0);
+      backand.offline.setOfflineMode(true);
+      backand.defaults.beforeExecuteOfflineItem = (request) => {
+        if(request.data.text !== 'DontCheckMe') return true;
+        return false;
+      };
+      backand.defaults.afterExecuteOfflineItem = (response) => {
+        console.log(response);
+        if(backand.offline.queue.length === 0) done();
+      };
+      backand.object.create('offline', {text:'test'}).then(res => {
+        expect(res.status).to.eql(1);
+        return backand.object.create('offline', {text:'DontCheckMe'})
+      }).then(res => {
+        expect(res.status).to.eql(1);
+        return backand.object.create('offline', {text:'test3'})
+      }).then(res => {
+        expect(res.status).to.eql(1);
+        expect(backand.offline.queue.length).to.eql(3);
+        backand.offline.setOfflineMode(false);
+      }).catch(err => {
+        done(err);
+      })
+    });
+    it('should queue update and remove calls', function(done) {
+      this.timeout(0);
+      backand.defaults.beforeExecuteOfflineItem = (request) => {
+        return true;
+      };
+      backand.defaults.afterExecuteOfflineItem = (response) => {
+        console.log(response);
+        if(backand.offline.queue.length === 0) done();
+      };
+      backand.object.create('offline', {text:'test'}).then(res => {
+        expect(res.status).to.eql(200);
+        lastCreatedId = res.data.__metadata.id;
+        backand.offline.setOfflineMode(true);
+        return backand.object.update('offline', lastCreatedId, {text:'test1'});
+      }).then(res => {
+        expect(res.status).to.eql(1);
+        return backand.object.update('offline', lastCreatedId, {text:'test2'});
+      }).then(res => {
+        expect(res.status).to.eql(1);
+        return backand.object.remove('offline', lastCreatedId);
+      }).then(res => {
+        expect(res.status).to.eql(1);
+        expect(backand.offline.queue.length).to.eql(3);
+        backand.offline.setOfflineMode(false);
+      }).catch(err => {
+        done(err);
+      })
     });
   });
   describe('backand.on', () => {
