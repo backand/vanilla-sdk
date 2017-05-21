@@ -8,7 +8,7 @@ import Http from './utils/http'
 import interceptors from './utils/interceptors'
 import Socket from './utils/socket'
 import detect from './utils/detector'
-import { __dispatchEvent__ } from './utils/fns'
+import { __dispatchEvent__, __generateFakeResponse__ } from './utils/fns'
 
 import auth from './services/auth'
 import object from './services/object'
@@ -109,7 +109,7 @@ backand.init = (config = {}) => {
 
   // TASK: set offline events
   function afterProcessReq(request, response) {
-    defaults.afterExecuteOfflineItem(request.payload, response);
+    defaults.afterExecuteOfflineItem(response, request.payload);
     return processReqs(utils.storage.get('queue'));
   }
 
@@ -123,30 +123,26 @@ backand.init = (config = {}) => {
     if(!request) {
       return;
     }
-    defaults.beforeExecuteOfflineItem(request.payload, function() {
+    if(defaults.beforeExecuteOfflineItem(request.payload)) {
       if(request.action === 'create') {
-        object[request.action].apply(null, request.params).then(response => {
-          return afterProcessReq(request, response);
-        }).catch(response => {
-          return afterProcessReq(request, response);
-        });
+        object[request.action].apply(null, request.params)
+          .then(afterProcessReq.bind(null, request)).catch(afterProcessReq.bind(null, request));
       }
       else {
         object.getOne(request.params[0], request.params[1]).then((response) => {
           if(!response.data.updatedAt) {
-            return Promise.reject('Cannot update this object, object is missing updatedAt property');
+            return Promise.reject(__generateFakeResponse__(0, '', {}, 'Cannot update this object, object is missing updatedAt property', {}));
           }
           if(new Date(response.data.updatedAt) > utils.offlineAt) {
-            return Promise.reject('Cannot update this object, object was updated after you entered offline mode');
+            return Promise.reject(__generateFakeResponse__(0, '', {}, 'Cannot update this object, object was updated after you entered offline mode', {}));
           }
           return object[request.action].apply(null, request.params);
-        }).then(response => {
-          return afterProcessReq(request, response);
-        }).catch(response => {
-          return afterProcessReq(request, response);
-        });
+        }).then(afterProcessReq.bind(null, request)).catch(afterProcessReq.bind(null, request));
       }
-    });
+    }
+    else {
+      return processReqs(utils.storage.get('queue'));
+    }
   }
   function __updateOnlineStatus__(event) {
     if(utils.offline) {

@@ -21,6 +21,6 @@ export default {
 
   runOffline: false,
   allowUpdatesinOfflineMode: false,
-  beforeExecuteOfflineItem: (request, execute) => { execute() },
-  afterExecuteOfflineItem: (request, response) => { },
+  beforeExecuteOfflineItem: (request) => { return true },
+  afterExecuteOfflineItem: (response, request) => { },
 };

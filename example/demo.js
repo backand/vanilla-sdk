@@ -16,11 +16,11 @@
     // storage: new backand.helpers.MemoryStorage(),
     runOffline: true,
     allowUpdatesinOfflineMode: true,
-    beforeExecuteOfflineItem: (request, execute) => {
+    beforeExecuteOfflineItem: (request) => {
       console.log(request);
-      execute();
+      return true;
     },
-    afterExecuteOfflineItem: (request, response) => {
+    afterExecuteOfflineItem: (response, request) => {
       console.log(response);
     },
   });

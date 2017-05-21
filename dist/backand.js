@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 2017-05-09
+ * @Compiled At: 2017-05-22
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -1417,10 +1417,10 @@ exports.default = {
 
   runOffline: false,
   allowUpdatesinOfflineMode: false,
-  beforeExecuteOfflineItem: function beforeExecuteOfflineItem(request, execute) {
-    execute();
+  beforeExecuteOfflineItem: function beforeExecuteOfflineItem(request) {
+    return true;
   },
-  afterExecuteOfflineItem: function afterExecuteOfflineItem(request, response) {}
+  afterExecuteOfflineItem: function afterExecuteOfflineItem(response, request) {}
 };
 
 },{}],5:[function(require,module,exports){
@@ -1727,7 +1727,7 @@ backand.init = function () {
 
   // TASK: set offline events
   function afterProcessReq(request, response) {
-    _defaults2.default.afterExecuteOfflineItem(request.payload, response);
+    _defaults2.default.afterExecuteOfflineItem(response, request.payload);
     return processReqs(_utils2.default.storage.get('queue'));
   }
 
@@ -1741,29 +1741,23 @@ backand.init = function () {
     if (!request) {
       return;
     }
-    _defaults2.default.beforeExecuteOfflineItem(request.payload, function () {
+    if (_defaults2.default.beforeExecuteOfflineItem(request.payload)) {
       if (request.action === 'create') {
-        _object2.default[request.action].apply(null, request.params).then(function (response) {
-          return afterProcessReq(request, response);
-        }).catch(function (response) {
-          return afterProcessReq(request, response);
-        });
+        _object2.default[request.action].apply(null, request.params).then(afterProcessReq.bind(null, request)).catch(afterProcessReq.bind(null, request));
       } else {
         _object2.default.getOne(request.params[0], request.params[1]).then(function (response) {
           if (!response.data.updatedAt) {
-            return _es6Promise.Promise.reject('Cannot update this object, object is missing updatedAt property');
+            return _es6Promise.Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Cannot update this object, object is missing updatedAt property', {}));
           }
           if (new Date(response.data.updatedAt) > _utils2.default.offlineAt) {
-            return _es6Promise.Promise.reject('Cannot update this object, object was updated after you entered offline mode');
+            return _es6Promise.Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Cannot update this object, object was updated after you entered offline mode', {}));
           }
           return _object2.default[request.action].apply(null, request.params);
-        }).then(function (response) {
-          return afterProcessReq(request, response);
-        }).catch(function (response) {
-          return afterProcessReq(request, response);
-        });
+        }).then(afterProcessReq.bind(null, request)).catch(afterProcessReq.bind(null, request));
       }
-    });
+    } else {
+      return processReqs(_utils2.default.storage.get('queue'));
+    }
   }
   function __updateOnlineStatus__(event) {
     if (_utils2.default.offline) {
