@@ -524,6 +524,23 @@ describe('Backand SDK', () => {
       })
     });
   });
+  describe('backand.invloke', () => {
+    it('invoke to get functions', function(done) {
+      this.timeout(0);
+      var params = {filter:[{fieldName:"actionType", operator:"equals", value:"Function"}],pageSize:200};
+      let json = {
+        method: 'GET',
+        url: '/1/action/config',
+        params: params
+      };
+      backand.invoke(json).then(res => {
+        expect(res.data.data[0].actionType).to.eql('Function');
+        done();
+      }).catch(err => {
+        done(err);
+      })
+    });
+  });
   describe('backand.on', () => {
     it('should have on function', () => {
       expect(backand.on).to.be.an('function');
