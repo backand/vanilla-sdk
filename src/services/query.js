@@ -39,7 +39,7 @@ function post (name, parameters) {
     return utils.http({
       url: `${URLS.query}/${name}`,
       method: 'POST',
-      params,
+      data: params,
     }).then(response => {
       __cacheData__(key, response);
       return response;
