@@ -7,7 +7,7 @@ describe('Backand SDK', () => {
   before(function() {
     localStorage.removeItem('BACKAND_user');
   });
-  describe.only('backand.init', () => {
+  describe('backand.init', () => {
     it('should initiate backand namespace', () => {
       expect(backand.init).to.be.an('function');
       backand.init({
@@ -356,7 +356,7 @@ describe('Backand SDK', () => {
       return backand.file.remove('items','files', 'file2upload');
     });
   });
-  describe.only('backand.query', () => {
+  describe('backand.query', () => {
     it('get', function() {
       this.timeout(0);
       return backand.query.get('getItemsCount');
