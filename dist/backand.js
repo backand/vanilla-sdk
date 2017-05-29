@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 5/25/2017
+ * @Compiled At: 5/29/2017
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -13,7 +13,7 @@
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   4.0.5
+ * @version   4.1.0
  */
 
 (function (global, factory) {
@@ -321,6 +321,7 @@ function handleMaybeThenable(promise, maybeThenable, then$$) {
   } else {
     if (then$$ === GET_THEN_ERROR) {
       _reject(promise, GET_THEN_ERROR.error);
+      GET_THEN_ERROR.error = null;
     } else if (then$$ === undefined) {
       fulfill(promise, maybeThenable);
     } else if (isFunction(then$$)) {
@@ -441,7 +442,7 @@ function invokeCallback(settled, promise, callback, detail) {
     if (value === TRY_CATCH_ERROR) {
       failed = true;
       error = value.error;
-      value = null;
+      value.error = null;
     } else {
       succeeded = true;
     }
@@ -1165,6 +1166,7 @@ return Promise;
 
 })));
 
+
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"_process":2}],2:[function(require,module,exports){
 // shim for using process in browser
@@ -1337,6 +1339,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -1711,7 +1717,7 @@ backand.init = function () {
     http: _http2.default.create({
       baseURL: _defaults2.default.apiUrl
     }),
-    offline: !navigator.onLine,
+    offline: navigator ? !navigator.onLine : false,
     forceOffline: false,
     offlineAt: null,
     detector: detector
@@ -1988,71 +1994,67 @@ function __socialAuth__(provider, isSignUp, spec, email) {
     var popup = null;
     if (_defaults2.default.isMobile) {
       if (_defaults2.default.mobilePlatform === 'ionic') {
-        (function () {
-          var dummyReturnAddress = 'http://www.backandblabla.bla';
-          url += dummyReturnAddress;
-          var handler = function handler(e) {
-            if (e.url.indexOf(dummyReturnAddress) === 0) {
-              var dataMatch = /(data|error)=(.+)/.exec(e.url);
-              var res = {};
-              if (dataMatch && dataMatch[1] && dataMatch[2]) {
-                res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
-                res.status = dataMatch[1] === 'data' ? 200 : 0;
-              }
-              popup.removeEventListener('loadstart', handler, false);
-              if (popup && popup.close) {
-                popup.close();
-              }
-              if (res.status != 200) {
-                reject(res);
-              } else {
-                resolve(res);
-              }
+        var dummyReturnAddress = 'http://www.backandblabla.bla';
+        url += dummyReturnAddress;
+        var handler = function handler(e) {
+          if (e.url.indexOf(dummyReturnAddress) === 0) {
+            var dataMatch = /(data|error)=(.+)/.exec(e.url);
+            var res = {};
+            if (dataMatch && dataMatch[1] && dataMatch[2]) {
+              res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
+              res.status = dataMatch[1] === 'data' ? 200 : 0;
             }
-          };
-          popup = cordova.InAppBrowser.open(url, '_blank');
-          popup.addEventListener('loadstart', handler, false);
-        })();
+            popup.removeEventListener('loadstart', handler, false);
+            if (popup && popup.close) {
+              popup.close();
+            }
+            if (res.status != 200) {
+              reject(res);
+            } else {
+              resolve(res);
+            }
+          }
+        };
+        popup = cordova.InAppBrowser.open(url, '_blank');
+        popup.addEventListener('loadstart', handler, false);
       } else if (_defaults2.default.mobilePlatform === 'react-native') {
         reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'react-native is not supported yet for socials', {}));
       } else {
         reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'isMobile is true but mobilePlatform is not supported.\n          \'try contact us in request to add support for this platform', {}));
       }
     } else if (_utils2.default.detector.env === 'browser') {
-      (function () {
-        var handler = function handler(e) {
-          var url = e.type === 'message' ? e.origin : e.url;
-          // ie-location-origin-polyfill
-          if (!window.location.origin) {
-            window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
-          }
-          if (url.indexOf(window.location.origin) === -1) {
-            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
-          }
-
-          var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
-          window.removeEventListener('message', handler, false);
-          window.removeEventListener('storage', handler, false);
-          if (popup && popup.close) {
-            popup.close();
-          }
-          e.type === 'storage' && localStorage.removeItem(e.key);
-
-          if (res.status != 200) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        };
-        if (_utils2.default.detector.type !== 'Internet Explorer') {
-          popup = window.open(url, 'socialpopup', spec);
-          window.addEventListener('message', handler, false);
-        } else {
-          popup = window.open('', '', spec);
-          popup.location = url;
-          window.addEventListener('storage', handler, false);
+      var _handler = function _handler(e) {
+        var url = e.type === 'message' ? e.origin : e.url;
+        // ie-location-origin-polyfill
+        if (!window.location.origin) {
+          window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
         }
-      })();
+        if (url.indexOf(window.location.origin) === -1) {
+          reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
+        }
+
+        var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
+        window.removeEventListener('message', _handler, false);
+        window.removeEventListener('storage', _handler, false);
+        if (popup && popup.close) {
+          popup.close();
+        }
+        e.type === 'storage' && localStorage.removeItem(e.key);
+
+        if (res.status != 200) {
+          reject(res);
+        } else {
+          resolve(res);
+        }
+      };
+      if (_utils2.default.detector.type !== 'Internet Explorer') {
+        popup = window.open(url, 'socialpopup', spec);
+        window.addEventListener('message', _handler, false);
+      } else {
+        popup = window.open('', '', spec);
+        popup.location = url;
+        window.addEventListener('storage', _handler, false);
+      }
     } else if (_utils2.default.detector.env === 'node') {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'socials are not supported in a nodejs environment', {}));
     }
@@ -2548,7 +2550,7 @@ function setOfflineMode(force) {
     _utils2.default.forceOffline = true;
     (0, _fns.__dispatchEvent__)('offline');
   } else {
-    _utils2.default.offline = !navigator.onLine;
+    _utils2.default.offline = navigator ? !navigator.onLine : false;
     _utils2.default.forceOffline = false;
     (0, _fns.__dispatchEvent__)('online');
   }
