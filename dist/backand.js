@@ -1,6 +1,6 @@
 /*********************************************************
  * @backand/vanilla-sdk - Backand SDK for JavaScript
- * @version v1.2.1
+ * @version v1.2.3
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
@@ -13,7 +13,7 @@
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   4.1.0
+ * @version   4.0.5
  */
 
 (function (global, factory) {
@@ -321,7 +321,6 @@ function handleMaybeThenable(promise, maybeThenable, then$$) {
   } else {
     if (then$$ === GET_THEN_ERROR) {
       _reject(promise, GET_THEN_ERROR.error);
-      GET_THEN_ERROR.error = null;
     } else if (then$$ === undefined) {
       fulfill(promise, maybeThenable);
     } else if (isFunction(then$$)) {
@@ -442,7 +441,7 @@ function invokeCallback(settled, promise, callback, detail) {
     if (value === TRY_CATCH_ERROR) {
       failed = true;
       error = value.error;
-      value.error = null;
+      value = null;
     } else {
       succeeded = true;
     }
@@ -1166,7 +1165,6 @@ return Promise;
 
 })));
 
-
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"_process":2}],2:[function(require,module,exports){
 // shim for using process in browser
@@ -1339,10 +1337,6 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -1717,7 +1711,7 @@ backand.init = function () {
     http: _http2.default.create({
       baseURL: _defaults2.default.apiUrl
     }),
-    offline: navigator ? !navigator.onLine : false,
+    offline: typeof navigator != 'undefined' ? !navigator.onLine : false,
     forceOffline: false,
     offlineAt: null,
     detector: detector
@@ -1994,67 +1988,71 @@ function __socialAuth__(provider, isSignUp, spec, email) {
     var popup = null;
     if (_defaults2.default.isMobile) {
       if (_defaults2.default.mobilePlatform === 'ionic') {
-        var dummyReturnAddress = 'http://www.backandblabla.bla';
-        url += dummyReturnAddress;
-        var handler = function handler(e) {
-          if (e.url.indexOf(dummyReturnAddress) === 0) {
-            var dataMatch = /(data|error)=(.+)/.exec(e.url);
-            var res = {};
-            if (dataMatch && dataMatch[1] && dataMatch[2]) {
-              res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
-              res.status = dataMatch[1] === 'data' ? 200 : 0;
+        (function () {
+          var dummyReturnAddress = 'http://www.backandblabla.bla';
+          url += dummyReturnAddress;
+          var handler = function handler(e) {
+            if (e.url.indexOf(dummyReturnAddress) === 0) {
+              var dataMatch = /(data|error)=(.+)/.exec(e.url);
+              var res = {};
+              if (dataMatch && dataMatch[1] && dataMatch[2]) {
+                res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
+                res.status = dataMatch[1] === 'data' ? 200 : 0;
+              }
+              popup.removeEventListener('loadstart', handler, false);
+              if (popup && popup.close) {
+                popup.close();
+              }
+              if (res.status != 200) {
+                reject(res);
+              } else {
+                resolve(res);
+              }
             }
-            popup.removeEventListener('loadstart', handler, false);
-            if (popup && popup.close) {
-              popup.close();
-            }
-            if (res.status != 200) {
-              reject(res);
-            } else {
-              resolve(res);
-            }
-          }
-        };
-        popup = cordova.InAppBrowser.open(url, '_blank');
-        popup.addEventListener('loadstart', handler, false);
+          };
+          popup = cordova.InAppBrowser.open(url, '_blank');
+          popup.addEventListener('loadstart', handler, false);
+        })();
       } else if (_defaults2.default.mobilePlatform === 'react-native') {
         reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'react-native is not supported yet for socials', {}));
       } else {
         reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'isMobile is true but mobilePlatform is not supported.\n          \'try contact us in request to add support for this platform', {}));
       }
     } else if (_utils2.default.detector.env === 'browser') {
-      var _handler = function _handler(e) {
-        var url = e.type === 'message' ? e.origin : e.url;
-        // ie-location-origin-polyfill
-        if (!window.location.origin) {
-          window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
-        }
-        if (url.indexOf(window.location.origin) === -1) {
-          reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
-        }
+      (function () {
+        var handler = function handler(e) {
+          var url = e.type === 'message' ? e.origin : e.url;
+          // ie-location-origin-polyfill
+          if (!window.location.origin) {
+            window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+          }
+          if (url.indexOf(window.location.origin) === -1) {
+            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
+          }
 
-        var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
-        window.removeEventListener('message', _handler, false);
-        window.removeEventListener('storage', _handler, false);
-        if (popup && popup.close) {
-          popup.close();
-        }
-        e.type === 'storage' && localStorage.removeItem(e.key);
+          var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
+          window.removeEventListener('message', handler, false);
+          window.removeEventListener('storage', handler, false);
+          if (popup && popup.close) {
+            popup.close();
+          }
+          e.type === 'storage' && localStorage.removeItem(e.key);
 
-        if (res.status != 200) {
-          reject(res);
+          if (res.status != 200) {
+            reject(res);
+          } else {
+            resolve(res);
+          }
+        };
+        if (_utils2.default.detector.type !== 'Internet Explorer') {
+          popup = window.open(url, 'socialpopup', spec);
+          window.addEventListener('message', handler, false);
         } else {
-          resolve(res);
+          popup = window.open('', '', spec);
+          popup.location = url;
+          window.addEventListener('storage', handler, false);
         }
-      };
-      if (_utils2.default.detector.type !== 'Internet Explorer') {
-        popup = window.open(url, 'socialpopup', spec);
-        window.addEventListener('message', _handler, false);
-      } else {
-        popup = window.open('', '', spec);
-        popup.location = url;
-        window.addEventListener('storage', _handler, false);
-      }
+      })();
     } else if (_utils2.default.detector.env === 'node') {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'socials are not supported in a nodejs environment', {}));
     }
