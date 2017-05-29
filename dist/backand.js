@@ -2550,7 +2550,7 @@ function setOfflineMode(force) {
     _utils2.default.forceOffline = true;
     (0, _fns.__dispatchEvent__)('offline');
   } else {
-    _utils2.default.offline = navigator ? !navigator.onLine : false;
+    _utils2.default.offline = typeof navigator != 'undefined' ? !navigator.onLine : false;
     _utils2.default.forceOffline = false;
     (0, _fns.__dispatchEvent__)('online');
   }

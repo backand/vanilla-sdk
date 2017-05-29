@@ -30,7 +30,7 @@ function setOfflineMode (force) {
     __dispatchEvent__('offline')
   }
   else {
-    utils.offline = navigator ? !navigator.onLine : false;
+    utils.offline = (typeof navigator != 'undefined') ? !navigator.onLine : false;
     utils.forceOffline = false;
     __dispatchEvent__('online');
   }

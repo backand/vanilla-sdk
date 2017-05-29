@@ -85,7 +85,7 @@ backand.init = (config = {}) => {
     http: Http.create({
       baseURL: defaults.apiUrl
     }),
-    offline: navigator ? !navigator.onLine : false,
+    offline: (typeof navigator != 'undefined') ? !navigator.onLine : false,
     forceOffline: false,
     offlineAt: null,
     detector,
