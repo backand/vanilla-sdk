@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 5/29/2017
+ * @Compiled At: 6/20/2017
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
@@ -13,7 +13,7 @@
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   4.0.5
+ * @version   4.1.0
  */
 
 (function (global, factory) {
@@ -321,6 +321,7 @@ function handleMaybeThenable(promise, maybeThenable, then$$) {
   } else {
     if (then$$ === GET_THEN_ERROR) {
       _reject(promise, GET_THEN_ERROR.error);
+      GET_THEN_ERROR.error = null;
     } else if (then$$ === undefined) {
       fulfill(promise, maybeThenable);
     } else if (isFunction(then$$)) {
@@ -441,7 +442,7 @@ function invokeCallback(settled, promise, callback, detail) {
     if (value === TRY_CATCH_ERROR) {
       failed = true;
       error = value.error;
-      value = null;
+      value.error = null;
     } else {
       succeeded = true;
     }
@@ -1165,6 +1166,7 @@ return Promise;
 
 })));
 
+
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"_process":2}],2:[function(require,module,exports){
 // shim for using process in browser
@@ -1337,6 +1339,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -1394,35 +1400,37 @@ var SOCIAL_PROVIDERS = exports.SOCIAL_PROVIDERS = {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 exports.default = {
-  appName: null,
-  anonymousToken: null,
-  useAnonymousTokenByDefault: true,
-  signUpToken: null,
+    appName: null,
+    anonymousToken: null,
+    useAnonymousTokenByDefault: true,
+    signUpToken: null,
+    masterToken: null,
+    userToken: null,
 
-  apiUrl: 'https://api.backand.com', // debug
-  exportUtils: false, // debug
+    apiUrl: 'https://api.backand.com', // debug
+    exportUtils: false, // debug
 
-  storage: {},
-  storagePrefix: 'BACKAND_',
+    storage: {},
+    storagePrefix: 'BACKAND_',
 
-  manageRefreshToken: true,
-  runSigninAfterSignup: true,
+    manageRefreshToken: true,
+    runSigninAfterSignup: true,
 
-  runSocket: false,
-  socketUrl: 'https://socket.backand.com', // debug
+    runSocket: false,
+    socketUrl: 'https://socket.backand.com', // debug
 
-  isMobile: false,
-  mobilePlatform: 'ionic',
+    isMobile: false,
+    mobilePlatform: 'ionic',
 
-  runOffline: false,
-  allowUpdatesinOfflineMode: false,
-  beforeExecuteOfflineItem: function beforeExecuteOfflineItem(request) {
-    return true;
-  },
-  afterExecuteOfflineItem: function afterExecuteOfflineItem(response, request) {}
+    runOffline: false,
+    allowUpdatesinOfflineMode: false,
+    beforeExecuteOfflineItem: function beforeExecuteOfflineItem(request) {
+        return true;
+    },
+    afterExecuteOfflineItem: function afterExecuteOfflineItem(response, request) {}
 };
 
 },{}],5:[function(require,module,exports){
@@ -1654,10 +1662,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     return;
   }
   local.Promise = _es6Promise.Promise;
-})(typeof self !== 'undefined' ? self : new Function('return this')());
-
+})(typeof self !== 'undefined' ? self : new Function('return this')()
 // TASK: run tests to identify the runtime environment
-var detector = (0, _detector2.default)();
+);var detector = (0, _detector2.default)();
 
 // TASK: set first defaults base on detector results
 _defaults2.default["storage"] = detector.env === 'browser' ? window.localStorage : new helpers.MemoryStorage();
@@ -1699,7 +1706,6 @@ backand.init = function () {
 
   // TASK: combine defaults with user config
   _extends(_defaults2.default, config);
-  // console.log(defaults);
 
   // TASK: verify new defaults
   if (!_defaults2.default.appName) throw new Error('appName is missing');
@@ -1716,21 +1722,23 @@ backand.init = function () {
     offlineAt: null,
     detector: detector
   });
+
+  if (_defaults2.default.masterToken && _defaults2.default.userToken) {
+    _auth2.default.useBasicAuth();
+  }
   if (_defaults2.default.runSocket) {
     _extends(_utils2.default, {
       socket: new _socket2.default(_defaults2.default.socketUrl)
     });
   }
-
   // TASK: sets http interceptors for authorization header & refresh tokens
   _utils2.default.http.config.interceptors = {
     request: _interceptors2.default.requestInterceptor,
     response: _interceptors2.default.responseInterceptor,
     responseError: _interceptors2.default.responseErrorInterceptor
-  };
 
-  // TASK: clean cache if needed
-  var storeUser = _utils2.default.storage.get('user');
+    // TASK: clean cache if needed
+  };var storeUser = _utils2.default.storage.get('user');
   if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== _defaults2.default.anonymousToken || !_defaults2.default.useAnonymousTokenByDefault)) {
     _utils2.default.storage.remove('user');
   }
@@ -1833,7 +1841,7 @@ exports.default = "!function(){var analytics=window.analytics=window.analytics||
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -1853,355 +1861,384 @@ var _fns = require('./../utils/fns');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-  __handleRefreshToken__: __handleRefreshToken__,
-  useAnonymousAuth: useAnonymousAuth,
-  signin: signin,
-  signup: signup,
-  socialSignin: socialSignin,
-  socialSigninWithToken: socialSigninWithToken,
-  socialSignup: socialSignup,
-  requestResetPassword: requestResetPassword,
-  resetPassword: resetPassword,
-  changePassword: changePassword,
-  signout: signout,
-  getSocialProviders: getSocialProviders
+    __handleRefreshToken__: __handleRefreshToken__,
+    useAnonymousAuth: useAnonymousAuth,
+    signin: signin,
+    signup: signup,
+    socialSignin: socialSignin,
+    socialSigninWithToken: socialSigninWithToken,
+    socialSignup: socialSignup,
+    requestResetPassword: requestResetPassword,
+    resetPassword: resetPassword,
+    changePassword: changePassword,
+    signout: signout,
+    getSocialProviders: getSocialProviders,
+    useBasicAuth: useBasicAuth,
+    getUserData: getUserData
 };
 
 
 function __authorize__(tokenData) {
-  var data = [];
-  Object.keys(tokenData).forEach(function (key) {
-    data.push(encodeURIComponent(key) + '=' + encodeURIComponent(tokenData[key]));
-  });
-  data = data.join("&");
-
-  return _utils2.default.http({
-    url: _constants.URLS.token,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    data: data + '&appName=' + _defaults2.default.appName + '&grant_type=password'
-  }).then(function (response) {
-    _utils2.default.storage.set('user', {
-      token: {
-        Authorization: 'Bearer ' + response.data.access_token
-      },
-      details: response.data
+    var data = [];
+    Object.keys(tokenData).forEach(function (key) {
+        data.push(encodeURIComponent(key) + '=' + encodeURIComponent(tokenData[key]));
     });
-    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNIN);
-    if (_defaults2.default.runSocket) {
-      _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
-    }
-    return response;
-  });
+    data = data.join("&");
+
+    return _utils2.default.http({
+        url: _constants.URLS.token,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: data + '&appName=' + _defaults2.default.appName + '&grant_type=password'
+    }).then(function (response) {
+        _utils2.default.storage.set('user', {
+            token: {
+                Authorization: 'Bearer ' + response.data.access_token
+            },
+            details: response.data
+        });
+        (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNIN);
+        if (_defaults2.default.runSocket) {
+            _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
+        }
+        return response;
+    });
+}
+// A function that sets the authorization in the storage and therefore in the header as basic auth,
+// the credentials are inserted in the init config.
+function useBasicAuth() {
+    return new Promise(function (resolve, reject) {
+        if (!_defaults2.default.userToken || !_defaults2.default.masterToken) {
+            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'userToken or masterToken are missing for basic authentication'));
+        } else {
+            var details = {
+                "token_type": "basic",
+                "expires_in": 0,
+                "appName": _defaults2.default.appName,
+                "role": "",
+                "firstName": "",
+                "lastName": "",
+                "fullName": "",
+                "regId": 0,
+                "userId": null
+            };
+            _utils2.default.storage.set('user', {
+                token: {
+                    Authorization: 'basic ' + window.btoa(_defaults2.default.masterToken + ':' + _defaults2.default.userToken)
+                },
+                details: details
+            });
+            resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, details, {}));
+        }
+    });
+}
+function getUserData() {
+    return _utils2.default.storage.get('user');
 }
 function __handleRefreshToken__() {
-  return new Promise(function (resolve, reject) {
-    var user = _utils2.default.storage.get('user');
-    if (!user || !user.details.refresh_token) {
-      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user or refreshToken found. authentication is required.', {}));
-    } else {
-      resolve(__authorize__({
-        username: user.details.username,
-        refreshToken: user.details.refresh_token
-      }));
-    }
-  });
+    return new Promise(function (resolve, reject) {
+        var user = _utils2.default.storage.get('user');
+        if (!user || !user.details.refresh_token) {
+            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user or refreshToken found. authentication is required.', {}));
+        } else {
+            resolve(__authorize__({
+                username: user.details.username,
+                refreshToken: user.details.refresh_token
+            }));
+        }
+    });
 }
 function useAnonymousAuth() {
-  return new Promise(function (resolve, reject) {
-    if (!_defaults2.default.anonymousToken) {
-      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'anonymousToken is missing', {}));
-    } else {
-      var details = {
-        // "access_token": defaults.anonymousToken,
-        "token_type": "AnonymousToken",
-        "expires_in": 0,
-        "appName": _defaults2.default.appName,
-        "username": "Guest",
-        "role": "User",
-        "firstName": "anonymous",
-        "lastName": "anonymous",
-        "fullName": "",
-        "regId": 0,
-        "userId": null
-      };
-      _utils2.default.storage.set('user', {
-        token: {
-          AnonymousToken: _defaults2.default.anonymousToken
-        },
-        details: details
-      });
-      // __dispatchEvent__(EVENTS.SIGNIN);
-      if (_defaults2.default.runSocket) {
-        _utils2.default.socket.connect(null, _defaults2.default.anonymousToken, _defaults2.default.appName);
-      }
-      resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, details, {}));
-    }
-  });
+    return new Promise(function (resolve, reject) {
+        if (!_defaults2.default.anonymousToken) {
+            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'anonymousToken is missing', {}));
+        } else {
+            var details = {
+                // "access_token": defaults.anonymousToken,
+                "token_type": "AnonymousToken",
+                "expires_in": 0,
+                "appName": _defaults2.default.appName,
+                "username": "Guest",
+                "role": "",
+                "firstName": "anonymous",
+                "lastName": "anonymous",
+                "fullName": "",
+                "regId": 0,
+                "userId": null
+            };
+            _utils2.default.storage.set('user', {
+                token: {
+                    AnonymousToken: _defaults2.default.anonymousToken
+                },
+                details: details
+            });
+            // __dispatchEvent__(EVENTS.SIGNIN);
+            if (_defaults2.default.runSocket) {
+                _utils2.default.socket.connect(null, _defaults2.default.anonymousToken, _defaults2.default.appName);
+            }
+            resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, details, {}));
+        }
+    });
 }
 function signin(username, password) {
-  return __authorize__({
-    username: username,
-    password: password
-  });
+    return __authorize__({
+        username: username,
+        password: password
+    });
 }
 function signup(firstName, lastName, email, password, confirmPassword) {
-  var parameters = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
+    var parameters = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
 
-  return _utils2.default.http({
-    url: _constants.URLS.signup,
-    method: 'POST',
-    headers: {
-      'SignUpToken': _defaults2.default.signUpToken
-    },
-    data: {
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: password,
-      confirmPassword: confirmPassword,
-      parameters: parameters
-    }
-  }).then(function (response) {
-    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
-    if (_defaults2.default.runSigninAfterSignup) {
-      return signin(response.data.username, password);
-    } else {
-      return response;
-    }
-  });
+    return _utils2.default.http({
+        url: _constants.URLS.signup,
+        method: 'POST',
+        headers: {
+            'SignUpToken': _defaults2.default.signUpToken
+        },
+        data: {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password,
+            confirmPassword: confirmPassword,
+            parameters: parameters
+        }
+    }).then(function (response) {
+        (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
+        if (_defaults2.default.runSigninAfterSignup) {
+            return signin(response.data.username, password);
+        } else {
+            return response;
+        }
+    });
 }
 function __getSocialUrl__(providerName, isSignup, isAutoSignUp) {
-  var provider = _constants.SOCIAL_PROVIDERS[providerName];
-  var action = isSignup ? 'up' : 'in';
-  var autoSignUpParam = '&signupIfNotSignedIn=' + (!isSignup && isAutoSignUp ? 'true' : 'false');
-  return '/user/socialSign' + action + '?provider=' + provider.name + autoSignUpParam + '&response_type=token&client_id=self&redirect_uri=' + provider.url + '&state=';
+    var provider = _constants.SOCIAL_PROVIDERS[providerName];
+    var action = isSignup ? 'up' : 'in';
+    var autoSignUpParam = '&signupIfNotSignedIn=' + (!isSignup && isAutoSignUp ? 'true' : 'false');
+    return '/user/socialSign' + action + '?provider=' + provider.name + autoSignUpParam + '&response_type=token&client_id=self&redirect_uri=' + provider.url + '&state=';
 }
 function __socialAuth__(provider, isSignUp, spec, email) {
-  return new Promise(function (resolve, reject) {
-    if (!_constants.SOCIAL_PROVIDERS[provider]) {
-      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Social Provider', {}));
-    }
-    var url = _defaults2.default.apiUrl + '/1/' + __getSocialUrl__(provider, isSignUp, true) + '&appname=' + _defaults2.default.appName + (email ? '&email=' + email : '') + '&returnAddress='; // ${location.href}
-    var popup = null;
-    if (_defaults2.default.isMobile) {
-      if (_defaults2.default.mobilePlatform === 'ionic') {
-        (function () {
-          var dummyReturnAddress = 'http://www.backandblabla.bla';
-          url += dummyReturnAddress;
-          var handler = function handler(e) {
-            if (e.url.indexOf(dummyReturnAddress) === 0) {
-              var dataMatch = /(data|error)=(.+)/.exec(e.url);
-              var res = {};
-              if (dataMatch && dataMatch[1] && dataMatch[2]) {
-                res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
-                res.status = dataMatch[1] === 'data' ? 200 : 0;
-              }
-              popup.removeEventListener('loadstart', handler, false);
-              if (popup && popup.close) {
-                popup.close();
-              }
-              if (res.status != 200) {
-                reject(res);
-              } else {
-                resolve(res);
-              }
-            }
-          };
-          popup = cordova.InAppBrowser.open(url, '_blank');
-          popup.addEventListener('loadstart', handler, false);
-        })();
-      } else if (_defaults2.default.mobilePlatform === 'react-native') {
-        reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'react-native is not supported yet for socials', {}));
-      } else {
-        reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'isMobile is true but mobilePlatform is not supported.\n          \'try contact us in request to add support for this platform', {}));
-      }
-    } else if (_utils2.default.detector.env === 'browser') {
-      (function () {
-        var handler = function handler(e) {
-          var url = e.type === 'message' ? e.origin : e.url;
-          // ie-location-origin-polyfill
-          if (!window.location.origin) {
-            window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
-          }
-          if (url.indexOf(window.location.origin) === -1) {
-            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
-          }
-
-          var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
-          window.removeEventListener('message', handler, false);
-          window.removeEventListener('storage', handler, false);
-          if (popup && popup.close) {
-            popup.close();
-          }
-          e.type === 'storage' && localStorage.removeItem(e.key);
-
-          if (res.status != 200) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        };
-        if (_utils2.default.detector.type !== 'Internet Explorer') {
-          popup = window.open(url, 'socialpopup', spec);
-          window.addEventListener('message', handler, false);
-        } else {
-          popup = window.open('', '', spec);
-          popup.location = url;
-          window.addEventListener('storage', handler, false);
+    return new Promise(function (resolve, reject) {
+        if (!_constants.SOCIAL_PROVIDERS[provider]) {
+            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Social Provider', {}));
         }
-      })();
-    } else if (_utils2.default.detector.env === 'node') {
-      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'socials are not supported in a nodejs environment', {}));
-    }
+        var url = _defaults2.default.apiUrl + '/1/' + __getSocialUrl__(provider, isSignUp, true) + '&appname=' + _defaults2.default.appName + (email ? '&email=' + email : '') + '&returnAddress='; // ${location.href}
+        var popup = null;
+        if (_defaults2.default.isMobile) {
+            if (_defaults2.default.mobilePlatform === 'ionic') {
+                var dummyReturnAddress = 'http://www.backandblabla.bla';
+                url += dummyReturnAddress;
+                var handler = function handler(e) {
+                    if (e.url.indexOf(dummyReturnAddress) === 0) {
+                        var dataMatch = /(data|error)=(.+)/.exec(e.url);
+                        var res = {};
+                        if (dataMatch && dataMatch[1] && dataMatch[2]) {
+                            res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
+                            res.status = dataMatch[1] === 'data' ? 200 : 0;
+                        }
+                        popup.removeEventListener('loadstart', handler, false);
+                        if (popup && popup.close) {
+                            popup.close();
+                        }
+                        if (res.status != 200) {
+                            reject(res);
+                        } else {
+                            resolve(res);
+                        }
+                    }
+                };
+                popup = cordova.InAppBrowser.open(url, '_blank');
+                popup.addEventListener('loadstart', handler, false);
+            } else if (_defaults2.default.mobilePlatform === 'react-native') {
+                reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'react-native is not supported yet for socials', {}));
+            } else {
+                reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'isMobile is true but mobilePlatform is not supported.\n          \'try contact us in request to add support for this platform', {}));
+            }
+        } else if (_utils2.default.detector.env === 'browser') {
+            var _handler = function _handler(e) {
+                var url = e.type === 'message' ? e.origin : e.url;
+                // ie-location-origin-polyfill
+                if (!window.location.origin) {
+                    window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+                }
+                if (url.indexOf(window.location.origin) === -1) {
+                    reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
+                }
 
-    if (popup && popup.focus) {
-      popup.focus();
-    }
-  });
+                var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
+                window.removeEventListener('message', _handler, false);
+                window.removeEventListener('storage', _handler, false);
+                if (popup && popup.close) {
+                    popup.close();
+                }
+                e.type === 'storage' && localStorage.removeItem(e.key);
+
+                if (res.status != 200) {
+                    reject(res);
+                } else {
+                    resolve(res);
+                }
+            };
+            if (_utils2.default.detector.type !== 'Internet Explorer') {
+                popup = window.open(url, 'socialpopup', spec);
+                window.addEventListener('message', _handler, false);
+            } else {
+                popup = window.open('', '', spec);
+                popup.location = url;
+                window.addEventListener('storage', _handler, false);
+            }
+        } else if (_utils2.default.detector.env === 'node') {
+            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'socials are not supported in a nodejs environment', {}));
+        }
+
+        if (popup && popup.focus) {
+            popup.focus();
+        }
+    });
 }
 function socialSignin(provider) {
-  var spec = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'left=1, top=1, width=500, height=560';
+    var spec = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'left=1, top=1, width=500, height=560';
 
-  return __socialAuth__(provider, false, spec, '').then(function (response) {
-    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
-    return __authorize__({
-      accessToken: response.data.access_token
+    return __socialAuth__(provider, false, spec, '').then(function (response) {
+        (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
+        return __authorize__({
+            accessToken: response.data.access_token
+        });
     });
-  });
 }
 function socialSigninWithToken(provider, token) {
-  return _utils2.default.http({
-    url: _constants.URLS.socialSigninWithToken.replace('PROVIDER', provider),
-    method: 'GET',
-    params: {
-      accessToken: token,
-      appName: _defaults2.default.appName,
-      signupIfNotSignedIn: true
-    }
-  }).then(function (response) {
-    _utils2.default.storage.set('user', {
-      token: {
-        Authorization: 'Bearer ' + response.data.access_token
-      },
-      details: response.data
-    });
-    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNIN);
-    if (_defaults2.default.runSocket) {
-      _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
-    }
-    // PATCH
     return _utils2.default.http({
-      url: _constants.URLS.objects + '/users',
-      method: 'GET',
-      params: {
-        filter: [{
-          "fieldName": "email",
-          "operator": "equals",
-          "value": response.data.username
-        }]
-      }
-    }).then(function (patch) {
-      var _patch$data$data$ = patch.data.data[0],
-          id = _patch$data$data$.id,
-          firstName = _patch$data$data$.firstName,
-          lastName = _patch$data$data$.lastName;
+        url: _constants.URLS.socialSigninWithToken.replace('PROVIDER', provider),
+        method: 'GET',
+        params: {
+            accessToken: token,
+            appName: _defaults2.default.appName,
+            signupIfNotSignedIn: true
+        }
+    }).then(function (response) {
+        _utils2.default.storage.set('user', {
+            token: {
+                Authorization: 'Bearer ' + response.data.access_token
+            },
+            details: response.data
+        });
+        (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNIN);
+        if (_defaults2.default.runSocket) {
+            _utils2.default.socket.connect(_utils2.default.storage.get('user').token.Authorization, _defaults2.default.anonymousToken, _defaults2.default.appName);
+        }
+        // PATCH
+        return _utils2.default.http({
+            url: _constants.URLS.objects + '/users',
+            method: 'GET',
+            params: {
+                filter: [{
+                    "fieldName": "email",
+                    "operator": "equals",
+                    "value": response.data.username
+                }]
+            }
+        }).then(function (patch) {
+            var _patch$data$data$ = patch.data.data[0],
+                id = _patch$data$data$.id,
+                firstName = _patch$data$data$.firstName,
+                lastName = _patch$data$data$.lastName;
 
-      var user = _utils2.default.storage.get('user');
-      var newDetails = { userId: id.toString(), firstName: firstName, lastName: lastName };
-      _utils2.default.storage.set('user', {
-        token: user.token,
-        details: _extends({}, user.details, newDetails)
-      });
-      user = _utils2.default.storage.get('user');
-      return (0, _fns.__generateFakeResponse__)(response.status, response.statusText, response.headers, user.details);
+            var user = _utils2.default.storage.get('user');
+            var newDetails = { userId: id.toString(), firstName: firstName, lastName: lastName };
+            _utils2.default.storage.set('user', {
+                token: user.token,
+                details: _extends({}, user.details, newDetails)
+            });
+            user = _utils2.default.storage.get('user');
+            return (0, _fns.__generateFakeResponse__)(response.status, response.statusText, response.headers, user.details);
+        });
+        // EOP
     });
-    // EOP
-  });
 }
 function socialSignup(provider, email) {
-  var spec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'left=1, top=1, width=500, height=560';
+    var spec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'left=1, top=1, width=500, height=560';
 
-  return __socialAuth__(provider, true, spec, email).then(function (response) {
-    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
-    if (_defaults2.default.runSigninAfterSignup) {
-      return __authorize__({
-        accessToken: response.data.access_token
-      });
-    } else {
-      return response;
-    }
-  });
+    return __socialAuth__(provider, true, spec, email).then(function (response) {
+        (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNUP);
+        if (_defaults2.default.runSigninAfterSignup) {
+            return __authorize__({
+                accessToken: response.data.access_token
+            });
+        } else {
+            return response;
+        }
+    });
 }
 function requestResetPassword(username) {
-  return _utils2.default.http({
-    url: _constants.URLS.requestResetPassword,
-    method: 'POST',
-    data: {
-      appName: _defaults2.default.appName,
-      username: username
-    }
-  });
+    return _utils2.default.http({
+        url: _constants.URLS.requestResetPassword,
+        method: 'POST',
+        data: {
+            appName: _defaults2.default.appName,
+            username: username
+        }
+    });
 }
 function resetPassword(newPassword, resetToken) {
-  return _utils2.default.http({
-    url: _constants.URLS.resetPassword,
-    method: 'POST',
-    data: {
-      newPassword: newPassword,
-      resetToken: resetToken
-    }
-  });
+    return _utils2.default.http({
+        url: _constants.URLS.resetPassword,
+        method: 'POST',
+        data: {
+            newPassword: newPassword,
+            resetToken: resetToken
+        }
+    });
 }
 function changePassword(oldPassword, newPassword) {
-  return _utils2.default.http({
-    url: _constants.URLS.changePassword,
-    method: 'POST',
-    data: {
-      oldPassword: oldPassword,
-      newPassword: newPassword
-    }
-  });
+    return _utils2.default.http({
+        url: _constants.URLS.changePassword,
+        method: 'POST',
+        data: {
+            oldPassword: oldPassword,
+            newPassword: newPassword
+        }
+    });
 }
 function __signoutBody__() {
-  return new Promise(function (resolve, reject) {
-    _utils2.default.storage.remove('user');
-    if (_defaults2.default.runSocket) {
-      _utils2.default.socket.disconnect();
-    }
-    (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNOUT);
-    resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, _utils2.default.storage.get('user'), {}));
-  });
+    return new Promise(function (resolve, reject) {
+        _utils2.default.storage.remove('user');
+        if (_defaults2.default.runSocket) {
+            _utils2.default.socket.disconnect();
+        }
+        (0, _fns.__dispatchEvent__)(_constants.EVENTS.SIGNOUT);
+        resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, _utils2.default.storage.get('user'), {}));
+    });
 }
 function signout() {
-  var storeUser = _utils2.default.storage.get('user');
-  if (storeUser) {
-    if (!storeUser.token["Authorization"]) {
-      return __signoutBody__();
+    var storeUser = _utils2.default.storage.get('user');
+    if (storeUser) {
+        if (!storeUser.token["Authorization"]) {
+            return __signoutBody__();
+        } else {
+            return _utils2.default.http({
+                url: _constants.URLS.signout,
+                method: 'GET'
+            }).then(function (res) {
+                return __signoutBody__();
+            }).catch(function (res) {
+                return __signoutBody__();
+            });
+        }
     } else {
-      return _utils2.default.http({
-        url: _constants.URLS.signout,
-        method: 'GET'
-      }).then(function (res) {
-        return __signoutBody__();
-      }).catch(function (res) {
-        return __signoutBody__();
-      });
+        return Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user found. cannot signout.', {}));
     }
-  } else {
-    return Promise.reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'No cached user found. cannot signout.', {}));
-  }
 }
 function getSocialProviders() {
-  return _utils2.default.http({
-    url: _constants.URLS.socialProviders,
-    method: 'GET',
-    params: {
-      appName: _defaults2.default.appName
-    }
-  });
+    return _utils2.default.http({
+        url: _constants.URLS.socialProviders,
+        method: 'GET',
+        params: {
+            appName: _defaults2.default.appName
+        }
+    });
 }
 
 },{"./../constants":3,"./../defaults":4,"./../utils/fns":17,"./../utils/utils":22}],9:[function(require,module,exports){

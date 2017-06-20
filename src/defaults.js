@@ -3,6 +3,8 @@ export default {
   anonymousToken: null,
   useAnonymousTokenByDefault: true,
   signUpToken: null,
+  masterToken: null,
+  userToken: null,
 
   apiUrl: 'https://api.backand.com', // debug
   exportUtils: false, // debug
@@ -21,6 +23,9 @@ export default {
 
   runOffline: false,
   allowUpdatesinOfflineMode: false,
-  beforeExecuteOfflineItem: (request) => { return true },
-  afterExecuteOfflineItem: (response, request) => { },
+  beforeExecuteOfflineItem: (request) => {
+    return true
+  },
+  afterExecuteOfflineItem: (response, request) => {
+  },
 };

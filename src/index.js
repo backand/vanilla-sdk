@@ -28,7 +28,6 @@ import { Promise } from 'es6-promise'
  }
   local.Promise = Promise;
 })(typeof self !== 'undefined' ? self : new Function('return this')())
-
 // TASK: run tests to identify the runtime environment
 var detector = detect();
 
@@ -71,7 +70,7 @@ backand.init = (config = {}) => {
 
   // TASK: combine defaults with user config
   Object.assign(defaults, config);
-  // console.log(defaults);
+
 
   // TASK: verify new defaults
   if (!defaults.appName)
@@ -90,12 +89,15 @@ backand.init = (config = {}) => {
     offlineAt: null,
     detector,
   });
+
+    if(defaults.masterToken && defaults.userToken){
+        auth.useBasicAuth();
+    }
   if (defaults.runSocket) {
     Object.assign(utils, {
       socket: new Socket(defaults.socketUrl)
     });
   }
-
   // TASK: sets http interceptors for authorization header & refresh tokens
   utils.http.config.interceptors = {
     request: interceptors.requestInterceptor,
