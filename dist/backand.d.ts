@@ -28,7 +28,6 @@ declare namespace backand {
   let invoke: any;
   // auth
   function useAnonymousAuth (): any;
-  function getUserData (): any;
   function signin (username: string, password: string): any;
   function signup (firstName: string, lastName: string, email: string, password: string, confirmPassword: string, parameters?: any): any;
   function socialSignin (provider: string): any;
