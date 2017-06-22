@@ -83,6 +83,24 @@ describe('Backand SDK', () => {
                     done(err);
                 })
         });
+      it('should get list with basicAuth', function () {
+        this.timeout(0);
+        return backand.object.getList('items');
+      });
+      it('should create a list with basicAuth', function (done) {
+        this.timeout(0);
+        backand.object.create('items', {
+          name: 'test',
+          description: 'new item'
+        })
+            .then(res => {
+              lastCreatedId = res.data.__metadata.id;
+              done();
+            })
+            .catch(err => {
+              done(err);
+            })
+      });
         it('useAnonymousTokenByDefault', function (done) {
             this.timeout(0);
             backand.signout()
@@ -436,12 +454,33 @@ describe('Backand SDK', () => {
     describe('backand.fn', () => {
         it('get', function () {
             this.timeout(0);
-            return backand.fn.get('lmTest1', {param: 'test'});
+          return backand.fn.get('lmTest1', {param: 'test'});
+        });
+        it('should return exact parameters from get', function(done){
+           backand.fn.get('jsTest1', {param: '+test'})
+               .then(res => {
+                   console.log(res);
+                   expect(res.data.param).to.eql('+test');
+                   done();
+               })
+               .catch(err => {
+                   done(err);
+               })
         });
         it('post', function () {
             this.timeout(0);
             return backand.fn.post('lmTest1', {}, {param: 'test'});
         });
+      it('should return exact parameters from post', function(done){
+        backand.fn.post('jsTest1', {param: '+test'})
+            .then(res => {
+              expect(res.data.param).to.eql('+test');
+              done();
+            })
+            .catch(err => {
+              done(err);
+            })
+      });
     });
     describe('backand.helpers', () => {
         it('should have some impotant keys', () => {

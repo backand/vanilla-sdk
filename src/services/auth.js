@@ -70,7 +70,7 @@ function useBasicAuth() {
       };
       utils.storage.set('user', {
         token: {
-          Authorization: `basic ` + window.btoa(defaults.masterToken + ':' + defaults.userToken)
+          Authorization: 'Basic ' + new Buffer(defaults.masterToken + ':' + defaults.userToken).toString('base64')
         },
         details: details
       });
