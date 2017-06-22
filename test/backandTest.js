@@ -61,6 +61,24 @@ describe('Backand SDK', () => {
                     done(err);
                 })
         });
+        it('getList with basic', function () {
+          this.timeout(0);
+          return backand.object.getList('items');
+        });
+        it('create with basic', function (done) {
+          this.timeout(0);
+          backand.object.create('items', {
+            name: 'test',
+            description: 'new item'
+          })
+              .then(res => {
+                lastCreatedId = res.data.__metadata.id;
+                done();
+              })
+              .catch(err => {
+                done(err);
+              })
+        });
         it('useAnonymousAuth', function (done) {
             this.timeout(0);
             backand.useAnonymousAuth()
