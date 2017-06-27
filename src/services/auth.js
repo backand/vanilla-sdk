@@ -17,6 +17,7 @@ export default {
   signout,
   getSocialProviders,
   useBasicAuth,
+  createBasicToken,
 }
 
 function __authorize__(tokenData) {
@@ -57,7 +58,7 @@ function useBasicAuth() {
     }
     else {
       let details = {
-        "token_type": "basic",
+        "token_type": "Basic",
         "expires_in": 0,
         "appName": defaults.appName,
         "username": "",
@@ -68,9 +69,10 @@ function useBasicAuth() {
         "regId": 0,
         "userId": null
       };
+      let basicToken = 'Basic ' + createBasicToken(defaults.masterToken, defaults.userToken);
       utils.storage.set('user', {
         token: {
-          Authorization: 'Basic ' + new Buffer(defaults.masterToken + ':' + defaults.userToken).toString('base64')
+          Authorization:  basicToken
         },
         details: details
       });
@@ -78,6 +80,9 @@ function useBasicAuth() {
     }
   });
 
+}
+function createBasicToken(masterToken, userToken){
+  return new Buffer(masterToken + ':' + userToken).toString('base64')
 }
 function __handleRefreshToken__() {
   return new Promise((resolve, reject) => {

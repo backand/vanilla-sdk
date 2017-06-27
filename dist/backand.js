@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 6/22/2017
+ * @Compiled At: 6/27/2017
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
@@ -3744,7 +3744,12 @@ backand.init = function () {
   if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== _defaults2.default.anonymousToken || !_defaults2.default.useAnonymousTokenByDefault)) {
     _utils2.default.storage.remove('user');
   }
-
+  if (storeUser && storeUser.token["Basic"] && storeUser.token["Basic"] !== _defaults2.default.createBasicToken(_defaults2.default.masterToken, _defaults2.default.userToken)) {
+    _utils2.default.storage.remove('user');
+  }
+  if (storeUser.accessToken && storeUser.appName !== _defaults2.default.appName) {
+    _utils2.default.storage.remove('user');
+  }
   // TASK: set offline events
   function afterProcessReq(request, response) {
     _defaults2.default.afterExecuteOfflineItem(response, request.payload);
@@ -3876,7 +3881,8 @@ exports.default = {
   changePassword: changePassword,
   signout: signout,
   getSocialProviders: getSocialProviders,
-  useBasicAuth: useBasicAuth
+  useBasicAuth: useBasicAuth,
+  createBasicToken: createBasicToken
 };
 
 
@@ -3916,7 +3922,7 @@ function useBasicAuth() {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'userToken or masterToken are missing for basic authentication'));
     } else {
       var details = {
-        "token_type": "basic",
+        "token_type": "Basic",
         "expires_in": 0,
         "appName": _defaults2.default.appName,
         "username": "",
@@ -3927,15 +3933,19 @@ function useBasicAuth() {
         "regId": 0,
         "userId": null
       };
+      var basicToken = 'Basic ' + createBasicToken(_defaults2.default.masterToken, _defaults2.default.userToken);
       _utils2.default.storage.set('user', {
         token: {
-          Authorization: 'Basic ' + new Buffer(_defaults2.default.masterToken + ':' + _defaults2.default.userToken).toString('base64')
+          Authorization: basicToken
         },
         details: details
       });
       resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, details, {}));
     }
   });
+}
+function createBasicToken(masterToken, userToken) {
+  return new Buffer(masterToken + ':' + userToken).toString('base64');
 }
 function __handleRefreshToken__() {
   return new Promise(function (resolve, reject) {

@@ -110,7 +110,12 @@ backand.init = (config = {}) => {
   if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== defaults.anonymousToken || !defaults.useAnonymousTokenByDefault)) {
     utils.storage.remove('user');
   }
-
+  if (storeUser && storeUser.token["Basic"] && (storeUser.token["Basic"] !== defaults.createBasicToken(defaults.masterToken, defaults.userToken))){
+    utils.storage.remove('user');
+  }
+  if(storeUser.accessToken && (storeUser.appName !== defaults.appName)){
+    utils.storage.remove('user');
+  }
   // TASK: set offline events
   function afterProcessReq(request, response) {
     defaults.afterExecuteOfflineItem(response, request.payload);
