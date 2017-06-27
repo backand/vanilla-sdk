@@ -11,6 +11,7 @@ export default {
 
   storage: {},
   storagePrefix: 'BACKAND_',
+  externalStorage: null,
 
   manageRefreshToken: true,
   runSigninAfterSignup: true,

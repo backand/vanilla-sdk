@@ -3417,6 +3417,7 @@ exports.default = {
 
   storage: {},
   storagePrefix: 'BACKAND_',
+  externalStorage: null,
 
   manageRefreshToken: true,
   runSigninAfterSignup: true,
@@ -3536,11 +3537,12 @@ var StorageAbstract = exports.StorageAbstract = function () {
 var MemoryStorage = exports.MemoryStorage = function (_StorageAbstract) {
   _inherits(MemoryStorage, _StorageAbstract);
 
-  function MemoryStorage() {
+  function MemoryStorage(externalStorage) {
     _classCallCheck(this, MemoryStorage);
 
     var _this = _possibleConstructorReturn(this, (MemoryStorage.__proto__ || Object.getPrototypeOf(MemoryStorage)).call(this));
 
+    _this.externalStorage = externalStorage;
     _this.data = {};
     return _this;
   }
@@ -3548,11 +3550,15 @@ var MemoryStorage = exports.MemoryStorage = function (_StorageAbstract) {
   _createClass(MemoryStorage, [{
     key: "setItem",
     value: function setItem(id, val) {
+      if (this.externalStorage && this.externalStorage.setItem) {
+        this.externalStorage.setItem(id, val);
+      }
       return this.data[id] = String(val);
     }
   }, {
     key: "getItem",
     value: function getItem(id) {
+      if (!this.data.hasOwnProperty(id) && this.externalStorage.getItem) this.data[id] = this.externalStorage.getItem(id);
       return this.data.hasOwnProperty(id) ? this.data[id] : null;
     }
   }, {
@@ -3712,6 +3718,7 @@ backand.init = function () {
   // TASK: verify new defaults
   if (!_defaults2.default.appName) throw new Error('appName is missing');
   if (!_defaults2.default.anonymousToken) _defaults2.default.useAnonymousTokenByDefault = false;
+  if (_defaults2.default.externalStorage) _defaults2.default.storage = new helpers.MemoryStorage(_defaults2.default.externalStorage);
 
   // TASK: init utils
   _extends(_utils2.default, {
