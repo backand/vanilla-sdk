@@ -77,6 +77,8 @@ backand.init = (config = {}) => {
     throw new Error('appName is missing');
   if (!defaults.anonymousToken)
     defaults.useAnonymousTokenByDefault = false;
+  if (defaults.externalStorage)
+    defaults.storage = new helpers.MemoryStorage(defaults.externalStorage);
 
   // TASK: init utils
   Object.assign(utils, {

@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 6/22/2017
+ * @Compiled At: 6/27/2017
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
@@ -42,22 +42,22 @@ function placeHoldersCount (b64) {
 
 function byteLength (b64) {
   // base64 is 4/3 + up to two characters of the original data
-  return b64.length * 3 / 4 - placeHoldersCount(b64)
+  return (b64.length * 3 / 4) - placeHoldersCount(b64)
 }
 
 function toByteArray (b64) {
-  var i, j, l, tmp, placeHolders, arr
+  var i, l, tmp, placeHolders, arr
   var len = b64.length
   placeHolders = placeHoldersCount(b64)
 
-  arr = new Arr(len * 3 / 4 - placeHolders)
+  arr = new Arr((len * 3 / 4) - placeHolders)
 
   // if there are placeholders, only get up to the last complete 4 chars
   l = placeHolders > 0 ? len - 4 : len
 
   var L = 0
 
-  for (i = 0, j = 0; i < l; i += 4, j += 3) {
+  for (i = 0; i < l; i += 4) {
     tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
     arr[L++] = (tmp >> 16) & 0xFF
     arr[L++] = (tmp >> 8) & 0xFF
@@ -3417,6 +3417,7 @@ exports.default = {
 
   storage: {},
   storagePrefix: 'BACKAND_',
+  externalStorage: null,
 
   manageRefreshToken: true,
   runSigninAfterSignup: true,
@@ -3536,11 +3537,12 @@ var StorageAbstract = exports.StorageAbstract = function () {
 var MemoryStorage = exports.MemoryStorage = function (_StorageAbstract) {
   _inherits(MemoryStorage, _StorageAbstract);
 
-  function MemoryStorage() {
+  function MemoryStorage(externalStorage) {
     _classCallCheck(this, MemoryStorage);
 
     var _this = _possibleConstructorReturn(this, (MemoryStorage.__proto__ || Object.getPrototypeOf(MemoryStorage)).call(this));
 
+    _this.externalStorage = externalStorage;
     _this.data = {};
     return _this;
   }
@@ -3548,11 +3550,15 @@ var MemoryStorage = exports.MemoryStorage = function (_StorageAbstract) {
   _createClass(MemoryStorage, [{
     key: "setItem",
     value: function setItem(id, val) {
+      if (this.externalStorage && this.externalStorage.setItem) {
+        this.externalStorage.setItem(id, val);
+      }
       return this.data[id] = String(val);
     }
   }, {
     key: "getItem",
     value: function getItem(id) {
+      if (!this.data.hasOwnProperty(id) && this.externalStorage.getItem) this.data[id] = this.externalStorage.getItem(id);
       return this.data.hasOwnProperty(id) ? this.data[id] : null;
     }
   }, {
@@ -3664,9 +3670,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     return;
   }
   local.Promise = _es6Promise.Promise;
-})(typeof self !== 'undefined' ? self : new Function('return this')()
+})(typeof self !== 'undefined' ? self : new Function('return this')());
 // TASK: run tests to identify the runtime environment
-);var detector = (0, _detector2.default)();
+var detector = (0, _detector2.default)();
 
 // TASK: set first defaults base on detector results
 _defaults2.default["storage"] = detector.env === 'browser' ? window.localStorage : new helpers.MemoryStorage();
@@ -3712,6 +3718,7 @@ backand.init = function () {
   // TASK: verify new defaults
   if (!_defaults2.default.appName) throw new Error('appName is missing');
   if (!_defaults2.default.anonymousToken) _defaults2.default.useAnonymousTokenByDefault = false;
+  if (_defaults2.default.externalStorage) _defaults2.default.storage = new helpers.MemoryStorage(_defaults2.default.externalStorage);
 
   // TASK: init utils
   _extends(_utils2.default, {
