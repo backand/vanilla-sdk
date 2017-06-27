@@ -5086,12 +5086,31 @@ var Http = function () {
   }, {
     key: '_encodeParams',
     value: function _encodeParams(params) {
-      var paramsArr = [];
+      var paramsArr = [],
+          i = void 0,
+          v = void 0,
+          objValue = void 0;
+      console.log(params);
       for (var param in params) {
         var val = params[param];
-        if ((typeof val === 'undefined' ? 'undefined' : _typeof(val)) === 'object') {
+        if (Array.isArray(val)) {
+          for (i = 0; i < val.length; i++) {
+            for (v in val[i]) {
+              val[i][v] = encodeURIComponent(val[i][v]);
+            }
+          }
           val = JSON.stringify(val);
+        } else if ((typeof val === 'undefined' ? 'undefined' : _typeof(val)) === 'object') {
+          for (objValue in val) {
+            val[objValue] = encodeURIComponent(val[objValue]);
+          }
+          val = JSON.stringify(val);
+        } else {
+          val = encodeURIComponent(val);
         }
+
+        console.log(val);
+        console.log(encodeURIComponent(val));
         paramsArr.push(param + '=' + encodeURIComponent(val));
       }
       return paramsArr.join('&');
@@ -5123,6 +5142,7 @@ var Http = function () {
       var cfg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       return new Promise(function (resolve, reject) {
+
         var config = _extends({}, _this.defaults, cfg);
         if (!config.url || typeof config.url !== 'string' || config.url.length === 0) {
           reject(_this._handleError('url parameter is missing', config));
@@ -5136,6 +5156,7 @@ var Http = function () {
         return new Promise(function (resolve, reject) {
           var req = new XMLHttpRequest();
           var params = _this._encodeParams(config.params);
+          console.log(params);
           req.open(config.method, '' + (config.baseURL ? config.baseURL + '/' : '') + config.url + (params ? '?' + params : ''), true, config.auth.username, config.auth.password);
           req.withCredentials = config.withCredentials || false;
           req.timeout = config.timeout || 0;

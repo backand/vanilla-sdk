@@ -472,12 +472,13 @@ describe('Backand SDK', () => {
     describe('backand.fn', () => {
         it('get', function () {
             this.timeout(0);
+            console.log('test1');
           return backand.fn.get('lmTest1', {param: 'test'});
         });
         it('should return exact parameters from get', function(done){
+          console.log('test2');
            backand.fn.get('jsTest1', {param: '+test'})
                .then(res => {
-                   console.log(res);
                    expect(res.data.param).to.eql('+test');
                    done();
                })
@@ -487,9 +488,11 @@ describe('Backand SDK', () => {
         });
         it('post', function () {
             this.timeout(0);
+          console.log('test3');
             return backand.fn.post('lmTest1', {}, {param: 'test'});
         });
       it('should return exact parameters from post', function(done){
+        console.log('test4');
         backand.fn.post('jsTest1', {param: '+test'})
             .then(res => {
               expect(res.data.param).to.eql('+test');
