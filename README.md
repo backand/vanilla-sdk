@@ -600,3 +600,13 @@ backand.offline.queue;
 ## License
 
   [MIT](LICENSE)
+
+<!---
+Internal deployment to all SDK's
+
+1. Run 'npm run patch'
+2. Run 'npm publish'
+3. Run from TeamCity: Build Deploy and Publish
+4. Only for Angular 1, open project: angular1-sdk and run 'npm run patch' - for now ignore the error in the end
+5. Ready to be tested!
+-->
