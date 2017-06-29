@@ -1,7 +1,7 @@
 {
   "name": "backand-vanilla-sdk",
   "description": "Backand SDK for JavaScript",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "main": [
     "dist/backand.js"
   ],
