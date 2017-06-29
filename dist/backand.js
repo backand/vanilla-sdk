@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 6/27/2017
+ * @Compiled At: 6/29/2017
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
@@ -1922,7 +1922,7 @@ function isnan (val) {
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   4.1.0
+ * @version   4.0.5
  */
 
 (function (global, factory) {
@@ -2230,7 +2230,6 @@ function handleMaybeThenable(promise, maybeThenable, then$$) {
   } else {
     if (then$$ === GET_THEN_ERROR) {
       _reject(promise, GET_THEN_ERROR.error);
-      GET_THEN_ERROR.error = null;
     } else if (then$$ === undefined) {
       fulfill(promise, maybeThenable);
     } else if (isFunction(then$$)) {
@@ -2351,7 +2350,7 @@ function invokeCallback(settled, promise, callback, detail) {
     if (value === TRY_CATCH_ERROR) {
       failed = true;
       error = value.error;
-      value.error = null;
+      value = null;
     } else {
       succeeded = true;
     }
@@ -3075,7 +3074,6 @@ return Promise;
 
 })));
 
-
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"_process":6}],4:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -3341,10 +3339,6 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -3670,9 +3664,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     return;
   }
   local.Promise = _es6Promise.Promise;
-})(typeof self !== 'undefined' ? self : new Function('return this')()
+})(typeof self !== 'undefined' ? self : new Function('return this')());
 // TASK: run tests to identify the runtime environment
-);var detector = (0, _detector2.default)();
+var detector = (0, _detector2.default)();
 
 // TASK: set first defaults base on detector results
 _defaults2.default["storage"] = detector.env === 'browser' ? window.localStorage : new helpers.MemoryStorage();
@@ -3745,16 +3739,18 @@ backand.init = function () {
     request: _interceptors2.default.requestInterceptor,
     response: _interceptors2.default.responseInterceptor,
     responseError: _interceptors2.default.responseErrorInterceptor
+  };
 
-    // TASK: clean cache if needed
-  };var storeUser = _utils2.default.storage.get('user');
+  // TASK: clean cache if needed
+  var storeUser = _utils2.default.storage.get('user');
   if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== _defaults2.default.anonymousToken || !_defaults2.default.useAnonymousTokenByDefault)) {
     _utils2.default.storage.remove('user');
   }
   if (storeUser && storeUser.token["Basic"] && storeUser.token["Basic"] !== _defaults2.default.createBasicToken(_defaults2.default.masterToken, _defaults2.default.userToken)) {
     _utils2.default.storage.remove('user');
   }
-  if (storeUser.accessToken && storeUser.appName !== _defaults2.default.appName) {
+
+  if (storeUser && storeUser.details.access_token && storeUser.details.appName !== _defaults2.default.appName) {
     _utils2.default.storage.remove('user');
   }
   // TASK: set offline events
@@ -4046,67 +4042,71 @@ function __socialAuth__(provider, isSignUp, spec, email) {
     var popup = null;
     if (_defaults2.default.isMobile) {
       if (_defaults2.default.mobilePlatform === 'ionic') {
-        var dummyReturnAddress = 'http://www.backandblabla.bla';
-        url += dummyReturnAddress;
-        var handler = function handler(e) {
-          if (e.url.indexOf(dummyReturnAddress) === 0) {
-            var dataMatch = /(data|error)=(.+)/.exec(e.url);
-            var res = {};
-            if (dataMatch && dataMatch[1] && dataMatch[2]) {
-              res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
-              res.status = dataMatch[1] === 'data' ? 200 : 0;
+        (function () {
+          var dummyReturnAddress = 'http://www.backandblabla.bla';
+          url += dummyReturnAddress;
+          var handler = function handler(e) {
+            if (e.url.indexOf(dummyReturnAddress) === 0) {
+              var dataMatch = /(data|error)=(.+)/.exec(e.url);
+              var res = {};
+              if (dataMatch && dataMatch[1] && dataMatch[2]) {
+                res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
+                res.status = dataMatch[1] === 'data' ? 200 : 0;
+              }
+              popup.removeEventListener('loadstart', handler, false);
+              if (popup && popup.close) {
+                popup.close();
+              }
+              if (res.status != 200) {
+                reject(res);
+              } else {
+                resolve(res);
+              }
             }
-            popup.removeEventListener('loadstart', handler, false);
-            if (popup && popup.close) {
-              popup.close();
-            }
-            if (res.status != 200) {
-              reject(res);
-            } else {
-              resolve(res);
-            }
-          }
-        };
-        popup = cordova.InAppBrowser.open(url, '_blank');
-        popup.addEventListener('loadstart', handler, false);
+          };
+          popup = cordova.InAppBrowser.open(url, '_blank');
+          popup.addEventListener('loadstart', handler, false);
+        })();
       } else if (_defaults2.default.mobilePlatform === 'react-native') {
         reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'react-native is not supported yet for socials', {}));
       } else {
         reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'isMobile is true but mobilePlatform is not supported.\n          \'try contact us in request to add support for this platform', {}));
       }
     } else if (_utils2.default.detector.env === 'browser') {
-      var _handler = function _handler(e) {
-        var url = e.type === 'message' ? e.origin : e.url;
-        // ie-location-origin-polyfill
-        if (!window.location.origin) {
-          window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
-        }
-        if (url.indexOf(window.location.origin) === -1) {
-          reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
-        }
+      (function () {
+        var handler = function handler(e) {
+          var url = e.type === 'message' ? e.origin : e.url;
+          // ie-location-origin-polyfill
+          if (!window.location.origin) {
+            window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+          }
+          if (url.indexOf(window.location.origin) === -1) {
+            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
+          }
 
-        var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
-        window.removeEventListener('message', _handler, false);
-        window.removeEventListener('storage', _handler, false);
-        if (popup && popup.close) {
-          popup.close();
-        }
-        e.type === 'storage' && localStorage.removeItem(e.key);
+          var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
+          window.removeEventListener('message', handler, false);
+          window.removeEventListener('storage', handler, false);
+          if (popup && popup.close) {
+            popup.close();
+          }
+          e.type === 'storage' && localStorage.removeItem(e.key);
 
-        if (res.status != 200) {
-          reject(res);
+          if (res.status != 200) {
+            reject(res);
+          } else {
+            resolve(res);
+          }
+        };
+        if (_utils2.default.detector.type !== 'Internet Explorer') {
+          popup = window.open(url, 'socialpopup', spec);
+          window.addEventListener('message', handler, false);
         } else {
-          resolve(res);
+          popup = window.open('', '', spec);
+          popup.location = url;
+          window.addEventListener('storage', handler, false);
         }
-      };
-      if (_utils2.default.detector.type !== 'Internet Explorer') {
-        popup = window.open(url, 'socialpopup', spec);
-        window.addEventListener('message', _handler, false);
-      } else {
-        popup = window.open('', '', spec);
-        popup.location = url;
-        window.addEventListener('storage', _handler, false);
-      }
+      })();
     } else if (_utils2.default.detector.env === 'node') {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'socials are not supported in a nodejs environment', {}));
     }
@@ -5089,14 +5089,17 @@ var Http = function () {
       var paramsArr = [],
           i = void 0,
           v = void 0,
+          e = void 0,
           objValue = void 0;
       console.log(params);
       for (var param in params) {
         var val = params[param];
         if (Array.isArray(val)) {
           for (i = 0; i < val.length; i++) {
-            for (v in val[i]) {
-              val[i][v] = encodeURIComponent(val[i][v]);
+            if (_typeof(val[i]) === 'object') {
+              for (v in val[i]) {
+                val[i][v] = encodeURIComponent(val[i][v]);
+              }
             }
           }
           val = JSON.stringify(val);
@@ -5108,9 +5111,6 @@ var Http = function () {
         } else {
           val = encodeURIComponent(val);
         }
-
-        console.log(val);
-        console.log(encodeURIComponent(val));
         paramsArr.push(param + '=' + encodeURIComponent(val));
       }
       return paramsArr.join('&');

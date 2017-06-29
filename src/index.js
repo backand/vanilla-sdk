@@ -115,7 +115,8 @@ backand.init = (config = {}) => {
   if (storeUser && storeUser.token["Basic"] && (storeUser.token["Basic"] !== defaults.createBasicToken(defaults.masterToken, defaults.userToken))){
     utils.storage.remove('user');
   }
-  if(storeUser.accessToken && (storeUser.appName !== defaults.appName)){
+
+  if (storeUser && storeUser.details.access_token && storeUser.details.appName !== defaults.appName) {
     utils.storage.remove('user');
   }
   // TASK: set offline events
