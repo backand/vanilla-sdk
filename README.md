@@ -114,7 +114,7 @@ Below is a list of the properties offered by the SDK, a description of the funct
 | ---- | ----------- | ------- |
 | constants | EVENTS, URLS, SOCIALS | Provides access to constants in the SDK |
 | helpers | `filter`, `sort`, `exclude`, `StorageAbstract` | Provides helper methods for working with the SDK |
-| direct properties | `useAnonymousAuth`, `signin`, `signup`, `socialSignin`, `socialSigninWithToken`, `socialSignup`, `requestResetPassword`, `resetPassword`, `changePassword`, `signout`, `getSocialProviders` | These are properties available directly on the Backand SDK object, mostly focused on Authentication |
+| direct properties | `useAnonymousAuth`, `useBasicAuth`, `signin`, `signup`, `socialSignin`, `socialSigninWithToken`, `socialSignup`, `requestResetPassword`, `resetPassword`, `changePassword`, `signout`, `getSocialProviders` | These are properties available directly on the Backand SDK object, mostly focused on Authentication |
 | defaults | *none* | This stores the current app's configuration in the SDK |
 | object | `getList`, `create`, `getOne`, `update`, `remove`, `get` (action), `post` (action) | This encapsulates all methods used to manipulate objects |
 | file | `upload`, `remove` | Provides helper methods for working with files |
