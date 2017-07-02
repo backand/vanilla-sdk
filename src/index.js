@@ -112,7 +112,7 @@ backand.init = (config = {}) => {
   if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== defaults.anonymousToken || !defaults.useAnonymousTokenByDefault)) {
     utils.storage.remove('user');
   }
-  if (storeUser && storeUser.token["Basic"] && (storeUser.token["Basic"] !== defaults.createBasicToken(defaults.masterToken, defaults.userToken))){
+  if (storeUser && storeUser.details.token_type && (storeUser.details.token_type === "Basic" && storeUser.token['Authorization'] !== 'Basic ' + auth.createBasicToken(defaults.masterToken, defaults.userToken))){
     utils.storage.remove('user');
   }
 

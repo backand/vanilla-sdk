@@ -1,10 +1,10 @@
 /*********************************************************
  * @backand/vanilla-sdk - Backand SDK for JavaScript
- * @version v1.2.6
+ * @version v1.2.7
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 6/29/2017
+ * @Compiled At: 7/2/2017
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
@@ -42,22 +42,22 @@ function placeHoldersCount (b64) {
 
 function byteLength (b64) {
   // base64 is 4/3 + up to two characters of the original data
-  return b64.length * 3 / 4 - placeHoldersCount(b64)
+  return (b64.length * 3 / 4) - placeHoldersCount(b64)
 }
 
 function toByteArray (b64) {
-  var i, j, l, tmp, placeHolders, arr
+  var i, l, tmp, placeHolders, arr
   var len = b64.length
   placeHolders = placeHoldersCount(b64)
 
-  arr = new Arr(len * 3 / 4 - placeHolders)
+  arr = new Arr((len * 3 / 4) - placeHolders)
 
   // if there are placeholders, only get up to the last complete 4 chars
   l = placeHolders > 0 ? len - 4 : len
 
   var L = 0
 
-  for (i = 0, j = 0; i < l; i += 4, j += 3) {
+  for (i = 0; i < l; i += 4) {
     tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
     arr[L++] = (tmp >> 16) & 0xFF
     arr[L++] = (tmp >> 8) & 0xFF
@@ -1922,7 +1922,7 @@ function isnan (val) {
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   4.0.5
+ * @version   4.1.0
  */
 
 (function (global, factory) {
@@ -2230,6 +2230,7 @@ function handleMaybeThenable(promise, maybeThenable, then$$) {
   } else {
     if (then$$ === GET_THEN_ERROR) {
       _reject(promise, GET_THEN_ERROR.error);
+      GET_THEN_ERROR.error = null;
     } else if (then$$ === undefined) {
       fulfill(promise, maybeThenable);
     } else if (isFunction(then$$)) {
@@ -2350,7 +2351,7 @@ function invokeCallback(settled, promise, callback, detail) {
     if (value === TRY_CATCH_ERROR) {
       failed = true;
       error = value.error;
-      value = null;
+      value.error = null;
     } else {
       succeeded = true;
     }
@@ -3074,6 +3075,7 @@ return Promise;
 
 })));
 
+
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"_process":6}],4:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -3339,6 +3341,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -3552,7 +3558,7 @@ var MemoryStorage = exports.MemoryStorage = function (_StorageAbstract) {
   }, {
     key: "getItem",
     value: function getItem(id) {
-      if (!this.data.hasOwnProperty(id) && this.externalStorage.getItem) this.data[id] = this.externalStorage.getItem(id);
+      if (!this.data.hasOwnProperty(id) && this.externalStorage && this.externalStorage.getItem) this.data[id] = this.externalStorage.getItem(id);
       return this.data.hasOwnProperty(id) ? this.data[id] : null;
     }
   }, {
@@ -3739,14 +3745,13 @@ backand.init = function () {
     request: _interceptors2.default.requestInterceptor,
     response: _interceptors2.default.responseInterceptor,
     responseError: _interceptors2.default.responseErrorInterceptor
-  };
 
-  // TASK: clean cache if needed
-  var storeUser = _utils2.default.storage.get('user');
+    // TASK: clean cache if needed
+  };var storeUser = _utils2.default.storage.get('user');
   if (storeUser && storeUser.token["AnonymousToken"] && (storeUser.token["AnonymousToken"] !== _defaults2.default.anonymousToken || !_defaults2.default.useAnonymousTokenByDefault)) {
     _utils2.default.storage.remove('user');
   }
-  if (storeUser && storeUser.token["Basic"] && storeUser.token["Basic"] !== _defaults2.default.createBasicToken(_defaults2.default.masterToken, _defaults2.default.userToken)) {
+  if (storeUser && storeUser.details.token_type && storeUser.details.token_type === "Basic" && storeUser.token['Authorization'] !== 'Basic ' + _auth2.default.createBasicToken(_defaults2.default.masterToken, _defaults2.default.userToken)) {
     _utils2.default.storage.remove('user');
   }
 
@@ -4042,71 +4047,67 @@ function __socialAuth__(provider, isSignUp, spec, email) {
     var popup = null;
     if (_defaults2.default.isMobile) {
       if (_defaults2.default.mobilePlatform === 'ionic') {
-        (function () {
-          var dummyReturnAddress = 'http://www.backandblabla.bla';
-          url += dummyReturnAddress;
-          var handler = function handler(e) {
-            if (e.url.indexOf(dummyReturnAddress) === 0) {
-              var dataMatch = /(data|error)=(.+)/.exec(e.url);
-              var res = {};
-              if (dataMatch && dataMatch[1] && dataMatch[2]) {
-                res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
-                res.status = dataMatch[1] === 'data' ? 200 : 0;
-              }
-              popup.removeEventListener('loadstart', handler, false);
-              if (popup && popup.close) {
-                popup.close();
-              }
-              if (res.status != 200) {
-                reject(res);
-              } else {
-                resolve(res);
-              }
+        var dummyReturnAddress = 'http://www.backandblabla.bla';
+        url += dummyReturnAddress;
+        var handler = function handler(e) {
+          if (e.url.indexOf(dummyReturnAddress) === 0) {
+            var dataMatch = /(data|error)=(.+)/.exec(e.url);
+            var res = {};
+            if (dataMatch && dataMatch[1] && dataMatch[2]) {
+              res.data = JSON.parse(decodeURIComponent(dataMatch[2].replace(/#.*/, '')));
+              res.status = dataMatch[1] === 'data' ? 200 : 0;
             }
-          };
-          popup = cordova.InAppBrowser.open(url, '_blank');
-          popup.addEventListener('loadstart', handler, false);
-        })();
+            popup.removeEventListener('loadstart', handler, false);
+            if (popup && popup.close) {
+              popup.close();
+            }
+            if (res.status != 200) {
+              reject(res);
+            } else {
+              resolve(res);
+            }
+          }
+        };
+        popup = cordova.InAppBrowser.open(url, '_blank');
+        popup.addEventListener('loadstart', handler, false);
       } else if (_defaults2.default.mobilePlatform === 'react-native') {
         reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'react-native is not supported yet for socials', {}));
       } else {
         reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'isMobile is true but mobilePlatform is not supported.\n          \'try contact us in request to add support for this platform', {}));
       }
     } else if (_utils2.default.detector.env === 'browser') {
-      (function () {
-        var handler = function handler(e) {
-          var url = e.type === 'message' ? e.origin : e.url;
-          // ie-location-origin-polyfill
-          if (!window.location.origin) {
-            window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
-          }
-          if (url.indexOf(window.location.origin) === -1) {
-            reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
-          }
-
-          var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
-          window.removeEventListener('message', handler, false);
-          window.removeEventListener('storage', handler, false);
-          if (popup && popup.close) {
-            popup.close();
-          }
-          e.type === 'storage' && localStorage.removeItem(e.key);
-
-          if (res.status != 200) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        };
-        if (_utils2.default.detector.type !== 'Internet Explorer') {
-          popup = window.open(url, 'socialpopup', spec);
-          window.addEventListener('message', handler, false);
-        } else {
-          popup = window.open('', '', spec);
-          popup.location = url;
-          window.addEventListener('storage', handler, false);
+      var _handler = function _handler(e) {
+        var url = e.type === 'message' ? e.origin : e.url;
+        // ie-location-origin-polyfill
+        if (!window.location.origin) {
+          window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
         }
-      })();
+        if (url.indexOf(window.location.origin) === -1) {
+          reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'Unknown Origin Message', {}));
+        }
+
+        var res = e.type === 'message' ? JSON.parse(e.data) : JSON.parse(e.newValue);
+        window.removeEventListener('message', _handler, false);
+        window.removeEventListener('storage', _handler, false);
+        if (popup && popup.close) {
+          popup.close();
+        }
+        e.type === 'storage' && localStorage.removeItem(e.key);
+
+        if (res.status != 200) {
+          reject(res);
+        } else {
+          resolve(res);
+        }
+      };
+      if (_utils2.default.detector.type !== 'Internet Explorer') {
+        popup = window.open(url, 'socialpopup', spec);
+        window.addEventListener('message', _handler, false);
+      } else {
+        popup = window.open('', '', spec);
+        popup.location = url;
+        window.addEventListener('storage', _handler, false);
+      }
     } else if (_utils2.default.detector.env === 'node') {
       reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'socials are not supported in a nodejs environment', {}));
     }
