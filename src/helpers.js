@@ -80,7 +80,7 @@ export class MemoryStorage extends StorageAbstract{
     return this.data[id] = String(val);
   }
   getItem (id) {
-    if (!this.data.hasOwnProperty(id) && this.externalStorage.getItem)
+    if (!this.data.hasOwnProperty(id) && this.externalStorage && this.externalStorage.getItem)
       this.data[id] = this.externalStorage.getItem(id);
     return this.data.hasOwnProperty(id) ? this.data[id] : null;
   }
