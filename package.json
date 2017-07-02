@@ -18,6 +18,7 @@
     "start": "browser-sync start -s ./example/ -f ./dist/ ./example/ --ss ./dist/                 --port 3000",
     "test": "browser-sync start -s ./test/    -f ./dist/ ./test/    --ss ./dist/ ./node_modules/ --port 3000 --index runner.html",
     "patch": "npm version patch -m \"Release version %s\"",
+    "preversion": "npm test",
     "version": "npm run build && gulp bower && git add -A",
     "postversion": "git push && git push --tags"
   },
