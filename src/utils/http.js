@@ -62,7 +62,6 @@ class Http {
 
   _encodeParams(params) {
     let paramsArr = [], i, v, e, objValue;
-    console.log(params);
     for (let param in params) {
       let val = params[param];
       if (Array.isArray(val)) {
@@ -125,7 +124,6 @@ class Http {
       return new Promise((resolve, reject) => {
         let req = new XMLHttpRequest();
         let params = this._encodeParams(config.params);
-        console.log(params);
         req.open(config.method, `${config.baseURL ? config.baseURL + '/' : ''}${config.url}${params ? '?' + params : ''}`, true, config.auth.username, config.auth.password);
         req.withCredentials = config.withCredentials || false;
         req.timeout = config.timeout || 0;
