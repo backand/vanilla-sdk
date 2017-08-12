@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 7/1/2017
+ * @Compiled At: 8/12/2017
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
@@ -5092,21 +5092,25 @@ var Http = function () {
           v = void 0,
           e = void 0,
           objValue = void 0;
-      console.log(params);
       for (var param in params) {
         var val = params[param];
         if (Array.isArray(val)) {
           for (i = 0; i < val.length; i++) {
             if (_typeof(val[i]) === 'object') {
               for (v in val[i]) {
-                val[i][v] = encodeURIComponent(val[i][v]);
+                var valuecheck = val[i][v].toString();
+                if (valuecheck.includes('+')) {
+                  val[i][v] = encodeURIComponent(val[i][v]);
+                }
               }
             }
           }
           val = JSON.stringify(val);
         } else if ((typeof val === 'undefined' ? 'undefined' : _typeof(val)) === 'object') {
           for (objValue in val) {
-            val[objValue] = encodeURIComponent(val[objValue]);
+            if (val[objValue].includes('+')) {
+              val[objValue] = encodeURIComponent(val[objValue]);
+            }
           }
           val = JSON.stringify(val);
         } else {
@@ -5114,7 +5118,8 @@ var Http = function () {
         }
         paramsArr.push(param + '=' + encodeURIComponent(val));
       }
-      return paramsArr.join('&');
+      var join = paramsArr.join('&');
+      return join;
     }
   }, {
     key: '_setHeaders',
@@ -5157,7 +5162,6 @@ var Http = function () {
         return new Promise(function (resolve, reject) {
           var req = new XMLHttpRequest();
           var params = _this._encodeParams(config.params);
-          console.log(params);
           req.open(config.method, '' + (config.baseURL ? config.baseURL + '/' : '') + config.url + (params ? '?' + params : ''), true, config.auth.username, config.auth.password);
           req.withCredentials = config.withCredentials || false;
           req.timeout = config.timeout || 0;

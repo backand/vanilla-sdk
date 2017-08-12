@@ -62,14 +62,16 @@ class Http {
 
   _encodeParams(params) {
     let paramsArr = [], i, v, e, objValue;
-    console.log(params);
     for (let param in params) {
       let val = params[param];
       if (Array.isArray(val)) {
         for (i = 0; i < val.length; i++) {
           if(typeof val[i] === 'object'){
             for (v in val[i]) {
-              val[i][v] = encodeURIComponent(val[i][v]);
+              let valuecheck = val[i][v].toString();
+              if(valuecheck.includes('+')) {
+                val[i][v] = encodeURIComponent(val[i][v]);
+              }
             }
           }
         }
@@ -77,7 +79,9 @@ class Http {
       }
       else if (typeof val === 'object') {
         for (objValue in val) {
-          val[objValue] = encodeURIComponent(val[objValue]);
+          if(val[objValue].includes('+')) {
+            val[objValue] = encodeURIComponent(val[objValue]);
+          }
         }
         val = JSON.stringify(val);
       }
@@ -125,7 +129,6 @@ class Http {
       return new Promise((resolve, reject) => {
         let req = new XMLHttpRequest();
         let params = this._encodeParams(config.params);
-        console.log(params);
         req.open(config.method, `${config.baseURL ? config.baseURL + '/' : ''}${config.url}${params ? '?' + params : ''}`, true, config.auth.username, config.auth.password);
         req.withCredentials = config.withCredentials || false;
         req.timeout = config.timeout || 0;
