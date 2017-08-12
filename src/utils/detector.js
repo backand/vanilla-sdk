@@ -129,7 +129,6 @@ export default function detect ()  {
     result.type = 'unknown'
   }
 
-  result.device !== 'unknown' &&
-    console.info(`Running on ${result.device} with a ${result.os} os and ${result.env} ${result.env !== result.type ? '(' + result.type + ')' : '' } environment ...`);
+ 
   return result
 }
