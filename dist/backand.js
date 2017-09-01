@@ -1,6 +1,6 @@
 /*********************************************************
  * @backand/vanilla-sdk - Backand SDK for JavaScript
- * @version v1.2.10
+ * @version v1.2.11
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
@@ -3828,7 +3828,7 @@ backand.init = function () {
   if (_defaults2.default.runSocket) {
     storeUser = _utils2.default.storage.get('user');
     var authToken = storeUser ? storeUser.token.Authorization : null;
-    storeUser && _utils2.default.socket.connect(authToken, _defaults2.default.anonymousToken, _defaults2.default.appName);
+    _utils2.default.socket.connect(authToken, _defaults2.default.anonymousToken, _defaults2.default.appName);
     _extends(backand, {
       on: _socket2.default.prototype.on.bind(_utils2.default.socket)
     });
