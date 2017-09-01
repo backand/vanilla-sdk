@@ -202,7 +202,7 @@ backand.init = (config = {}) => {
   if(defaults.runSocket) {
     storeUser = utils.storage.get('user');
     var authToken = (storeUser) ? storeUser.token.Authorization : null;
-    storeUser && utils.socket.connect(
+    utils.socket.connect(
       authToken,
       defaults.anonymousToken,
       defaults.appName
