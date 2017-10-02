@@ -66,10 +66,10 @@ class Http {
       let val = params[param];
       if (Array.isArray(val)) {
         for (i = 0; i < val.length; i++) {
-          if(typeof val[i] === 'object'){
+          if (typeof val[i] === 'object') {
             for (v in val[i]) {
-              let valuecheck = val[i][v].toString();
-              if(valuecheck.includes('+')) {
+              let valuecheck = val[i][v] ? val[i][v].toString() : '';
+              if (valuecheck.includes('+')) {
                 val[i][v] = encodeURIComponent(val[i][v]);
               }
             }
@@ -79,7 +79,7 @@ class Http {
       }
       else if (typeof val === 'object') {
         for (objValue in val) {
-          if(val[objValue].includes('+')) {
+          if (typeof val[objValue] === 'string' && val[objValue].includes('+')) {
             val[objValue] = encodeURIComponent(val[objValue]);
           }
         }
