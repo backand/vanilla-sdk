@@ -4,7 +4,7 @@
  * @link https://github.com/backand/vanilla-sdk#readme
  * @copyright Copyright (c) 2017 Backand https://www.backand.com/
  * @license MIT (http://www.opensource.org/licenses/mit-license.php)
- * @Compiled At: 10/2/2017
+ * @Compiled At: 2017-11-02
   *********************************************************/
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.backand = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict'
@@ -3673,6 +3673,20 @@ _defaults2.default["storage"] = detector.env === 'browser' ? window.localStorage
 _defaults2.default["isMobile"] = detector.device === 'mobile' || detector.device === 'tablet';
 
 if (detector.env === 'browser') {
+
+  // Task: polyfill the CustomEvent() constructor functionality in Internet Explorer 9 and higher
+  (function () {
+    if (typeof window.CustomEvent === "function") return false;
+    function CustomEvent(event, params) {
+      params = params || { bubbles: false, cancelable: false, detail: undefined };
+      var evt = document.createEvent('CustomEvent');
+      evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+      return evt;
+    }
+    CustomEvent.prototype = window.Event.prototype;
+    window.CustomEvent = CustomEvent;
+  })();
+
   // TASK: get data from url in social sign-in popup
   if (window.location) {
     var dataMatch = /(data|error)=(.+)/.exec(window.location.href);
@@ -3788,6 +3802,7 @@ backand.init = function () {
     }
   }
   function __updateOnlineStatus__(event) {
+    _utils2.default.offline = typeof navigator != 'undefined' ? !navigator.onLine : false;
     if (_utils2.default.offline) {
       _utils2.default.offlineAt = new Date();
       (0, _fns.__dispatchEvent__)('startOfflineMode');
@@ -4935,19 +4950,21 @@ function __dispatchEvent__(name) {
     event.eventName = name;
     _extends(event, addons);
     window.dispatchEvent(event);
-  } else if (document.createEvent) {
-    event = document.createEvent('Event');
-    event.initEvent(name, false, false);
-    event.eventName = name;
-    _extends(event, addons);
-    window.dispatchEvent(event);
-  } else if (document.createEventObject) {
-    event = document.createEventObject();
-    event.eventType = name;
-    event.eventName = name;
-    _extends(event, addons);
-    window.fireEvent('on' + event.eventType, event);
   }
+  // else if (document.createEvent) {
+  //   event = document.createEvent('Event');
+  //   event.initEvent(name, false, false);
+  //   event.eventName = name;
+  //   Object.assign(event, addons);
+  //   window.dispatchEvent(event);
+  // }
+  // else if (document.createEventObject) {
+  //   event = document.createEventObject();
+  //   event.eventType = name;
+  //   event.eventName = name;
+  //   Object.assign(event, addons);
+  //   window.fireEvent('on' + event.eventType, event);
+  // }
 }
 
 function __cacheData__(key, response) {
@@ -4957,13 +4974,14 @@ function __cacheData__(key, response) {
     c[key].config = {
       fromCache: true
     };
-    _utils2.default.storage.set('cache', _extends(_utils2.default.storage.get('cache'), c));
+    var _cache = _utils2.default.storage.get('cache') || {};
+    _utils2.default.storage.set('cache', _extends(_cache, c));
   }
 }
 
 function __deleteCacheData__(key) {
   if (_defaults2.default.runOffline) {
-    var c = _utils2.default.storage.get('cache');
+    var c = _utils2.default.storage.get('cache') || {};
     delete c[key];
     _utils2.default.storage.set('cache', c);
   }
@@ -5323,9 +5341,17 @@ var Socket = function () {
 
     if (!window.io) throw new Error('runSocket is true but socketio-client is not included');
     this.url = url;
-    this.socket = io.connect(this.url, { 'forceNew': true });
+    // this.socket = io.connect(this.url, {'forceNew':true });
+    this.socket = io.connect(this.url, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 99999
+    });
 
-    this.socket.on('connect', function () {});
+    this.socket.on('connect', function () {
+      _this.socket.emit("login", _this.auth.token, _this.auth.anonymousToken, _this.auth.appName);
+    });
     this.socket.on('authorized', function () {
       console.info('socket connected');
     });
@@ -5364,8 +5390,12 @@ var Socket = function () {
   }, {
     key: 'connect',
     value: function connect(token, anonymousToken, appName) {
+      this.auth = {
+        token: token,
+        anonymousToken: anonymousToken,
+        appName: appName
+      };
       this.socket.connect();
-      this.socket.emit("login", token, anonymousToken, appName);
     }
   }, {
     key: 'disconnect',

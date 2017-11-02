@@ -3,9 +3,15 @@ export default class Socket {
     if (!window.io)
       throw new Error('runSocket is true but socketio-client is not included');
     this.url = url;
-    this.socket = io.connect(this.url, {'forceNew':true });
+    // this.socket = io.connect(this.url, {'forceNew':true });
+    this.socket = io.connect(this.url, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax : 5000,
+      reconnectionAttempts: 99999
+    });
 
-    this.socket.on('connect', () => {});
+    this.socket.on('connect', () => { this.socket.emit("login", this.auth.token, this.auth.anonymousToken, this.auth.appName); });
     this.socket.on('authorized', () => { console.info(`socket connected`); });
     this.socket.on('notAuthorized', () => { setTimeout(() => this.disconnect(), 1111); });
     this.socket.on('disconnect', () => { console.info(`socket disconnect`); });
@@ -25,10 +31,14 @@ export default class Socket {
     });
   }
   connect (token, anonymousToken, appName) {
+    this.auth = {
+      token,
+      anonymousToken,
+      appName
+    };
     this.socket.connect();
-    this.socket.emit("login", token, anonymousToken, appName);
   }
   disconnect () {
-    this.socket.disconnect ();
+    this.socket.disconnect();
   }
 }

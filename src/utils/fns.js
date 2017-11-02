@@ -21,20 +21,20 @@ export function __dispatchEvent__ (name, addons = {}) {
     Object.assign(event, addons);
     window.dispatchEvent(event);
   }
-  else if (document.createEvent) {
-    event = document.createEvent('Event');
-    event.initEvent(name, false, false);
-    event.eventName = name;
-    Object.assign(event, addons);
-    window.dispatchEvent(event);
-  }
-  else if (document.createEventObject) {
-    event = document.createEventObject();
-    event.eventType = name;
-    event.eventName = name;
-    Object.assign(event, addons);
-    window.fireEvent('on' + event.eventType, event);
-  }
+  // else if (document.createEvent) {
+  //   event = document.createEvent('Event');
+  //   event.initEvent(name, false, false);
+  //   event.eventName = name;
+  //   Object.assign(event, addons);
+  //   window.dispatchEvent(event);
+  // }
+  // else if (document.createEventObject) {
+  //   event = document.createEventObject();
+  //   event.eventType = name;
+  //   event.eventName = name;
+  //   Object.assign(event, addons);
+  //   window.fireEvent('on' + event.eventType, event);
+  // }
 }
 
 export function __cacheData__ (key, response) {
@@ -44,13 +44,14 @@ export function __cacheData__ (key, response) {
     c[key].config = {
       fromCache: true
     }
-    utils.storage.set('cache', Object.assign(utils.storage.get('cache'), c));
+    let _cache = utils.storage.get('cache') || {};
+    utils.storage.set('cache', Object.assign(_cache, c));
   }
 }
 
 export function __deleteCacheData__ (key) {
   if (defaults.runOffline) {
-    let c = utils.storage.get('cache');
+    let c = utils.storage.get('cache') || {};
     delete c[key];
     utils.storage.set('cache', c);
   }

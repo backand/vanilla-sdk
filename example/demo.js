@@ -16,11 +16,11 @@
     // storage: new backand.helpers.MemoryStorage(),
     runOffline: true,
     allowUpdatesinOfflineMode: true,
-    beforeExecuteOfflineItem: (request) => {
+    beforeExecuteOfflineItem: function (request) {
       console.log(request);
       return true;
     },
-    afterExecuteOfflineItem: (response, request) => {
+    afterExecuteOfflineItem: function (response, request) {
       console.log(response);
     },
   });
@@ -30,14 +30,14 @@
   var objectName = "items";
 
   var successCallback = function (response) {
-      // console.log(response);
+      console.log(response);
       outputElement.innerText = '';
       outputContainer.classList.remove('panel-danger');
       outputContainer.classList.add('panel-success');
       outputElement.innerText = "status: " + response.status + "\n" + JSON.stringify(response.data);
   };
   var errorCallback = function (error) {
-    // console.log(error);
+    console.log(error);
     outputElement.innerText = '';
     outputContainer.classList.remove('panel-success');
     outputContainer.classList.add('panel-danger');

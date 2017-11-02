@@ -36,6 +36,20 @@ defaults["storage"]  = (detector.env === 'browser') ? window.localStorage : new 
 defaults["isMobile"] = (detector.device === 'mobile' || detector.device === 'tablet');
 
 if(detector.env === 'browser') {
+
+  // Task: polyfill the CustomEvent() constructor functionality in Internet Explorer 9 and higher
+  (function () {
+    if ( typeof window.CustomEvent === "function" ) return false;
+    function CustomEvent ( event, params ) {
+      params = params || { bubbles: false, cancelable: false, detail: undefined };
+      var evt = document.createEvent( 'CustomEvent' );
+      evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+      return evt;
+    }
+    CustomEvent.prototype = window.Event.prototype;
+    window.CustomEvent = CustomEvent;
+  })();
+
   // TASK: get data from url in social sign-in popup
   if(window.location) {
     let dataMatch = /(data|error)=(.+)/.exec(window.location.href);
@@ -92,9 +106,9 @@ backand.init = (config = {}) => {
     detector,
   });
 
-    if(defaults.masterToken && defaults.userToken){
-        auth.useBasicAuth();
-    }
+  if(defaults.masterToken && defaults.userToken){
+    auth.useBasicAuth();
+  }
   if (defaults.runSocket) {
     Object.assign(utils, {
       socket: new Socket(defaults.socketUrl)
@@ -157,6 +171,7 @@ backand.init = (config = {}) => {
     }
   }
   function __updateOnlineStatus__(event) {
+    utils.offline = (typeof navigator != 'undefined') ? !navigator.onLine : false;
     if(utils.offline) {
       utils.offlineAt = new Date();
       __dispatchEvent__('startOfflineMode');
