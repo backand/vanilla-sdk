@@ -171,7 +171,9 @@ backand.init = (config = {}) => {
     }
   }
   function __updateOnlineStatus__(event) {
-    utils.offline = (typeof navigator != 'undefined') ? !navigator.onLine : false;
+    if(!utils.forceOffline) {
+      utils.offline = (typeof navigator != 'undefined') ? !navigator.onLine : false;
+    }
     if(utils.offline) {
       utils.offlineAt = new Date();
       __dispatchEvent__('startOfflineMode');
