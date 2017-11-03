@@ -28,6 +28,7 @@
   var outputContainer = document.getElementById('outputContainer');
   var outputElement = document.getElementById('outputElement');
   var objectName = "items";
+  var offlineMode = false;
 
   var successCallback = function (response) {
       console.log(response);
@@ -114,6 +115,12 @@
 
   document.getElementById('deleteitem_btn').addEventListener('click', function() {
     backand.object.remove(objectName, lastCreatedId).then(successCallback).catch(errorCallback);
+  }, false);
+
+  document.getElementById('setoffline_btn').addEventListener('click', function() {
+    offlineMode = !offlineMode;
+    backand.offline.setOfflineMode(offlineMode);
+    document.getElementById('setoffline_btn').innerHTML = "Offline is " + offlineMode.toString();
   }, false);
 
   // FILES
