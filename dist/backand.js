@@ -3992,9 +3992,11 @@ function useAccessAuth() {
         "regId": 0,
         "userId": null
       };
+      var aToken = _defaults2.default.accessToken.toLowerCase().startsWith('bearer') ? _defaults2.default.accessToken : 'Bearer ' + _defaults2.default.accessToken;
       _utils2.default.storage.set('user', {
         token: {
-          Authorization: 'Bearer ' + _defaults2.default.accessToken
+          Authorization: aToken,
+          appName: _defaults2.default.appName
         },
         details: details
       });

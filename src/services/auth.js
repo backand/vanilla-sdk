@@ -103,9 +103,11 @@ function useAccessAuth() {
         "regId": 0,
         "userId": null
       };
+      var aToken = defaults.accessToken.toLowerCase().startsWith('bearer') ? defaults.accessToken : 'Bearer ' + defaults.accessToken;
       utils.storage.set('user', {
         token: {
-          Authorization:  'Bearer ' + defaults.accessToken
+          Authorization:  aToken,
+          appName: defaults.appName
         },
         details: details
       });
