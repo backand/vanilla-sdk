@@ -109,6 +109,11 @@ backand.init = (config = {}) => {
   if(defaults.masterToken && defaults.userToken){
     auth.useBasicAuth();
   }
+
+  if(defaults.accessToken){
+    auth.useAccessAuth();
+  }
+
   if (defaults.runSocket) {
     Object.assign(utils, {
       socket: new Socket(defaults.socketUrl)

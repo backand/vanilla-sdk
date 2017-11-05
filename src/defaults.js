@@ -5,6 +5,7 @@ export default {
   signUpToken: null,
   masterToken: null,
   userToken: null,
+  accessToken: null,
 
   apiUrl: 'https://api.backand.com', // debug
   exportUtils: false, // debug

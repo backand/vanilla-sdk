@@ -113,15 +113,17 @@ describe('Backand SDK', () => {
           })
     });
     it('should change from anonymous auth to basic auth, username should be testsdk@backand.com', function (done) {
-      backand.useBasicAuth();
-      backand.user.getUserDetails(true)
-          .then(res => {
-            expect(res.data.username).to.eql('testsdk@backand.com');
-            done();
-          })
-          .catch(err => {
-            done(err);
-          })
+      backand.useBasicAuth()
+      .then(res =>{
+        backand.user.getUserDetails(true)
+        .then(res => {
+          expect(res.data.username).to.eql('testsdk@backand.com');
+          done();
+        })
+        .catch(err => {
+          done(err);
+        })
+      })
     });
     it('should get list with basicAuth', function () {
       this.timeout(0);
@@ -167,6 +169,32 @@ describe('Backand SDK', () => {
             done(err);
           })
     });
+    it('should change to access token, username should be testsdk@backand.com', function (done) {
+      //get the current token
+      this.timeout(0);
+      var accessToken = null;
+      backand.user.getToken()
+      .then(res => {
+        accessToken = res.data;
+        localStorage.removeItem('BACKAND_user');
+        //start using the token
+        backand.defaults.accessToken = accessToken;
+        backand.useAccessAuth().then(res => {
+          backand.user.getUserDetails(true)
+          .then(res => {
+            expect(res.data.username).to.eql('testsdk@backand.com');
+            done();
+          })
+          .catch(err => {
+            done(err);
+          })
+        })
+        .catch(err => {
+          done(err);
+        })
+      })          
+    });
+
     it('signin with basic auth', function (done) {
       this.timeout(0);
       backand.signin('testsdk@backand.com', 'Password1', 'basic')

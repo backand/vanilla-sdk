@@ -3405,6 +3405,7 @@ exports.default = {
   signUpToken: null,
   masterToken: null,
   userToken: null,
+  accessToken: null,
 
   apiUrl: 'https://api.backand.com', // debug
   exportUtils: false, // debug
@@ -3743,6 +3744,11 @@ backand.init = function () {
   if (_defaults2.default.masterToken && _defaults2.default.userToken) {
     _auth2.default.useBasicAuth();
   }
+
+  if (_defaults2.default.accessToken) {
+    _auth2.default.useAccessAuth();
+  }
+
   if (_defaults2.default.runSocket) {
     _extends(_utils2.default, {
       socket: new _socket2.default(_defaults2.default.socketUrl)
@@ -3903,6 +3909,7 @@ exports.default = {
   signout: signout,
   getSocialProviders: getSocialProviders,
   useBasicAuth: useBasicAuth,
+  useAccessAuth: useAccessAuth,
   createBasicToken: createBasicToken
 };
 
@@ -3958,6 +3965,36 @@ function useBasicAuth() {
       _utils2.default.storage.set('user', {
         token: {
           Authorization: basicToken
+        },
+        details: details
+      });
+      resolve((0, _fns.__generateFakeResponse__)(200, 'OK', {}, details, {}));
+    }
+  });
+}
+
+// A function that sets the authorization in the storage and therefore in the header as Access Token auth,
+// the credentials are inserted in the init config.
+function useAccessAuth() {
+  return new Promise(function (resolve, reject) {
+    if (!_defaults2.default.accessToken) {
+      reject((0, _fns.__generateFakeResponse__)(0, '', {}, 'accessToken is missing for Access authentication'));
+    } else {
+      var details = {
+        "token_type": "",
+        "expires_in": 0,
+        "appName": _defaults2.default.appName,
+        "username": "",
+        "role": "",
+        "firstName": "",
+        "lastName": "",
+        "fullName": "",
+        "regId": 0,
+        "userId": null
+      };
+      _utils2.default.storage.set('user', {
+        token: {
+          Authorization: 'Bearer ' + _defaults2.default.accessToken
         },
         details: details
       });

@@ -17,6 +17,7 @@ export default {
   signout,
   getSocialProviders,
   useBasicAuth,
+  useAccessAuth,
   createBasicToken,
 }
 
@@ -73,6 +74,38 @@ function useBasicAuth() {
       utils.storage.set('user', {
         token: {
           Authorization:  basicToken
+        },
+        details: details
+      });
+      resolve(__generateFakeResponse__(200, 'OK', {}, details, {}));
+    }
+  });
+
+}
+
+// A function that sets the authorization in the storage and therefore in the header as Access Token auth,
+// the credentials are inserted in the init config.
+function useAccessAuth() {
+  return new Promise((resolve, reject) => {
+    if (!defaults.accessToken) {
+      reject(__generateFakeResponse__(0, '', {}, 'accessToken is missing for Access authentication'))
+    }
+    else {
+      let details = {
+        "token_type": "",
+        "expires_in": 0,
+        "appName": defaults.appName,
+        "username": "",
+        "role": "",
+        "firstName": "",
+        "lastName": "",
+        "fullName": "",
+        "regId": 0,
+        "userId": null
+      };
+      utils.storage.set('user', {
+        token: {
+          Authorization:  'Bearer ' + defaults.accessToken
         },
         details: details
       });
